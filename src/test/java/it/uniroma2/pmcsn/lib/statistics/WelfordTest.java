@@ -1,7 +1,8 @@
 package it.uniroma2.pmcsn.lib.statistics;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WelfordTest {
 

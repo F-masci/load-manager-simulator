@@ -1,6 +1,9 @@
 package it.uniroma2.pmcsn.model.server;
 
+import it.uniroma2.pmcsn.lib.statistics.TimedWelford;
+import it.uniroma2.pmcsn.lib.statistics.Welford;
 import it.uniroma2.pmcsn.model.Job;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,16 +20,12 @@ public abstract class Server {
     protected final List<Job> activeJobs = new ArrayList<>();
     protected final Queue<Job> queue = new LinkedList<>(); // Kept for interface consistency, empty in PS mode
 
-    // Statistics and integrals
-    protected double lastEventTime = 0.0;
-    protected double timeIntegratedActiveJobs = 0.0;
-    protected double timeIntegratedQueueLength = 0.0;
-    protected double timeIntegratedSystemLength = 0.0;
+    // Statistics and integrals using Welford and TimedWelford
+    protected final TimedWelford activeJobsStat = new TimedWelford();
+    protected final TimedWelford systemLengthStat = new TimedWelford();
+    protected final Welford responseTimeStat = new Welford();
 
-    protected int completedJobsCount = 0;
-    protected double totalWaitingTime = 0.0;
-    protected double totalResponseTime = 0.0;
-    protected double totalServiceTime = 0.0;
+    protected double totalServiceTime = 0.0; // Kept as simple sum for now
 
     protected Server(int id, int capacity, double speedMultiplier) {
         this.id = id;
@@ -39,7 +38,7 @@ public abstract class Server {
     }
 
     public void setLastEventTime(double lastEventTime) {
-        this.lastEventTime = lastEventTime;
+        // No longer needed as TimedWelford handles internal timing
     }
 
     public void setSpeedMultiplier(double speedMultiplier) {
@@ -66,13 +65,8 @@ public abstract class Server {
      * Updates time-integrated statistics based on the current clock.
      */
     public void updateStatistics(double currentClock) {
-        double duration = currentClock - lastEventTime;
-        if (duration > 0) {
-            timeIntegratedActiveJobs += duration * activeJobs.size();
-            timeIntegratedQueueLength += duration * queue.size();
-            timeIntegratedSystemLength += duration * (activeJobs.size() + queue.size());
-            lastEventTime = currentClock;
-        }
+        activeJobsStat.updateToTime(currentClock, activeJobs.size());
+        systemLengthStat.updateToTime(currentClock, activeJobs.size() + queue.size());
     }
 
     /**
@@ -104,6 +98,7 @@ public abstract class Server {
         if (activeJobs.size() < capacity) {
             job.setStartTime(currentClock);
             activeJobs.add(job);
+            updateStatistics(currentClock);
             return job;
         } else {
             return null;
@@ -125,37 +120,51 @@ public abstract class Server {
         }
 
         job.setCompletionTime(currentClock);
-        completedJobsCount++;
-        totalWaitingTime += job.getWaitingTime(); // 0 under PS
-        totalResponseTime += job.getResponseTime();
+        responseTimeStat.update(job.getResponseTime());
         totalServiceTime += job.getServiceTime();
 
+        updateStatistics(currentClock);
         return null;
     }
 
     // Getters for statistics
+    /**
+     * Resets all performance statistics.
+     * @param currentClock The current simulation clock.
+     */
+    public void resetStatistics(double currentClock) {
+        activeJobsStat.reset();
+        activeJobsStat.updateToTime(currentClock, activeJobs.size());
+        
+        systemLengthStat.reset();
+        systemLengthStat.updateToTime(currentClock, activeJobs.size() + queue.size());
+        
+        responseTimeStat.reset();
+        totalServiceTime = 0.0;
+    }
+
     public double getTimeIntegratedActiveJobs() {
-        return timeIntegratedActiveJobs;
+        return activeJobsStat.getMean() * activeJobsStat.getTotalDuration();
     }
 
     public double getTimeIntegratedQueueLength() {
-        return timeIntegratedQueueLength;
+        return (systemLengthStat.getMean() - activeJobsStat.getMean()) * systemLengthStat.getTotalDuration();
     }
 
     public double getTimeIntegratedSystemLength() {
-        return timeIntegratedSystemLength;
+        return systemLengthStat.getMean() * systemLengthStat.getTotalDuration();
     }
 
     public int getCompletedJobsCount() {
-        return completedJobsCount;
+        return (int) responseTimeStat.getCount();
     }
 
     public double getTotalWaitingTime() {
-        return totalWaitingTime;
+        return 0.0; // Under PS, waiting time is 0 (accepted jobs start immediately)
     }
 
     public double getTotalResponseTime() {
-        return totalResponseTime;
+        return responseTimeStat.getMean() * responseTimeStat.getCount();
     }
 
     public double getTotalServiceTime() {
@@ -163,29 +172,24 @@ public abstract class Server {
     }
 
     public double getAverageUtilization(double totalTime) {
-        if (totalTime <= 0) return 0.0;
         // In a PS server, average utilization is the average active jobs fraction of capacity
-        return timeIntegratedActiveJobs / (totalTime * capacity);
+        return activeJobsStat.getMean() / capacity;
     }
 
     public double getAverageQueueLength(double totalTime) {
-        if (totalTime <= 0) return 0.0;
-        return timeIntegratedQueueLength / totalTime;
+        return systemLengthStat.getMean() - activeJobsStat.getMean();
     }
 
     public double getAverageSystemLength(double totalTime) {
-        if (totalTime <= 0) return 0.0;
-        return timeIntegratedSystemLength / totalTime;
+        return systemLengthStat.getMean();
     }
 
     public double getAverageWaitingTime() {
-        if (completedJobsCount == 0) return 0.0;
-        return totalWaitingTime / completedJobsCount;
+        return 0.0;
     }
 
     public double getAverageResponseTime() {
-        if (completedJobsCount == 0) return 0.0;
-        return totalResponseTime / completedJobsCount;
+        return responseTimeStat.getMean();
     }
 
     @Override

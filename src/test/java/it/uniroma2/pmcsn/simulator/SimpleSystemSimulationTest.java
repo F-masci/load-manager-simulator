@@ -12,7 +12,8 @@ import it.uniroma2.pmcsn.model.load.scaler.vertical.NoVerticalScaler;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SimpleSystemSimulationTest {
 

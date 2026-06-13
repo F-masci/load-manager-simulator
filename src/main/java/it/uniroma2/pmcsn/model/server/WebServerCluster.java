@@ -112,6 +112,15 @@ public class WebServerCluster {
     }
 
     /**
+     * Updates statistics for all active and draining servers.
+     */
+    public void updateStatistics(double clock) {
+        for (WebServer ws : allServers) {
+            ws.updateStatistics(clock);
+        }
+    }
+
+    /**
      * Updates statistics and processes jobs for all active and draining servers.
      */
     public void processActiveJobs(double elapsed, double nextTime) {
@@ -134,6 +143,17 @@ public class WebServerCluster {
         for (WebServer ws : allServers) {
             ws.updateStatistics(clock);
         }
+    }
+
+    /**
+     * Resets statistics for all servers in the cluster and scaling counts.
+     */
+    public void resetStatistics(double clock) {
+        for (WebServer ws : allServers) {
+            ws.resetStatistics(clock);
+        }
+        scaleUpCount = 0;
+        scaleDownCount = 0;
     }
 
     public int getScaleUpCount() {

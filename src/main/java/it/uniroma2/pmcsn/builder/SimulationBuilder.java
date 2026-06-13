@@ -3,23 +3,23 @@ package it.uniroma2.pmcsn.builder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.controller.SimulationController;
-import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
-import it.uniroma2.pmcsn.model.load.LoadManager;
 import it.uniroma2.pmcsn.model.event.source.EventSource;
 import it.uniroma2.pmcsn.model.event.source.ExponentialEventSource;
 import it.uniroma2.pmcsn.model.event.source.HyperexponentialEventSource;
 import it.uniroma2.pmcsn.model.event.source.TraceEventSource;
+import it.uniroma2.pmcsn.model.load.LoadManager;
+import it.uniroma2.pmcsn.model.load.routing.Router;
+import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
+import it.uniroma2.pmcsn.model.load.routing.webserver.LeastLoadedRoutingStrategy;
+import it.uniroma2.pmcsn.model.load.routing.webserver.RoundRobinRoutingStrategy;
+import it.uniroma2.pmcsn.model.load.routing.webserver.WebServerRoutingStrategy;
+import it.uniroma2.pmcsn.model.load.scaler.horizontal.HorizontalScaler;
+import it.uniroma2.pmcsn.model.load.scaler.horizontal.MovingWindowHorizontalScaler;
+import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
+import it.uniroma2.pmcsn.model.load.scaler.vertical.VerticalScaler;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
-import it.uniroma2.pmcsn.model.load.scaler.horizontal.HorizontalScaler;
-import it.uniroma2.pmcsn.model.load.scaler.horizontal.MovingWindowHorizontalScaler;
-import it.uniroma2.pmcsn.model.load.scaler.vertical.VerticalScaler;
-import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
-import it.uniroma2.pmcsn.model.load.routing.Router;
-import it.uniroma2.pmcsn.model.load.routing.webserver.WebServerRoutingStrategy;
-import it.uniroma2.pmcsn.model.load.routing.webserver.RoundRobinRoutingStrategy;
-import it.uniroma2.pmcsn.model.load.routing.webserver.LeastLoadedRoutingStrategy;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class SimulationBuilder {
     private int webServerCount = 3;
     private int spikeServerCapacity = 10;
     private double spikeCpuPercentage = 0.4;
-    private WorkloadType workloadType = WorkloadType.DISTRIBUTION;
+    private WorkloadType workloadType = WorkloadType.HYPEREXPONENTIAL;
 
     // Scaling configurations
     private double scaleUpLimit = 8.0;

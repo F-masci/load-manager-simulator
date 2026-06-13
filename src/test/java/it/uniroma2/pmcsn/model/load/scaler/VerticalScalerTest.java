@@ -1,10 +1,11 @@
 package it.uniroma2.pmcsn.model.load.scaler;
 
-import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
-import it.uniroma2.pmcsn.model.load.scaler.vertical.NoVerticalScaler;
-import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.Job;
+import it.uniroma2.pmcsn.model.load.scaler.vertical.NoVerticalScaler;
+import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
+import it.uniroma2.pmcsn.model.server.SpikeServer;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class VerticalScalerTest {

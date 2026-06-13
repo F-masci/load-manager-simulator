@@ -2,7 +2,9 @@ package it.uniroma2.pmcsn.model.event.source;
 
 import it.uniroma2.pmcsn.model.Job;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for EventSource workload generators (Exponential and Hyperexponential).

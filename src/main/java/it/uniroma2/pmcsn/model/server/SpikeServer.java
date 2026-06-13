@@ -1,10 +1,12 @@
 package it.uniroma2.pmcsn.model.server;
 
+import it.uniroma2.pmcsn.lib.statistics.TimedWelford;
+
 /**
  * Represents the Spike Server (Layer 2) using Processor Sharing scheduling.
  */
 public class SpikeServer extends Server {
-    private double timeIntegratedSpeedMultiplier = 0.0;
+    private final TimedWelford speedMultiplierStat = new TimedWelford();
 
     public SpikeServer(int id, int capacity, double speedMultiplier) {
         super(id, capacity, speedMultiplier);
@@ -12,20 +14,21 @@ public class SpikeServer extends Server {
 
     @Override
     public void updateStatistics(double currentClock) {
-        double duration = currentClock - lastEventTime;
-        if (duration > 0) {
-            timeIntegratedSpeedMultiplier += duration * speedMultiplier;
-        }
+        speedMultiplierStat.updateToTime(currentClock, speedMultiplier);
         super.updateStatistics(currentClock);
+    }
+
+    @Override
+    public void resetStatistics(double currentClock) {
+        super.resetStatistics(currentClock);
+        this.speedMultiplierStat.reset();
+        this.speedMultiplierStat.updateToTime(currentClock, speedMultiplier);
     }
 
     /**
      * Calculates the average speed multiplier (capacity multiplier) of the SpikeServer.
      */
     public double getAverageSpeedMultiplier(double totalTime) {
-        if (totalTime <= 0) {
-            return speedMultiplier;
-        }
-        return timeIntegratedSpeedMultiplier / totalTime;
+        return speedMultiplierStat.getMean();
     }
 }

@@ -26,8 +26,53 @@ public record ApplicationConfig(
     int minServers,
     int maxServers,
     double spikeUpperThreshold,
-    double spikeLowerThreshold
+    double spikeLowerThreshold,
+    SimulationMethod simulationMethod,
+    int numReplications,
+    int numBatches,
+    int batchSize,
+    int warmUpJobs
 ) {
+
+    // Base configuration and load
+    public static final double MAX_TIME = 10000.0;
+    public static final long SEED = 123456789L;
+    public static final double MEAN_INTERARRIVAL = 2.0;
+    public static final double MEAN_SERVICE = 1.5;
+    public static final int SI_MAX = 5;
+
+    // Server and routing configuration
+    public static final int WEB_SERVER_COUNT = 3;
+    public static final int WEB_SERVER_CAPACITY = 1;
+    public static final int SPIKE_SERVER_CAPACITY = 10;
+    public static final RoutingPolicy ROUTING_POLICY = RoutingPolicy.ROUND_ROBIN;
+    public static final String TRACE_PATH = null; // Oppure String, se gestito come oggetto
+    public static final double SPIKE_CPU_PERCENTAGE = 0.4;
+    public static final WorkloadType WORKLOAD_TYPE = WorkloadType.HYPEREXPONENTIAL;
+
+    // Autoscaling configuration
+    public static final double SCALE_UP_LIMIT = 8.0;
+    public static final double SCALE_DOWN_LIMIT = 2.0;
+    public static final double SCALE_INTERVAL = 30.0;
+    public static final double COOLDOWN = 30.0;
+    public static final int MIN_SERVERS = 1;
+    public static final int MAX_SERVERS = 10;
+    public static final double SPIKE_UPPER_THRESHOLD = 0.70;
+    public static final double SPIKE_LOWER_THRESHOLD = 0.30;
+
+    // Simulation configuration
+    public static final SimulationMethod SIMULATION_METHOD = SimulationMethod.INDEPENDENT_REPLICATIONS;
+    public static final int NUM_REPLICATIONS = 10;
+    public static final int NUM_BATCHES = 64;
+    public static final int BATCH_SIZE = 1024;
+    public static final int WARM_UP_JOBS = 1000;
+
+    public ApplicationConfig() {
+        this(MAX_TIME, SEED, MEAN_INTERARRIVAL, MEAN_SERVICE, SI_MAX, WEB_SERVER_COUNT, WEB_SERVER_CAPACITY,
+                SPIKE_SERVER_CAPACITY, ROUTING_POLICY, TRACE_PATH, SPIKE_CPU_PERCENTAGE,
+                WORKLOAD_TYPE.name());
+    }
+
     /**
      * Overloaded constructor for backward compatibility.
      */
@@ -38,7 +83,8 @@ public record ApplicationConfig(
         this(maxTime, seed, meanInterarrival, meanService, siMax, webServersCount, webServerCapacity,
              spikeServerCapacity, routingPolicy, tracePath, spikeCpuPercentage,
              WorkloadType.valueOf(workloadType.toUpperCase()),
-             8.0, 2.0, 30.0, 30.0, webServersCount, 10, 0.70, 0.30);
+                SCALE_UP_LIMIT, SCALE_DOWN_LIMIT, SCALE_INTERVAL, COOLDOWN, webServersCount, MIN_SERVERS, SPIKE_UPPER_THRESHOLD, SPIKE_LOWER_THRESHOLD,
+             SIMULATION_METHOD, NUM_REPLICATIONS, NUM_BATCHES, BATCH_SIZE, WARM_UP_JOBS);
     }
 
     /**
@@ -52,7 +98,8 @@ public record ApplicationConfig(
         this(maxTime, seed, meanInterarrival, meanService, siMax, webServersCount, webServerCapacity,
              spikeServerCapacity, routingPolicy, tracePath, spikeCpuPercentage,
              WorkloadType.valueOf(workloadType.toUpperCase()),
-             scaleUpLimit, scaleDownLimit, scaleInterval, 30.0, minServers, maxServers, 0.70, 0.30);
+             scaleUpLimit, scaleDownLimit, scaleInterval, COOLDOWN, minServers, maxServers, SPIKE_UPPER_THRESHOLD, SPIKE_LOWER_THRESHOLD,
+             SIMULATION_METHOD, NUM_REPLICATIONS, NUM_BATCHES, BATCH_SIZE, WARM_UP_JOBS);
     }
 
     /**
@@ -67,35 +114,8 @@ public record ApplicationConfig(
         this(maxTime, seed, meanInterarrival, meanService, siMax, webServersCount, webServerCapacity,
              spikeServerCapacity, routingPolicy, tracePath, spikeCpuPercentage,
              WorkloadType.valueOf(workloadType.toUpperCase()),
-             scaleUpLimit, scaleDownLimit, scaleInterval, 30.0, minServers, maxServers,
-             spikeUpperThreshold, spikeLowerThreshold);
-    }
-
-    /**
-     * Factory method creating a default configuration.
-     */
-    public static ApplicationConfig defaultConfiguration() {
-        return new ApplicationConfig(
-            10000.0,
-            123456789L,
-            2.0,
-            1.5,
-            5,
-            3,
-            1,
-            10,
-            RoutingPolicy.ROUND_ROBIN,
-            null,
-            0.4, // default 40% CPU share
-            WorkloadType.DISTRIBUTION,
-            8.0,   // scaleUpLimit
-            2.0,   // scaleDownLimit
-            30.0,  // scaleInterval (window size)
-            30.0,  // cooldown (default 30 seconds)
-            1,     // minServers
-            10,    // maxServers
-            0.70,  // spikeUpperThreshold
-            0.30   // spikeLowerThreshold
-        );
+             scaleUpLimit, scaleDownLimit, scaleInterval, COOLDOWN, minServers, maxServers,
+             spikeUpperThreshold, spikeLowerThreshold,
+             SimulationMethod.INDEPENDENT_REPLICATIONS, NUM_REPLICATIONS, NUM_BATCHES, BATCH_SIZE, WARM_UP_JOBS);
     }
 }

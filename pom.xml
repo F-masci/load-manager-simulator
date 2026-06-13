@@ -16,7 +16,11 @@
         <!-- Dependencies -->
         <slf4j-api.version>2.0.18</slf4j-api.version>
         <logback-classic.version>1.5.34</logback-classic.version>
+
+        <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
+
         <junit-jupiter.version>6.1.0</junit-jupiter.version>
+        <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
     </properties>
 
     <dependencies>
@@ -53,7 +57,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
+                <version>${maven-surefire-plugin.version}</version>
             </plugin>
         </plugins>
     </build>
@@ -67,9 +71,9 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>${exec-maven-plugin.version}</version>
                         <configuration>
-                            <mainClass>it.uniroma2.pmcsn.HorizontalScalerSimulator</mainClass>
+                            <mainClass>it.uniroma2.pmcsn.LoadManagerSimulator</mainClass>
                             <arguments>
                                 <argument>-time</argument>
                                 <argument>1000</argument>
@@ -97,9 +101,9 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>${exec-maven-plugin.version}</version>
                         <configuration>
-                            <mainClass>it.uniroma2.pmcsn.HorizontalScalerSimulator</mainClass>
+                            <mainClass>it.uniroma2.pmcsn.LoadManagerSimulator</mainClass>
                             <arguments>
                                 <argument>-time</argument>
                                 <argument>200</argument>
@@ -141,9 +145,9 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>${exec-maven-plugin.version}</version>
                         <configuration>
-                            <mainClass>it.uniroma2.pmcsn.HorizontalScalerSimulator</mainClass>
+                            <mainClass>it.uniroma2.pmcsn.LoadManagerSimulator</mainClass>
                             <arguments>
                                 <argument>-time</argument>
                                 <argument>15</argument>

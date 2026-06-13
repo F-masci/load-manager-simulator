@@ -2,13 +2,10 @@ package it.uniroma2.pmcsn.controller;
 
 import it.uniroma2.pmcsn.model.Job;
 import it.uniroma2.pmcsn.model.event.Event;
-import it.uniroma2.pmcsn.model.event.source.EventSource;
 import it.uniroma2.pmcsn.model.event.EventType;
-import it.uniroma2.pmcsn.model.*;
-import it.uniroma2.pmcsn.model.load.*;
+import it.uniroma2.pmcsn.model.event.source.EventSource;
 import it.uniroma2.pmcsn.model.load.LoadManager;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.MovingWindowHorizontalScaler;
-import it.uniroma2.pmcsn.model.server.*;
 import it.uniroma2.pmcsn.model.server.Server;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServer;
@@ -16,8 +13,8 @@ import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.PriorityQueue;
 import java.util.List;
+import java.util.PriorityQueue;
 
 /**
  * Controller class managing the next-event driven simulation with Processor Sharing.
@@ -28,6 +25,7 @@ public class SimulationController {
     private static final Logger logger = LoggerFactory.getLogger(SimulationController.class);
 
     private double clock = 0.0;
+    private double clockSinceReset = 0.0;
     private final double maxTime;
     private final PriorityQueue<Event> eventQueue = new PriorityQueue<>();
     private final EventSource eventSource;
@@ -57,38 +55,11 @@ public class SimulationController {
      * Starts the simulation run.
      */
     public void run() {
-        // Schedule the first arrival
-        scheduleNextArrival();
-
-        // Schedule the first periodic scaling check
-        double scaleInterval = getScaleInterval();
-        if (scaleInterval > 0.0) {
-            eventQueue.add(new Event(scaleInterval, EventType.SCALE_CHECK, null, null));
-        }
+        scheduleInitialEvents();
 
         // Main next-event loop
-        while (!eventQueue.isEmpty()) {
-            Event event = eventQueue.poll();
-            double nextTime = event.getTime();
-
-            if (nextTime > maxTime) {
-                // Advance clock to maxTime and process active jobs up to that point
-                double elapsedToMax = maxTime - clock;
-                processActiveJobs(elapsedToMax, maxTime);
-                clock = maxTime;
-                break;
-            }
-
-            // Calculate elapsed time since last event
-            double elapsed = nextTime - clock;
-            processActiveJobs(elapsed, nextTime);
-            clock = nextTime;
-
-            processEvent(event);
-            
-            // Under Processor Sharing, any event changes active job counts (N),
-            // requiring rescheduling of completion times for all active jobs.
-            rescheduleCompletions();
+        while (processNextEvent()) {
+            // Processing...
         }
 
         // Finalize statistics clock alignment
@@ -97,6 +68,96 @@ public class SimulationController {
 
         // Print final simulation report
         printReport();
+    }
+
+    /**
+     * Schedules the first arrival and scaling check.
+     */
+    public void scheduleInitialEvents() {
+        if (clock == 0.0 && eventQueue.isEmpty()) {
+            // Initialize statistics at t=0
+            webServerCluster.updateStatistics(0.0);
+            spikeServer.updateStatistics(0.0);
+
+            // Schedule the first arrival
+            scheduleNextArrival();
+
+            // Schedule the first periodic scaling check
+            double scaleInterval = getScaleInterval();
+            if (scaleInterval > 0.0) {
+                eventQueue.add(new Event(scaleInterval, EventType.SCALE_CHECK, null, null));
+            }
+        }
+    }
+
+    /**
+     * Runs the simulation until a specific number of jobs are completed (warm-up).
+     */
+    public void runUntilWarmUp(int warmUpJobs) {
+        scheduleInitialEvents();
+        while (totalJobsCompleted < warmUpJobs && processNextEvent()) {
+            // loop
+        }
+    }
+
+    /**
+     * Runs the simulation for a specific number of completed jobs (a batch).
+     */
+    public void runBatch(int batchSize) {
+        int target = totalJobsCompleted + batchSize;
+        while (totalJobsCompleted < target && processNextEvent()) {
+            // loop
+        }
+    }
+
+    /**
+     * Processes the next event in the queue.
+     * @return true if an event was processed, false if the queue is empty or maxTime reached.
+     */
+    public boolean processNextEvent() {
+        if (eventQueue.isEmpty()) {
+            return false;
+        }
+
+        Event event = eventQueue.poll();
+        double nextTime = event.getTime();
+
+        if (nextTime > maxTime) {
+            // Advance clock to maxTime and process active jobs up to that point
+            double elapsedToMax = maxTime - clock;
+            processActiveJobs(elapsedToMax, maxTime);
+            clock = maxTime;
+            return false;
+        }
+
+        // Calculate elapsed time since last event
+        double elapsed = nextTime - clock;
+        processActiveJobs(elapsed, nextTime);
+        clock = nextTime;
+
+        processEvent(event);
+        
+        // Under Processor Sharing, any event changes active job counts (N),
+        // requiring rescheduling of completion times for all active jobs.
+        rescheduleCompletions();
+        return true;
+    }
+
+    /**
+     * Resets performance statistics for steady-state analysis.
+     */
+    public void resetStatistics() {
+        clockSinceReset = clock;
+        totalJobsArrived = 0;
+        totalJobsDiverted = 0;
+        totalJobsCompleted = 0;
+        totalSystemResponseTime = 0.0;
+        webServerCluster.resetStatistics(clock);
+        spikeServer.resetStatistics(clock);
+    }
+
+    public double getClockSinceReset() {
+        return clock - clockSinceReset;
     }
 
     private void processEvent(Event event) {
@@ -288,7 +349,8 @@ public class SimulationController {
     }
 
     public double getThroughput() {
-        return clock > 0.0 ? (double) totalJobsCompleted / clock : 0.0;
+        double duration = getClockSinceReset();
+        return duration > 0.0 ? (double) totalJobsCompleted / duration : 0.0;
     }
 
     public double getAverageResponseTime() {
@@ -297,10 +359,11 @@ public class SimulationController {
 
     public double getAverageJobsInSystem() {
         double total = 0.0;
+        double duration = getClockSinceReset();
         for (WebServer ws : webServerCluster.getAllServers()) {
-            total += ws.getAverageSystemLength(clock);
+            total += ws.getAverageSystemLength(duration);
         }
-        total += spikeServer.getAverageSystemLength(clock);
+        total += spikeServer.getAverageSystemLength(duration);
         return total;
     }
 
@@ -310,8 +373,9 @@ public class SimulationController {
             return 0.0;
         }
         double sum = 0.0;
+        double duration = getClockSinceReset();
         for (WebServer ws : all) {
-            sum += ws.getAverageUtilization(clock);
+            sum += ws.getAverageUtilization(duration);
         }
         return sum / all.size();
     }

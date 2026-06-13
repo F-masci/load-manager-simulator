@@ -1,11 +1,11 @@
 package it.uniroma2.pmcsn.model.load;
 
 import it.uniroma2.pmcsn.model.Job;
-import it.uniroma2.pmcsn.model.server.Server;
-import it.uniroma2.pmcsn.model.server.SpikeServer;
+import it.uniroma2.pmcsn.model.load.routing.Router;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.HorizontalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.VerticalScaler;
-import it.uniroma2.pmcsn.model.load.routing.Router;
+import it.uniroma2.pmcsn.model.server.Server;
+import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
 
 /**
