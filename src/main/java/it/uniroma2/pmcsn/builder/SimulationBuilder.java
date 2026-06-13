@@ -32,10 +32,11 @@ import java.util.List;
 public class SimulationBuilder {
     private double maxTime = 1000.0;
     private EventSource eventSource;
-    private HorizontalScaler scaler;
+    private HorizontalScaler horizontalScaler;
     private VerticalScaler verticalScaler;
     private SpikeServer spikeServer;
-    private final List<WebServer> webServers = new ArrayList<>();
+    private WebServerCluster webServerCluster;
+    private Router router;
     private RoutingPolicy routingPolicy = RoutingPolicy.ROUND_ROBIN;
 
     // Default configuration values
@@ -43,11 +44,10 @@ public class SimulationBuilder {
     private double meanInterarrival = 2.0;
     private double meanService = 1.0;
     private int siMax = 5;
-    private int webServerCapacity = 1;
     private int webServerCount = 3;
-    private int spikeServerCapacity = 10;
     private double spikeCpuPercentage = 0.4;
     private WorkloadType workloadType = WorkloadType.HYPEREXPONENTIAL;
+    private String tracePath = null;
 
     // Scaling configurations
     private double scaleUpLimit = 8.0;
@@ -69,8 +69,6 @@ public class SimulationBuilder {
         this.meanService = config.meanService();
         this.siMax = config.siMax();
         this.webServerCount = config.webServersCount();
-        this.webServerCapacity = config.webServerCapacity();
-        this.spikeServerCapacity = config.spikeServerCapacity();
         this.routingPolicy = config.routingPolicy();
         this.spikeCpuPercentage = config.spikeCpuPercentage();
         this.workloadType = config.workloadType();
@@ -86,18 +84,8 @@ public class SimulationBuilder {
         // Vertical scaling config
         this.spikeUpperThreshold = config.spikeUpperThreshold();
         this.spikeLowerThreshold = config.spikeLowerThreshold();
+        this.tracePath = config.tracePath();
 
-        try {
-            if (workloadType == WorkloadType.TRACE && config.tracePath() != null) {
-                this.traceFile(config.tracePath());
-            } else if (workloadType == WorkloadType.HYPEREXPONENTIAL) {
-                this.eventSource = new HyperexponentialEventSource(seed);
-            } else {
-                this.eventSource = new ExponentialEventSource(seed, meanInterarrival, meanService);
-            }
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to load trace file from path: " + config.tracePath(), e);
-        }
         return this;
     }
 
@@ -126,18 +114,8 @@ public class SimulationBuilder {
         return this;
     }
 
-    public SimulationBuilder webServerCapacity(int capacity) {
-        this.webServerCapacity = capacity;
-        return this;
-    }
-
     public SimulationBuilder webServerCount(int count) {
         this.webServerCount = count;
-        return this;
-    }
-
-    public SimulationBuilder spikeServerCapacity(int capacity) {
-        this.spikeServerCapacity = capacity;
         return this;
     }
 
@@ -200,18 +178,10 @@ public class SimulationBuilder {
     }
 
     /**
-     * Adds a custom pre-built WebServer.
-     */
-    public SimulationBuilder addWebServer(WebServer webServer) {
-        this.webServers.add(webServer);
-        return this;
-    }
-
-    /**
      * Sets a custom pre-built HorizontalScaler.
      */
-    public SimulationBuilder scaler(HorizontalScaler scaler) {
-        this.scaler = scaler;
+    public SimulationBuilder horizontalScaler(HorizontalScaler scaler) {
+        this.horizontalScaler = scaler;
         return this;
     }
 
@@ -232,36 +202,61 @@ public class SimulationBuilder {
     }
 
     /**
+     * Set a custom pre-built WebServerCluster.
+     */
+    public SimulationBuilder webServerCluster(WebServerCluster webServerCluster) {
+        this.webServerCluster = webServerCluster;
+        return this;
+    }
+
+    /**
+     * Set a custom pre-built Router.
+     */
+    public SimulationBuilder router(Router router) {
+        this.router = router;
+        return this;
+    }
+
+    /**
      * Builds and returns a SimulationController configured with builder options.
      */
     public SimulationController build() {
         if (eventSource == null) {
-            if (workloadType == WorkloadType.HYPEREXPONENTIAL) {
-                eventSource = new HyperexponentialEventSource(seed);
-            } else {
-                eventSource = new ExponentialEventSource(seed, meanInterarrival, meanService);
-            }
+                switch (workloadType) {
+                    case TRACE -> {
+                        if (tracePath != null) {
+                            try {
+                                this.eventSource = new TraceEventSource(tracePath);
+                            } catch (IOException e) {
+                                throw new IllegalArgumentException("Failed to load trace file from path: " + tracePath, e);
+                            }
+                        } else {
+                            // If workload type is TRACE but no trace path provided,
+                            // fallback to exponential with warning
+                            this.eventSource = new ExponentialEventSource(seed, meanInterarrival, meanService);
+                        }
+                    }
+                    case HYPEREXPONENTIAL -> this.eventSource = new HyperexponentialEventSource(seed, meanInterarrival, meanService);
+                    default -> this.eventSource = new ExponentialEventSource(seed, meanInterarrival, meanService);
+                }
         }
 
         // WebServerCluster
-        WebServerCluster webServerCluster;
-        if (!webServers.isEmpty()) {
-            webServerCluster = new WebServerCluster(minServers, maxServers, webServerCapacity, webServers);
-        } else {
+        if (webServerCluster == null) {
             int finalMin = Math.max(minServers, webServerCount);
             int finalMax = Math.max(maxServers, finalMin);
-            webServerCluster = new WebServerCluster(finalMin, finalMax, webServerCapacity);
+            webServerCluster = new WebServerCluster(finalMin, finalMax);
         }
 
         // Build Horizontal Scaler if not custom configured
-        if (scaler == null) {
-            scaler = new MovingWindowHorizontalScaler(scaleUpLimit, scaleDownLimit, scaleInterval, cooldown);
+        if (horizontalScaler == null) {
+            horizontalScaler = new MovingWindowHorizontalScaler(scaleUpLimit, scaleDownLimit, scaleInterval, cooldown);
         }
 
         // Build SpikeServer if not custom configured
         if (spikeServer == null) {
             double speedMultiplier = spikeCpuPercentage / 0.4;
-            spikeServer = new SpikeServer(0, spikeServerCapacity, speedMultiplier);
+            spikeServer = new SpikeServer(0, speedMultiplier);
         }
 
         // Build Vertical Scaler if not custom configured
@@ -272,16 +267,16 @@ public class SimulationBuilder {
         }
 
         // Build Router
-        WebServerRoutingStrategy webServerStrategy;
-        if (routingPolicy == RoutingPolicy.ROUND_ROBIN) {
-            webServerStrategy = new RoundRobinRoutingStrategy();
-        } else {
-            webServerStrategy = new LeastLoadedRoutingStrategy();
+        if(router == null) {
+            switch(routingPolicy) {
+                case RoutingPolicy.ROUND_ROBIN -> router = new Router(siMax, new RoundRobinRoutingStrategy());
+                case RoutingPolicy.LEAST_LOADED -> router = new Router(siMax, new LeastLoadedRoutingStrategy());
+                default -> throw new IllegalArgumentException("Unsupported routing policy: " + routingPolicy);
+            }
         }
-        Router router = new Router(siMax, webServerStrategy);
 
         // LoadManager
-        LoadManager loadController = new LoadManager(scaler, verticalScaler, router);
+        LoadManager loadController = new LoadManager(horizontalScaler, verticalScaler, router);
 
         return new SimulationController(maxTime, eventSource, webServerCluster, spikeServer, loadController);
     }

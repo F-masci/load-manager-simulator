@@ -25,4 +25,14 @@ public abstract class DistributionEventSource implements EventSource {
         jobCounter = 0;
         rngs.plantSeeds(seed);
     }
+
+    @Override
+    public long getSeed() {
+        return rngs.getSeed();
+    }
+
+    @Override
+    public void plantSeeds(long seed) {
+        rngs.plantSeeds(seed);
+    }
 }

@@ -12,7 +12,7 @@ public class HorizontalScalerTest {
     public void testMovingWindowHorizontalScalerScaleUpAndCooldown() {
         // scaleUpLimit = 4.0, scaleDownLimit = 1.0, windowSize = 30.0, cooldown = 100.0
         MovingWindowHorizontalScaler scaler = new MovingWindowHorizontalScaler(4.0, 1.0, 30.0, 100.0);
-        WebServerCluster cluster = new WebServerCluster(1, 5, 1);
+        WebServerCluster cluster = new WebServerCluster(1, 5);
 
         // Record response times: average will be 5.0 (exceeds scaleUpLimit = 4.0)
         scaler.recordCompletion(1.0, 5.0);
@@ -34,10 +34,10 @@ public class HorizontalScalerTest {
     @Test
     public void testMovingWindowHorizontalScalerScaleDown() {
         MovingWindowHorizontalScaler scaler = new MovingWindowHorizontalScaler(4.0, 1.0, 30.0, 10.0);
-        WebServerCluster cluster = new WebServerCluster(1, 5, 1);
+        WebServerCluster cluster = new WebServerCluster(1, 5);
 
         // Scale it up first manually so active servers count is 2
-        assertTrue(cluster.scaleUp(0.0));
+        assertTrue(cluster.scaleOut(0.0));
         assertEquals(2, cluster.getActiveServers().size());
 
         // Record low response times: average will be 0.5 (below scaleDownLimit = 1.0)
@@ -53,7 +53,7 @@ public class HorizontalScalerTest {
     @Test
     public void testNoHorizontalScaler() {
         NoHorizontalScaler scaler = new NoHorizontalScaler();
-        WebServerCluster cluster = new WebServerCluster(2, 5, 1);
+        WebServerCluster cluster = new WebServerCluster(2, 5);
 
         scaler.recordCompletion(1.0, 10.0);
         scaler.recordCompletion(2.0, 10.0);

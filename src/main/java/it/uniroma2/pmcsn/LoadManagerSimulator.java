@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class LoadManagerSimulator {
     private static final Logger logger = LoggerFactory.getLogger(LoadManagerSimulator.class);
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
 
         // Parse configurations from command line arguments
         ApplicationConfig config = CommandLineConfigParser.parse(args);
@@ -36,8 +36,7 @@ public class LoadManagerSimulator {
 
             logger.info("  Max Time:              {}", config.maxTime());
             logger.info("  SI_max Threshold:      {}", config.siMax());
-            logger.info("  Web Servers count:     {} (capacity per server={})", config.webServersCount(), config.webServerCapacity());
-            logger.info("  Spike Server capacity: {}", config.spikeServerCapacity());
+            logger.info("  Web Servers count:     {}", config.webServersCount());
             logger.info("  Routing Policy:        {}", config.routingPolicy());
             logger.info("  Simulation Method:     {}", config.simulationMethod());
 

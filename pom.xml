@@ -21,9 +21,18 @@
 
         <junit-jupiter.version>6.1.0</junit-jupiter.version>
         <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
+        <jetbrains-annotations.version>26.1.0</jetbrains-annotations.version>
     </properties>
 
     <dependencies>
+
+        <!-- Annotation dependencies -->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${jetbrains-annotations.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Logging dependencies -->
         <dependency>
@@ -108,8 +117,6 @@
                                 <argument>-time</argument>
                                 <argument>200</argument>
                                 <argument>-webservers</argument>
-                                <argument>1</argument>
-                                <argument>-webcap</argument>
                                 <argument>1</argument>
                                 <argument>-simax</argument>
                                 <argument>1</argument>

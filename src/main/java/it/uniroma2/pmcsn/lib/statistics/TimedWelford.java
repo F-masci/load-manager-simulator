@@ -9,6 +9,7 @@ public class TimedWelford {
     private double totalDuration = 0.0;
     private double mean = 0.0;
     private double sumOfSquares = 0.0;
+    private long count = 0;
 
     // For tracking state over time
     private double lastTime = 0.0;
@@ -25,6 +26,7 @@ public class TimedWelford {
         if (duration <= 0.0) {
             return;
         }
+        count++;
         double delta = value - mean;
         totalDuration += duration;
         mean += (duration / totalDuration) * delta;
@@ -94,12 +96,22 @@ public class TimedWelford {
     }
 
     /**
+     * Gets the number of updates (segments) added.
+     *
+     * @return the count of updates
+     */
+    public long getCount() {
+        return count;
+    }
+
+    /**
      * Resets the accumulator to its initial state.
      */
     public void reset() {
         totalDuration = 0.0;
         mean = 0.0;
         sumOfSquares = 0.0;
+        count = 0;
         lastTime = 0.0;
         currentValue = 0.0;
         initialized = false;

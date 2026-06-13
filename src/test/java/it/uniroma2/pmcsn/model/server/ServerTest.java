@@ -11,7 +11,7 @@ public class ServerTest {
 
     @Test
     public void testProcessorSharingServer() {
-        WebServer server = new WebServer(1, 10);
+        WebServer server = new WebServer(1);
         Job job1 = new Job(1, 0.0, 10.0);
         Job job2 = new Job(2, 0.0, 5.0);
 
@@ -27,14 +27,11 @@ public class ServerTest {
     }
 
     @Test
-    public void testServerCapacity() {
-        WebServer server = new WebServer(1, 2); // capacity = 2
-        Job job1 = new Job(1, 0.0, 1.0);
-        Job job2 = new Job(2, 0.0, 1.0);
-        Job job3 = new Job(3, 0.0, 1.0);
-
-        assertNotNull(server.acceptJob(job1, 0.0));
-        assertNotNull(server.acceptJob(job2, 0.0));
-        assertNull(server.acceptJob(job3, 0.0)); // Over capacity
+    public void testInfiniteCapacity() {
+        WebServer server = new WebServer(1);
+        for (int i = 0; i < 100; i++) {
+            assertNotNull(server.acceptJob(new Job(i, 0.0, 1.0), 0.0));
+        }
+        assertEquals(100, server.getActiveJobs().size());
     }
 }

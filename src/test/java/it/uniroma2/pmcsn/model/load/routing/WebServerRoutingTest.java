@@ -15,9 +15,9 @@ public class WebServerRoutingTest {
 
     @Test
     public void testRoundRobinRoutingStrategy() {
-        WebServerCluster cluster = new WebServerCluster(3, 5, 10);
+        WebServerCluster cluster = new WebServerCluster(3, 5);
         Router router = new Router(5, new RoundRobinRoutingStrategy(), new ThresholdSpikeServerRoutingStrategy());
-        SpikeServer spikeServer = new SpikeServer(0, 10, 1.0);
+        SpikeServer spikeServer = new SpikeServer(0, 1.0);
 
         Job job1 = new Job(1, 0.0, 1.0);
         Job job2 = new Job(2, 0.0, 1.0);
@@ -33,9 +33,9 @@ public class WebServerRoutingTest {
 
     @Test
     public void testLeastLoadedRoutingStrategy() {
-        WebServerCluster cluster = new WebServerCluster(3, 5, 10);
+        WebServerCluster cluster = new WebServerCluster(3, 5);
         Router router = new Router(5, new LeastLoadedRoutingStrategy(), new ThresholdSpikeServerRoutingStrategy());
-        SpikeServer spikeServer = new SpikeServer(0, 10, 1.0);
+        SpikeServer spikeServer = new SpikeServer(0, 1.0);
 
         // Simulate some load on Server 1 and 2
         WebServer ws1 = cluster.getActiveServers().get(0);

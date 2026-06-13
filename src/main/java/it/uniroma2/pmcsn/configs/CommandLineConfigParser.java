@@ -19,8 +19,6 @@ public class CommandLineConfigParser {
         double service = ApplicationConfig.MEAN_SERVICE;
         int siMax = ApplicationConfig.SI_MAX;
         int webServers = ApplicationConfig.WEB_SERVER_COUNT;
-        int webCap = ApplicationConfig.WEB_SERVER_CAPACITY;
-        int spikeCap = ApplicationConfig.SPIKE_SERVER_CAPACITY;
         RoutingPolicy policy = ApplicationConfig.ROUTING_POLICY;
         String tracePath = ApplicationConfig.TRACE_PATH;
         double spikeCpu = ApplicationConfig.SPIKE_CPU_PERCENTAGE;
@@ -59,12 +57,6 @@ public class CommandLineConfigParser {
                         break;
                     case "-webservers":
                         webServers = Integer.parseInt(args[++i]);
-                        break;
-                    case "-webcap":
-                        webCap = Integer.parseInt(args[++i]);
-                        break;
-                    case "-spikecap":
-                        spikeCap = Integer.parseInt(args[++i]);
                         break;
                     case "-policy":
                         policy = RoutingPolicy.valueOf(args[++i].toUpperCase());
@@ -141,7 +133,7 @@ public class CommandLineConfigParser {
 
         return new ApplicationConfig(
             maxTime, seed, interarrival, service, siMax,
-            webServers, webCap, spikeCap, policy, tracePath,
+            webServers, policy, tracePath,
             spikeCpu, workload, scaleUpLimit, scaleDownLimit,
             scaleInterval, cooldown, minServers, maxServers,
             spikeUpperThreshold, spikeLowerThreshold,
@@ -161,8 +153,6 @@ public class CommandLineConfigParser {
         System.out.println("  -service <double>                 Mean service time (default 1.5)");
         System.out.println("  -simax <int>                      SI_max threshold for spike server redirection (default 5)");
         System.out.println("  -webservers <int>                 Number of active Web Servers (default 3)");
-        System.out.println("  -webcap <int>                     Capacity of each Web Server (default 1)");
-        System.out.println("  -spikecap <int>                   Capacity of the Spike Server (default 10)");
         System.out.println("  -policy <ROUND_ROBIN|LEAST_LOADED> Load routing policy (default ROUND_ROBIN)");
         System.out.println("  -trace <path>                     Path to trace file (absolute or relative to workspace)");
         System.out.println("  -share <double>                   Spike Server CPU capacity share (e.g. 0.4 or 0.8, default 0.4)");

@@ -30,20 +30,16 @@ public class UtilizationThresholdVerticalScaler extends VerticalScaler {
 
         double utilization = spikeServer.getAverageUtilization(clock);
         if (!isScaled && utilization >= upperThreshold) {
-            spikeServer.setSpeedMultiplier(scaledSpeed);
+            spikeServer.setSpeedMultiplier(scaledSpeed, clock);
             isScaled = true;
             lastScalingTime = clock;
             scaleUpCount++;
-            logger.info("[Vertical Scaling] Scale Up: SpikeServer speed set to {} at clock={} (utilization={})",
-                    scaledSpeed, clock, utilization);
             return true;
         } else if (isScaled && utilization <= lowerThreshold) {
-            spikeServer.setSpeedMultiplier(baseSpeed);
+            spikeServer.setSpeedMultiplier(baseSpeed, clock);
             isScaled = false;
             lastScalingTime = clock;
             scaleDownCount++;
-            logger.info("[Vertical Scaling] Scale Down: SpikeServer speed restored to {} at clock={} (utilization={})",
-                    baseSpeed, clock, utilization);
             return true;
         }
         return false;

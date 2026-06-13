@@ -6,7 +6,7 @@ import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import java.util.List;
 
 /**
- * Implementation of WebServerRoutingStrategy selecting Web Servers in a round-robin (cyclic) fashion.
+ * Implementation of WebServerRoutingStrategy selecting Web Servers in a round-robin fashion.
  */
 public class RoundRobinRoutingStrategy implements WebServerRoutingStrategy {
     private int index = 0;

@@ -66,4 +66,14 @@ public class TraceEventSource implements EventSource {
     public void reset() {
         currentIndex = 0;
     }
+
+    @Override
+    public long getSeed() {
+        return 0L; // TraceEventSource does not use a random number generator, so we return a fixed seed
+    }
+
+    @Override
+    public void plantSeeds(long seed) {
+        // TraceEventSource does not use a random number generator, so this method has no effect
+    }
 }

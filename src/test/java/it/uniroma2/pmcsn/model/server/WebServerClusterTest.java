@@ -11,21 +11,21 @@ public class WebServerClusterTest {
 
     @Test
     public void testWebServerClusterScalingAndDraining() {
-        WebServerCluster cluster = new WebServerCluster(2, 4, 10);
+        WebServerCluster cluster = new WebServerCluster(2, 4);
         assertEquals(2, cluster.getActiveServers().size());
         assertEquals(2, cluster.getAllServers().size());
 
         // Scale Up
-        assertTrue(cluster.scaleUp(10.0));
+        assertTrue(cluster.scaleOut(10.0));
         assertEquals(3, cluster.getActiveServers().size());
         assertEquals(3, cluster.getAllServers().size());
         
         // Scale Up to Max
-        assertTrue(cluster.scaleUp(20.0));
+        assertTrue(cluster.scaleOut(20.0));
         assertEquals(4, cluster.getActiveServers().size());
         
         // Cannot scale up beyond max
-        assertFalse(cluster.scaleUp(30.0));
+        assertFalse(cluster.scaleOut(30.0));
         assertEquals(4, cluster.getActiveServers().size());
 
         // Let's add an active job on the last server to test draining
@@ -34,7 +34,7 @@ public class WebServerClusterTest {
         lastWs.acceptJob(job, 20.0);
 
         // Scale Down
-        assertTrue(cluster.scaleDown(25.0));
+        assertTrue(cluster.scaleIn(25.0));
         assertEquals(3, cluster.getActiveServers().size());
         assertEquals(1, cluster.getDrainingServers().size());
         assertEquals(lastWs.getId(), cluster.getDrainingServers().get(0).getId());

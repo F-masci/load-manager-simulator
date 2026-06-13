@@ -5,8 +5,8 @@ package it.uniroma2.pmcsn.model.server;
  */
 public class WebServer extends Server {
 
-    public WebServer(int id, int capacity) {
-        super(id, capacity, 1.0);
+    public WebServer(int id) {
+        super(id, 1.0);
     }
 
     /**

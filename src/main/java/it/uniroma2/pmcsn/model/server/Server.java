@@ -4,18 +4,15 @@ import it.uniroma2.pmcsn.lib.statistics.TimedWelford;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
 import it.uniroma2.pmcsn.model.Job;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Base abstract class representing a Server node.
  * Supports Processor Sharing (PS) scheduling and processing rate scaling.
+ * Servers have infinite capacity (infinite queue).
  */
 public abstract class Server {
     protected final int id;
-    protected final int capacity; // Acts as SI_max for Web Servers
     protected double speedMultiplier;
     protected final List<Job> activeJobs = new ArrayList<>();
     protected final Queue<Job> queue = new LinkedList<>(); // Kept for interface consistency, empty in PS mode
@@ -23,13 +20,13 @@ public abstract class Server {
     // Statistics and integrals using Welford and TimedWelford
     protected final TimedWelford activeJobsStat = new TimedWelford();
     protected final TimedWelford systemLengthStat = new TimedWelford();
+    protected final TimedWelford busyStat = new TimedWelford();
     protected final Welford responseTimeStat = new Welford();
 
     protected double totalServiceTime = 0.0; // Kept as simple sum for now
 
-    protected Server(int id, int capacity, double speedMultiplier) {
+    protected Server(int id, double speedMultiplier) {
         this.id = id;
-        this.capacity = capacity;
         this.speedMultiplier = speedMultiplier;
     }
 
@@ -43,10 +40,6 @@ public abstract class Server {
 
     public void setSpeedMultiplier(double speedMultiplier) {
         this.speedMultiplier = speedMultiplier;
-    }
-
-    public int getCapacity() {
-        return capacity;
     }
 
     public double getSpeedMultiplier() {
@@ -67,6 +60,7 @@ public abstract class Server {
     public void updateStatistics(double currentClock) {
         activeJobsStat.updateToTime(currentClock, activeJobs.size());
         systemLengthStat.updateToTime(currentClock, activeJobs.size() + queue.size());
+        busyStat.updateToTime(currentClock, activeJobs.isEmpty() ? 0.0 : 1.0);
     }
 
     /**
@@ -87,22 +81,18 @@ public abstract class Server {
     }
 
     /**
-     * Accepts a job. Under Processor Sharing, it enters execution immediately if capacity permits.
+     * Accepts a job. Under Processor Sharing with infinite queue, it enters execution immediately.
      *
      * @param job The job to accept
      * @param currentClock The current simulation clock
-     * @return The job if accepted, or null if server is at capacity.
+     * @return The job.
      */
     public Job acceptJob(Job job, double currentClock) {
         updateStatistics(currentClock);
-        if (activeJobs.size() < capacity) {
-            job.setStartTime(currentClock);
-            activeJobs.add(job);
-            updateStatistics(currentClock);
-            return job;
-        } else {
-            return null;
-        }
+        job.setStartTime(currentClock);
+        activeJobs.add(job);
+        updateStatistics(currentClock);
+        return job;
     }
 
     /**
@@ -139,6 +129,9 @@ public abstract class Server {
         systemLengthStat.reset();
         systemLengthStat.updateToTime(currentClock, activeJobs.size() + queue.size());
         
+        busyStat.reset();
+        busyStat.updateToTime(currentClock, activeJobs.isEmpty() ? 0.0 : 1.0);
+
         responseTimeStat.reset();
         totalServiceTime = 0.0;
     }
@@ -172,8 +165,8 @@ public abstract class Server {
     }
 
     public double getAverageUtilization(double totalTime) {
-        // In a PS server, average utilization is the average active jobs fraction of capacity
-        return activeJobsStat.getMean() / capacity;
+        // Utilization is the fraction of time the server was busy (activeJobs > 0)
+        return busyStat.getMean();
     }
 
     public double getAverageQueueLength(double totalTime) {
@@ -202,7 +195,7 @@ public abstract class Server {
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(id);
+        return Objects.hash(id);
     }
 
     @Override
@@ -210,7 +203,6 @@ public abstract class Server {
         return getClass().getSimpleName() + "{" +
                 "id=" + id +
                 ", active=" + activeJobs.size() +
-                "/" + capacity +
                 ", speedMult=" + speedMultiplier +
                 '}';
     }

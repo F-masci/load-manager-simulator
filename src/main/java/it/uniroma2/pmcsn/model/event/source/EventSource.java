@@ -19,4 +19,18 @@ public interface EventSource {
      * Resets the event source state.
      */
     void reset();
+
+    /**
+     * Gets the seed used for random number generation, if applicable.
+     *
+     * @return The seed value
+     */
+    long getSeed();
+
+    /**
+     * Set the seed used for random number generation, if applicable.
+     *
+     * @param seed The seed value
+     */
+    void plantSeeds(long seed);
 }

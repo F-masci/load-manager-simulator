@@ -16,9 +16,9 @@ public class SpikeServerRoutingTest {
 
     @Test
     public void testThresholdSpikeServerRoutingStrategy() {
-        WebServerCluster cluster = new WebServerCluster(1, 5, 10);
+        WebServerCluster cluster = new WebServerCluster(1, 5);
         Router router = new Router(2, new RoundRobinRoutingStrategy(), new ThresholdSpikeServerRoutingStrategy());
-        SpikeServer spikeServer = new SpikeServer(0, 10, 1.0);
+        SpikeServer spikeServer = new SpikeServer(0, 1.0);
 
         WebServer ws1 = cluster.getActiveServers().get(0);
         
@@ -36,9 +36,9 @@ public class SpikeServerRoutingTest {
 
     @Test
     public void testNoSpikeServerRoutingStrategy() {
-        WebServerCluster cluster = new WebServerCluster(1, 5, 10);
+        WebServerCluster cluster = new WebServerCluster(1, 5);
         Router router = new Router(2, new RoundRobinRoutingStrategy(), new NoSpikeServerRoutingStrategy());
-        SpikeServer spikeServer = new SpikeServer(0, 10, 1.0);
+        SpikeServer spikeServer = new SpikeServer(0, 1.0);
 
         WebServer ws1 = cluster.getActiveServers().get(0);
         

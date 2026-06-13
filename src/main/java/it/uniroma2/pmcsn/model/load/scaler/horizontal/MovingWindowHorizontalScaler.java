@@ -52,13 +52,13 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
         }
 
         if (avgResponse >= scaleUpThreshold) {
-            boolean scaled = cluster.scaleUp(clock);
+            boolean scaled = cluster.scaleOut(clock);
             if (scaled) {
                 lastScalingTime = clock;
                 return true;
             }
         } else if (avgResponse <= scaleDownThreshold) {
-            boolean scaled = cluster.scaleDown(clock);
+            boolean scaled = cluster.scaleIn(clock);
             if (scaled) {
                 lastScalingTime = clock;
                 return true;

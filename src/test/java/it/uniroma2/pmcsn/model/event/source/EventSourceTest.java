@@ -13,7 +13,7 @@ public class EventSourceTest {
 
     @Test
     public void testHyperexponentialGenerator() {
-        HyperexponentialEventSource source = new HyperexponentialEventSource(123456789L);
+        HyperexponentialEventSource source = new HyperexponentialEventSource(123456789L, 2.0,  1.5);
         Job firstJob = source.getNextJob(0.0);
         assertNotNull(firstJob);
         assertTrue(firstJob.getArrivalTime() > 0.0);
