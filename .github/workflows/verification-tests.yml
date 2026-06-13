@@ -1,4 +1,4 @@
-name: Run simulation tests
+name: Run verification tests
 
 on:
   push:
@@ -25,5 +25,5 @@ jobs:
 
       # Run the tests using Maven, cleaning the project first to ensure a fresh build.
       # Use --batch-mode to reduce the amount of output and speed up the build
-      - name: Run Tests with Maven
+      - name: Run Tests
         run: mvn --batch-mode clean test
