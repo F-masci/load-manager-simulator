@@ -1,6 +1,6 @@
 package it.uniroma2.pmcsn.configs;
 
-import it.uniroma2.pmcsn.controller.SimulationController.RoutingPolicy;
+import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
 
 /**
  * ApplicationConfig stores the configuration parameters for the simulation.

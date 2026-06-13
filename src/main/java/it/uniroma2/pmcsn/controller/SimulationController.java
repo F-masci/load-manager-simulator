@@ -27,17 +27,6 @@ import java.util.List;
 public class SimulationController {
     private static final Logger logger = LoggerFactory.getLogger(SimulationController.class);
 
-    public enum RoutingPolicy {
-        ROUND_ROBIN, LEAST_LOADED;
-
-        /**
-         * Overloaded equals method to allow direct comparison with string representations.
-         */
-        public boolean equals(String other) {
-            return other != null && this.name().equalsIgnoreCase(other);
-        }
-    }
-
     private double clock = 0.0;
     private final double maxTime;
     private final PriorityQueue<Event> eventQueue = new PriorityQueue<>();
@@ -292,6 +281,39 @@ public class SimulationController {
 
     public LoadManager getLoadManager() {
         return loadController;
+    }
+
+    public int getTotalJobsCompleted() {
+        return totalJobsCompleted;
+    }
+
+    public double getThroughput() {
+        return clock > 0.0 ? (double) totalJobsCompleted / clock : 0.0;
+    }
+
+    public double getAverageResponseTime() {
+        return totalJobsCompleted > 0 ? totalSystemResponseTime / totalJobsCompleted : 0.0;
+    }
+
+    public double getAverageJobsInSystem() {
+        double total = 0.0;
+        for (WebServer ws : webServerCluster.getAllServers()) {
+            total += ws.getAverageSystemLength(clock);
+        }
+        total += spikeServer.getAverageSystemLength(clock);
+        return total;
+    }
+
+    public double getSystemUtilization() {
+        List<WebServer> all = webServerCluster.getAllServers();
+        if (all.isEmpty()) {
+            return 0.0;
+        }
+        double sum = 0.0;
+        for (WebServer ws : all) {
+            sum += ws.getAverageUtilization(clock);
+        }
+        return sum / all.size();
     }
 
     public double getScaleInterval() {

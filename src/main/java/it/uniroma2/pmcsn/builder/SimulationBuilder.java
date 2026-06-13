@@ -3,7 +3,7 @@ package it.uniroma2.pmcsn.builder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.controller.SimulationController;
-import it.uniroma2.pmcsn.controller.SimulationController.RoutingPolicy;
+import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
 import it.uniroma2.pmcsn.model.load.LoadManager;
 import it.uniroma2.pmcsn.model.event.source.EventSource;
 import it.uniroma2.pmcsn.model.event.source.ExponentialEventSource;
@@ -16,10 +16,10 @@ import it.uniroma2.pmcsn.model.load.scaler.horizontal.HorizontalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.MovingWindowHorizontalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.VerticalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
-import it.uniroma2.pmcsn.model.server.*;
 import it.uniroma2.pmcsn.model.load.routing.Router;
-import it.uniroma2.pmcsn.model.load.routing.RoundRobinRouter;
-import it.uniroma2.pmcsn.model.load.routing.LeastLoadedRouter;
+import it.uniroma2.pmcsn.model.load.routing.webserver.WebServerRoutingStrategy;
+import it.uniroma2.pmcsn.model.load.routing.webserver.RoundRobinRoutingStrategy;
+import it.uniroma2.pmcsn.model.load.routing.webserver.LeastLoadedRoutingStrategy;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -272,12 +272,13 @@ public class SimulationBuilder {
         }
 
         // Build Router
-        Router router;
+        WebServerRoutingStrategy webServerStrategy;
         if (routingPolicy == RoutingPolicy.ROUND_ROBIN) {
-            router = new RoundRobinRouter(siMax);
+            webServerStrategy = new RoundRobinRoutingStrategy();
         } else {
-            router = new LeastLoadedRouter(siMax);
+            webServerStrategy = new LeastLoadedRoutingStrategy();
         }
+        Router router = new Router(siMax, webServerStrategy);
 
         // LoadManager
         LoadManager loadController = new LoadManager(scaler, verticalScaler, router);

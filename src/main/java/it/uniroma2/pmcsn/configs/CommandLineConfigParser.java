@@ -1,6 +1,6 @@
 package it.uniroma2.pmcsn.configs;
 
-import it.uniroma2.pmcsn.controller.SimulationController.RoutingPolicy;
+import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
 
 /**
  * Command-line arguments parser for the Horizontal Scaler Simulator.

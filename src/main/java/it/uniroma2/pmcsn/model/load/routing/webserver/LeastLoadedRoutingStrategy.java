@@ -1,4 +1,4 @@
-package it.uniroma2.pmcsn.model.load.routing;
+package it.uniroma2.pmcsn.model.load.routing.webserver;
 
 import it.uniroma2.pmcsn.model.Job;
 import it.uniroma2.pmcsn.model.server.WebServer;
@@ -6,16 +6,12 @@ import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import java.util.List;
 
 /**
- * Specialized router that selects the Web Server with the lowest load (Spike Indicator).
+ * Implementation of WebServerRoutingStrategy selecting the Web Server with the lowest load (Spike Indicator).
  */
-public class LeastLoadedRouter extends Router {
-
-    public LeastLoadedRouter(int siMax) {
-        super(siMax);
-    }
+public class LeastLoadedRoutingStrategy implements WebServerRoutingStrategy {
 
     @Override
-    protected WebServer selectWebServer(Job job, WebServerCluster cluster) {
+    public WebServer selectWebServer(Job job, WebServerCluster cluster) {
         List<WebServer> active = cluster.getActiveServers();
         if (active.isEmpty()) {
             throw new IllegalStateException("No active web servers in cluster.");
