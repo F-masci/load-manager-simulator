@@ -1,7 +1,6 @@
-package it.uniroma2.pmcsn;
+package it.uniroma2.pmcsn.controller;
 
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
-import it.uniroma2.pmcsn.controller.SimulationController;
 import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.MovingWindowHorizontalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
@@ -120,4 +119,3 @@ public class SimulationControllerTest {
         assertEquals(3, cluster.getActiveServers().size());
     }
 }
-

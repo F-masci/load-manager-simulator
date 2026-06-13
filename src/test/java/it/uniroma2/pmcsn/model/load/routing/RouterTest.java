@@ -1,12 +1,6 @@
-package it.uniroma2.pmcsn;
+package it.uniroma2.pmcsn.model.load.routing;
 
-import it.uniroma2.pmcsn.model.*;
-import it.uniroma2.pmcsn.model.load.routing.*;
-import it.uniroma2.pmcsn.model.server.*;
 import it.uniroma2.pmcsn.model.Job;
-import it.uniroma2.pmcsn.model.load.routing.LeastLoadedRouter;
-import it.uniroma2.pmcsn.model.load.routing.RoundRobinRouter;
-import it.uniroma2.pmcsn.model.load.routing.Router;
 import it.uniroma2.pmcsn.model.server.Server;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServer;
@@ -20,7 +14,7 @@ public class RouterTest {
     public void testRoundRobinRouter() {
         WebServerCluster cluster = new WebServerCluster(3, 5, 10);
         Router router = new RoundRobinRouter(5); // siMax = 5
-        SpikeServer spikeServer = new SpikeServer(999, 10, 1.0);
+        SpikeServer spikeServer = new SpikeServer(0, 10, 1.0); // Wait, spike server ID is 0 now! Let's check. Yes, ID is 0 since the last changes
 
         Job job1 = new Job(1, 0.0, 1.0);
         Job job2 = new Job(2, 0.0, 1.0);
@@ -38,7 +32,7 @@ public class RouterTest {
     public void testLeastLoadedRouter() {
         WebServerCluster cluster = new WebServerCluster(3, 5, 10);
         Router router = new LeastLoadedRouter(5); // siMax = 5
-        SpikeServer spikeServer = new SpikeServer(999, 10, 1.0);
+        SpikeServer spikeServer = new SpikeServer(0, 10, 1.0); // ID 0
 
         // Simulate some load on Server 1 and 2
         WebServer ws1 = cluster.getActiveServers().get(0);
@@ -62,7 +56,7 @@ public class RouterTest {
     public void testSpikeServerDiverting() {
         WebServerCluster cluster = new WebServerCluster(1, 5, 10);
         Router router = new RoundRobinRouter(2); // siMax = 2
-        SpikeServer spikeServer = new SpikeServer(999, 10, 1.0);
+        SpikeServer spikeServer = new SpikeServer(0, 10, 1.0); // ID 0
 
         WebServer ws1 = cluster.getActiveServers().get(0);
         

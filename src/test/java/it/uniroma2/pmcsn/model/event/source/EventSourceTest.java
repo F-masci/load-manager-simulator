@@ -1,7 +1,5 @@
-package it.uniroma2.pmcsn;
+package it.uniroma2.pmcsn.model.event.source;
 
-import it.uniroma2.pmcsn.model.event.source.HyperexponentialEventSource;
-import it.uniroma2.pmcsn.model.event.source.ExponentialEventSource;
 import it.uniroma2.pmcsn.model.Job;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,6 +1,5 @@
-package it.uniroma2.pmcsn;
+package it.uniroma2.pmcsn.model;
 
-import it.uniroma2.pmcsn.model.Job;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
