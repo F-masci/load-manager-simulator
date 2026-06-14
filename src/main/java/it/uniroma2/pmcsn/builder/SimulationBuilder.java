@@ -10,6 +10,9 @@ import it.uniroma2.pmcsn.model.event.source.TraceEventSource;
 import it.uniroma2.pmcsn.model.load.LoadManager;
 import it.uniroma2.pmcsn.model.load.routing.Router;
 import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
+import it.uniroma2.pmcsn.model.load.routing.spike.NoSpikeServerRoutingStrategy;
+import it.uniroma2.pmcsn.model.load.routing.spike.SpikeServerRoutingStrategy;
+import it.uniroma2.pmcsn.model.load.routing.spike.ThresholdSpikeServerRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.DeterministicRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.LeastLoadedRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.RoundRobinRoutingStrategy;
@@ -79,29 +82,28 @@ public class SimulationBuilder {
 
         // WebServerCluster
         WebServerCluster cluster = new WebServerCluster(config.cluster().minServers(), config.cluster().maxServers());
-
-        // SpikeServer
-        double baseSpeed = config.scaling().spikeCpuPercentage();
-        SpikeServer spikeServer = new SpikeServer(0, baseSpeed);
-
-        // Router
         WebServerRoutingStrategy wsStrategy = switch (config.load().routingPolicy()) {
             case RoutingPolicy.ROUND_ROBIN -> new RoundRobinRoutingStrategy();
             case RoutingPolicy.LEAST_LOADED -> new LeastLoadedRoutingStrategy();
             case RoutingPolicy.DETERMINISTIC -> new DeterministicRoutingStrategy();
         };
-        Router router = new Router(config.load().siMax(), wsStrategy);
+
+        // SpikeServer
+        SpikeServer spikeServer = new SpikeServer(0, config.scaling().spikeCpuPercentage());
+        SpikeServerRoutingStrategy spikeStrategy = config.cluster().spikeEnabled()
+                ? new ThresholdSpikeServerRoutingStrategy()
+                : new NoSpikeServerRoutingStrategy();
+
+        // Router
+        Router router = new Router(config.load().siMax(), wsStrategy, spikeStrategy);
 
         // Scalers
         HorizontalScaler hScaler = config.scaling().horizontalEnabled()
-            ? new MovingWindowHorizontalScaler(config.scaling().scaleUpLimit(), config.scaling().scaleDownLimit(),
-                                              config.scaling().scaleInterval(), config.scaling().cooldown())
+            ? new MovingWindowHorizontalScaler(config)
             : new NoHorizontalScaler();
 
-        double spikeBaseSpeed = spikeServer.getSpeedMultiplier();
         VerticalScaler vScaler = config.scaling().verticalEnabled()
-            ? new LoadThresholdVerticalScaler(config.scaling().spikeUpperThreshold(), config.scaling().spikeLowerThreshold(),
-                                                    spikeBaseSpeed, spikeBaseSpeed * 2.0, config.scaling().cooldown())
+            ? new LoadThresholdVerticalScaler(config)
             : new NoVerticalScaler();
 
         // LoadManager

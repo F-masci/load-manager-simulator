@@ -27,6 +27,7 @@ public record ApplicationConfig(
     public static final String TRACE_PATH = null;
     public static final double SPIKE_CPU_PERCENTAGE = 1.0;
     public static final WorkloadType WORKLOAD_TYPE = WorkloadType.HYPEREXPONENTIAL;
+    public static final boolean SPIKE_ENABLED = true;
 
     // Autoscaling configuration constants
     public static final double SCALE_UP_LIMIT = 8.0;
@@ -75,13 +76,14 @@ public record ApplicationConfig(
         }
 
         public LoadConfig(WorkloadType workloadType, double meanInterarrival, double meanService, RoutingPolicy routingPolicy) {
-            this(meanInterarrival, CV_INTERARRIVAL, meanService, CV_SERVICE, SI_MAX, routingPolicy, workloadType, TRACE_PATH);
+            this(workloadType, meanInterarrival, meanService, routingPolicy, SI_MAX);
+        }
+
+        public LoadConfig(WorkloadType workloadType, double meanInterarrival, double meanService, RoutingPolicy routingPolicy, int siMax) {
+            this(meanInterarrival, CV_INTERARRIVAL, meanService, CV_SERVICE, siMax, routingPolicy, workloadType, TRACE_PATH);
         }
 
 
-        public LoadConfig(double meanInterarrival, double cvInterarrival, double meanService, double cvService) {
-            this(WORKLOAD_TYPE, meanInterarrival, cvInterarrival, meanService, cvService);
-        }
 
         public LoadConfig(WorkloadType workloadType, double meanInterarrival, double cvInterarrival, double meanService, double cvService) {
             this(workloadType, meanInterarrival, cvInterarrival, meanService, cvService, ROUTING_POLICY);
@@ -113,15 +115,16 @@ public record ApplicationConfig(
     public record ClusterConfig(
         int webServersCount,
         int minServers,
-        int maxServers
+        int maxServers,
+        boolean spikeEnabled
     ) {
         public ClusterConfig() {
-            this(WEB_SERVER_COUNT, MIN_SERVERS, MAX_SERVERS);
+            this(WEB_SERVER_COUNT, MIN_SERVERS, MAX_SERVERS, SPIKE_ENABLED);
         }
 
 
         public static ClusterConfig singleServer() {
-            return new ClusterConfig(1, 1, 1);
+            return new ClusterConfig(1, 1, 1, false);
         }
     }
 

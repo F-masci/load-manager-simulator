@@ -82,7 +82,7 @@ public class SimulationFacade {
             controller.run(SimulationController.StopCondition.untilJobsCompleted(config.execution().batchSize()));
             updateAggregators(controller, rt, jis, util, thr);
             logger.info("Batch {}/{} completed", i + 1, config.execution().numBatches());
-            logger.debug("Batch {}/{} results:" +
+            logger.debug("Batch {}/{} results: " +
                     "Response Time {} | " +
                     "Jobs in System {} | " +
                     "System Utilization {} | " +
@@ -117,7 +117,7 @@ public class SimulationFacade {
             logger.info("Running replication {}/{} with seed {}...", i + 1, config.execution().numReplications(), currentSeed);
             controller.run(SimulationController.StopCondition.untilTimeElapsed(config.execution().maxTime()));
             logger.debug("Running replication {}/{} completed", i + 1, config.execution().numReplications());
-            logger.debug("Batch {}/{} results:" +
+            logger.debug("Batch {}/{} results: " +
                             "Response Time {} | " +
                             "Jobs in System {} | " +
                             "System Utilization {} | " +
@@ -164,7 +164,7 @@ public class SimulationFacade {
             IntervalEstimator.estimate(util.getCount(), util.getMean(), util.getStandardDeviation(), 0.95),
             IntervalEstimator.estimate(thr.getCount(), thr.getMean(), thr.getStandardDeviation(), 0.95)
         );
-        logger.info("\n" + results.toString());
+        logger.info("\n {}", results.toString());
         return results;
     }
 

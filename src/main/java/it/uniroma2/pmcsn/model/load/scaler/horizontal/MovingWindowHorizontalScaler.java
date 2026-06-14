@@ -1,5 +1,6 @@
 package it.uniroma2.pmcsn.model.load.scaler.horizontal;
 
+import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,15 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
     private final Queue<JobCompletionRecord> window = new LinkedList<>();
 
     private record JobCompletionRecord(double completionTime, double responseTime) {}
+
+    public MovingWindowHorizontalScaler(ApplicationConfig config) {
+        this(config.scaling());
+    }
+
+    public MovingWindowHorizontalScaler(ApplicationConfig.ScalingConfig scalingConfig) {
+        this(scalingConfig.scaleUpLimit(), scalingConfig.scaleDownLimit(),
+                scalingConfig.scaleInterval(), scalingConfig.cooldown());
+    }
 
     public MovingWindowHorizontalScaler(double scaleUpThreshold, double scaleDownThreshold, double windowSize, double cooldown) {
         super(scaleUpThreshold, scaleDownThreshold, cooldown);
