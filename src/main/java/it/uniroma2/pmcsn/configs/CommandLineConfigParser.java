@@ -87,7 +87,7 @@ public class CommandLineConfigParser {
             new ApplicationConfig.ClusterConfig(webServers, minServers, maxServers, true),
             new ApplicationConfig.ScalingConfig(scaleUpLimit, scaleDownLimit, scaleInterval, cooldown, 
                                                spikeUpperThreshold, spikeLowerThreshold, spikeCpu, true, true),
-            new ApplicationConfig.ExecutionConfig(method, seed, replications, maxTime, batches, batchSize, warmUp)
+            new ApplicationConfig.ExecutionConfig(method, seed, replications, maxTime, 0, batches, batchSize, warmUp)
         );
     }
 

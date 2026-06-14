@@ -105,6 +105,14 @@ public record ApplicationConfig(
         public static LoadConfig singleHyperexponentialServer(double meanInterarrival, double cvInterarrival, double meanService, double cvService) {
             return new LoadConfig(WorkloadType.HYPEREXPONENTIAL, meanInterarrival, cvInterarrival, meanService, cvService, RoutingPolicy.DETERMINISTIC);
         }
+
+        public static LoadConfig traceDriven(String tracePath, RoutingPolicy policy, int siMax) {
+            return new LoadConfig(0.0, 0.0, 0.0, 0.0, siMax, policy, WorkloadType.TRACE, tracePath);
+        }
+
+        public static LoadConfig traceDriven(String tracePath, RoutingPolicy policy) {
+            return traceDriven(tracePath, policy, SI_MAX);
+        }
     }
 
 
@@ -122,9 +130,12 @@ public record ApplicationConfig(
             this(WEB_SERVER_COUNT, MIN_SERVERS, MAX_SERVERS, SPIKE_ENABLED);
         }
 
-
         public static ClusterConfig singleServer() {
-            return new ClusterConfig(1, 1, 1, false);
+            return fixedServer(1);
+        }
+
+        public static ClusterConfig fixedServer(int numServers) {
+            return new ClusterConfig(numServers, numServers, numServers, false);
         }
     }
 
@@ -165,14 +176,14 @@ public record ApplicationConfig(
         long seed,
         int numReplications,
         double maxTime,
+        int maxJobs,
         int numBatches,
         int batchSize,
         int warmUpJobs
     ) {
         public ExecutionConfig() {
-            this(SIMULATION_METHOD, SEED, NUM_REPLICATIONS, MAX_TIME, NUM_BATCHES, BATCH_SIZE, WARM_UP_JOBS);
+            this(SIMULATION_METHOD, SEED, NUM_REPLICATIONS, MAX_TIME, 0, NUM_BATCHES, BATCH_SIZE, WARM_UP_JOBS);
         }
-
 
         public static ExecutionConfig batchRun(int numBatches, int batchSize) {
             return batchRun(numBatches, batchSize, WARM_UP_JOBS);
@@ -183,7 +194,15 @@ public record ApplicationConfig(
         }
 
         public static ExecutionConfig batchRun(long seed, int numBatches, int batchSize, int warmUpJobs) {
-            return new ExecutionConfig(SimulationMethod.BATCH_MEANS, seed, 0, MAX_TIME, numBatches, batchSize, warmUpJobs);
+            return new ExecutionConfig(SimulationMethod.BATCH_MEANS, seed, 0, MAX_TIME, 0, numBatches, batchSize, warmUpJobs);
+        }
+
+        public static ExecutionConfig singleRun(double maxTime) {
+            return new ExecutionConfig(SimulationMethod.INDEPENDENT_REPLICATIONS, SEED, 1, maxTime, 0, 0, 0, 0);
+        }
+
+        public static ExecutionConfig singleRun(int maxJobs) {
+            return new ExecutionConfig(SimulationMethod.INDEPENDENT_REPLICATIONS, SEED, 1, MAX_TIME, maxJobs, 0, 0, 0);
         }
     }
 
@@ -204,7 +223,7 @@ public record ApplicationConfig(
     public ApplicationConfig withSeed(long newSeed) {
         return new ApplicationConfig(load, cluster, scaling,
                 new ExecutionConfig(execution.method, newSeed, execution.numReplications, execution.maxTime,
-                        execution.numBatches, execution.batchSize, execution.warmUpJobs));
+                        execution.maxJobs, execution.numBatches, execution.batchSize, execution.warmUpJobs));
     }
 
     /* --- SCENARIOS --- */

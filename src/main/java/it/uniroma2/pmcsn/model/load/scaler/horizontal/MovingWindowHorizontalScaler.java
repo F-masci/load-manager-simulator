@@ -77,6 +77,11 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
         return false;
     }
 
+    @Override
+    public void resetStatistics() {
+        window.clear();
+    }
+
     public double getWindowSize() {
         return windowSize;
     }

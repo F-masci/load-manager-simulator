@@ -49,4 +49,9 @@ public abstract class VerticalScaler {
     public int getScaleDownCount() {
         return scaleDownCount;
     }
+
+    public void resetStatistics() {
+        scaleUpCount = 0;
+        scaleDownCount = 0;
+    }
 }

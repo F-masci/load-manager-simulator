@@ -43,4 +43,8 @@ public abstract class HorizontalScaler {
     public double getLastScalingTime() {
         return lastScalingTime;
     }
+
+    public void resetStatistics() {
+        // Default implementation for scalers without resettable metrics
+    }
 }

@@ -74,13 +74,10 @@ public class SimulationController {
         // Simulation loop
         while (totalJobsCompleted < targetJobs && clock < targetTime && processNextEvent());
 
-        // Report finalization
-        if (eventQueue.isEmpty() || clock >= maxTime) {
-            webServerCluster.finalizeStatistics(clock);
-            spikeServer.updateStatistics(clock);
-
-            updateSystemStats(clock);
-        }
+        // Report finalization - ALWAYS finalize to close last intervals
+        webServerCluster.finalizeStatistics(clock);
+        spikeServer.updateStatistics(clock);
+        updateSystemStats(clock);
     }
 
     public void scheduleInitialEvents() {
@@ -121,6 +118,9 @@ public class SimulationController {
         webServerCluster.resetStatistics(clock);
         spikeServer.resetStatistics(clock);
         
+        loadController.getHorizontalScaler().resetStatistics();
+        loadController.getVerticalScaler().resetStatistics();
+
         systemJisStat.reset();
         systemUtilStat.reset();
         updateSystemStats(clock);

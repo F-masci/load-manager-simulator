@@ -33,13 +33,13 @@ abstract public class ThresholdVerticalScaler extends VerticalScaler {
             spikeServer.setSpeedMultiplier(scaledSpeed, clock);
             isScaled = true;
             lastScalingTime = clock;
-            scaleUpCount++;
+            this.scaleUpCount++;
             return true;
         } else if (isScaled && currentMetric <= lowerThreshold) {
             spikeServer.setSpeedMultiplier(baseSpeed, clock);
             isScaled = false;
             lastScalingTime = clock;
-            scaleDownCount++;
+            this.scaleDownCount++;
             return true;
         }
         return false;
