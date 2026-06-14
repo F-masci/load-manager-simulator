@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ScalingSimulationTest {
     private static final Logger logger = LoggerFactory.getLogger(ScalingSimulationTest.class);
@@ -31,7 +30,7 @@ public class ScalingSimulationTest {
 
     @Test
     public void testHorizontalScaleOut() throws IOException {
-        // scaleUpLimit = 2.0 (RT). Window = 100.0.
+        // scaleUpLimit = 2.0 (RT). Window = 10.0.
         // Trace: 20 jobs, each with RT=5.
         // SCALE_CHECK at t=10. avgRT = 5.0 >= 2.0. Scale Out!
         List<String> trace = new ArrayList<>();
@@ -48,16 +47,17 @@ public class ScalingSimulationTest {
             ApplicationConfig.LoadConfig.traceDriven(tracePath, RoutingPolicy.ROUND_ROBIN),
             new ApplicationConfig.ClusterConfig(1, 1, 5, false),
             scaling,
-            ApplicationConfig.ExecutionConfig.singleRun(100.0) // Run enough to see completions and scale
+            ApplicationConfig.ExecutionConfig.singleRun(100.0) 
         );
 
         SimulationFacade facade = new SimulationFacade(testConfig);
         SimulationFacade.AggregatedResults results = facade.runSingleSimulation();
 
         logger.info("Verifying Horizontal Scale Out with Trace (20 jobs)...");
-        // Due to cooldown and window, we expect at least one scale-up.
-        assertTrue(results.scaleOutActions().mean() >= 1.0, "At least 1 horizontal scale-out should occur");
-        assertTrue(results.serverCompletions().size() > 1, "Should have more than 1 server used");
+        // Exact assertions
+        assertEquals(4.0, results.scaleOutActions().mean(), 1e-4, "Exactly 4 horizontal scale-out should occur (1 -> 5 servers)");
+        assertEquals(5, results.serverCompletions().size(), "Should have exactly 5 servers used");
+        assertEquals(81.0, results.responseTime().mean(), 1e-4, "Exact Mean Response Time mismatch");
     }
 
     @Test
@@ -79,14 +79,15 @@ public class ScalingSimulationTest {
             ApplicationConfig.LoadConfig.traceDriven(tracePath, RoutingPolicy.DETERMINISTIC, 0),
             new ApplicationConfig.ClusterConfig(1, 1, 1, true),
             scaling,
-            ApplicationConfig.ExecutionConfig.singleRun(50.0)
+            ApplicationConfig.ExecutionConfig.singleRun(15.0) 
         );
 
         SimulationFacade facade = new SimulationFacade(testConfig);
         SimulationFacade.AggregatedResults results = facade.runSingleSimulation();
 
         logger.info("Verifying Vertical Scale Up with Trace (20 jobs)...");
-        assertTrue(results.scaleUpActions().mean() >= 1.0, "At least 1 vertical scale-up should occur");
-        assertTrue(results.spikeAvgSpeed().mean() > 1.0, "Average speed should be boosted");
+        // Exact assertions
+        assertEquals(1.0, results.scaleUpActions().mean(), 1e-4, "Exactly 1 vertical scale-up should occur");
+        assertEquals(4.0000, results.spikeAvgSpeed().mean(), 1e-4, "Exact average speed multiplier mismatch");
     }
 }

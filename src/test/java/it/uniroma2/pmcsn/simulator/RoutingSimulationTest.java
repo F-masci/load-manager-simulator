@@ -1,8 +1,11 @@
 package it.uniroma2.pmcsn.simulator;
 
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
+import it.uniroma2.pmcsn.configs.LoggingDataType;
+import it.uniroma2.pmcsn.configs.LoggingFormat;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
 import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
+import it.uniroma2.pmcsn.utils.chart.SimulationChartUtility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
@@ -15,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RoutingSimulationTest {
     private static final Logger logger = LoggerFactory.getLogger(RoutingSimulationTest.class);
@@ -85,28 +89,68 @@ public class RoutingSimulationTest {
 
     @Test
     public void testSpikeServerRoutingDiversion() throws IOException {
-        // 1 Web Server, siMax = 1. 20 Jobs.
-        // J1 at t=1, J2 at t=1.1 -> J1 to WS, J2 to SS.
-        // We do this 10 times.
+        // Parameters for distinct "sawtooth" cycles with idle periods
+        final int SI_MAX = 5;
         List<String> trace = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            trace.add((i * 10.0 + 1.0) + " 5.0");
-            trace.add((i * 10.0 + 1.1) + " 5.0");
+
+        // Wave 1: t=0. Rapid influx, clears by t=20.
+        for (int i = 0; i < 12; i++) {
+            trace.add((i * 0.5) + " 5.0"); 
         }
+
+        // Wave 2: t=60. Smaller influx, clears by t=80.
+        for (int i = 0; i < 8; i++) {
+            trace.add((60.0 + i * 1.0) + " 4.0");
+        }
+
+        // Wave 3: t=120. Heavy burst, clears by t=150.
+        for (int i = 0; i < 20; i++) {
+            trace.add((120.0 + i * 0.3) + " 3.0");
+        }
+
+        // Wave 4: t=200. Long wave, clears by t=250.
+        for (int i = 0; i < 15; i++) {
+            trace.add((200.0 + i * 1.5) + " 8.0");
+        }
+        
+        final int TOTAL_JOBS = trace.size();
         String tracePath = createTraceFile(trace);
 
+        // Paths for state logging and chart in project root
+        Path resDir = Path.of("data", "res");
+        Path chartDir = Path.of("data", "chart");
+        Files.createDirectories(resDir);
+        Files.createDirectories(chartDir);
+
+        String csvPath = resDir.resolve("spike_diversion_state.csv").toAbsolutePath().toString();
+        String chartPath = chartDir.resolve("spike_diversion_chart.png").toAbsolutePath().toString();
+
         ApplicationConfig testConfig = new ApplicationConfig(
-            ApplicationConfig.LoadConfig.traceDriven(tracePath, RoutingPolicy.DETERMINISTIC, 1),
+            ApplicationConfig.LoadConfig.traceDriven(tracePath, RoutingPolicy.DETERMINISTIC, SI_MAX),
             new ApplicationConfig.ClusterConfig(1, 1, 1, true),
             ApplicationConfig.ScalingConfig.disabled(),
-            ApplicationConfig.ExecutionConfig.singleRun(20)
+            ApplicationConfig.ExecutionConfig.singleRun(TOTAL_JOBS),
+            new ApplicationConfig.LoggingConfig(true, LoggingFormat.CSV, LoggingDataType.LOAD_COMPARISON, csvPath)
         );
 
         SimulationFacade facade = new SimulationFacade(testConfig);
         SimulationFacade.AggregatedResults results = facade.runSingleSimulation();
 
-        logger.info("Verifying Spike Server Diversion with Trace (20 jobs)...");
-        assertEquals(10.0, results.divertedJobs().mean(), "Exactly 10 jobs should be diverted");
-        assertEquals(10.0, results.serverCompletions().get(1).mean(), "Web Server should complete 10 jobs");
+        logger.info("Verifying Spike Server Diversion with cyclic trace (55 jobs)...");
+        
+        // Exact assertions based on the deterministic trace logic
+        assertEquals(35.0, results.divertedJobs().mean(), 1e-4, "Exactly 35 jobs should be diverted");
+        assertEquals(20.0, results.serverCompletions().get(1).mean(), 1e-4, "Web Server should handle exactly 20 jobs");
+        
+        // Exact performance metrics for this trace
+        assertEquals(35.7273, results.responseTime().mean(), 1e-4, "Mean Response Time mismatch");
+        assertEquals(0.1913, results.throughput().mean(), 1e-4, "Mean Throughput mismatch");
+
+        // Generate chart as requested by default for this test
+        SimulationChartUtility.generateLoadComparisonChart(csvPath, chartPath);
+        logger.info("Cyclic load comparison chart generated at: {}", chartPath);
+        
+        assertTrue(Files.exists(Path.of(csvPath)), "Dataset CSV should exist");
+        assertTrue(Files.exists(Path.of(chartPath)), "Chart PNG should exist");
     }
 }

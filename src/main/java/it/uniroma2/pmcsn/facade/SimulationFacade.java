@@ -3,6 +3,9 @@ package it.uniroma2.pmcsn.facade;
 import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.controller.SimulationController;
+import it.uniroma2.pmcsn.controller.Simulator;
+import it.uniroma2.pmcsn.controller.decorator.storage.CsvStorageDecorator;
+import it.uniroma2.pmcsn.controller.decorator.storage.JsonStorageDecorator;
 import it.uniroma2.pmcsn.lib.statistics.IntervalEstimator;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
 import it.uniroma2.pmcsn.model.server.WebServer;
@@ -80,7 +83,7 @@ public class SimulationFacade {
     public AggregatedResults runBatchMeansSimulation(SimulationBuilder builder) {
         
         // Infinite horizon simulation
-        SimulationController controller = builder.build();
+        Simulator controller = builder.build();
 
         logger.info("Starting BATCH MEANS simulation (Infinite Horizon)... Warm-up: {} jobs", config.execution().warmUpJobs());
         if (config.execution().warmUpJobs() > 0) {
@@ -122,7 +125,7 @@ public class SimulationFacade {
         for (int i = 0; i < config.execution().numReplications(); i++) {
 
             // Ensure independence by creating a fresh controller with a specific seed for each replication
-            SimulationController controller = new SimulationBuilder()
+            Simulator controller = new SimulationBuilder()
                 .config(config.withSeed(currentSeed))
                 .build();
 
@@ -135,14 +138,6 @@ public class SimulationFacade {
             }
 
             logger.debug("Running replication {}/{} completed", i + 1, config.execution().numReplications());
-            logger.debug("Replication {}/{} results:" +
-                            "Response Time {} | " +
-                            "Jobs in System {} | " +
-                            "System Utilization {} | " +
-                            "Throughput {}",
-                    i + 1, config.execution().numReplications(),
-                    controller.getAverageResponseTime(), controller.getAverageJobsInSystem(),
-                    controller.getSystemUtilization(), controller.getThroughput());
             updateAggregators(controller);
 
             // Get seed from old run
@@ -161,7 +156,7 @@ public class SimulationFacade {
             throw new IllegalStateException("Configuration must be set to 1 replication for a single simulation run.");
         }
 
-        SimulationController controller = new SimulationBuilder().config(config).build();
+        Simulator controller = new SimulationBuilder().config(config).build();
         if (config.execution().maxJobs() > 0) {
             controller.run(SimulationController.StopCondition.untilJobsCompleted(config.execution().maxJobs()));
         } else {
@@ -170,7 +165,18 @@ public class SimulationFacade {
         updateAggregators(controller);
         AggregatedResults results = createResults("SINGLE RUN", 1);
         this.lastResults = results;
+        
+        // Finalize decorators (close files)
+        // Since decorators are wrapping the controller, we should find them
+        findAndCloseStorage(controller);
+        
         return results;
+    }
+
+    private void findAndCloseStorage(Simulator s) {
+        if (s instanceof CsvStorageDecorator d) d.finalizeSimulation();
+        else if (s instanceof JsonStorageDecorator d) d.finalizeSimulation();
+        else if (s instanceof it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator sd) findAndCloseStorage(sd.getDecorated());
     }
 
 
@@ -185,7 +191,7 @@ public class SimulationFacade {
     /**
      * Updates statistical aggregators with metrics from a completed simulation segment.
      */
-    private void updateAggregators(SimulationController c) {
+    private void updateAggregators(Simulator c) {
         rt.update(c.getAverageResponseTime());
         jis.update(c.getAverageJobsInSystem());
         util.update(c.getSystemUtilization());

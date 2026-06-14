@@ -39,6 +39,12 @@ public class CommandLineConfigParser {
         int batchSize = ApplicationConfig.BATCH_SIZE;
         int warmUp = ApplicationConfig.WARM_UP_JOBS;
 
+        // Logging
+        boolean logEnabled = ApplicationConfig.LOGGING_ENABLED;
+        LoggingFormat logFormat = ApplicationConfig.LOGGING_FORMAT;
+        LoggingDataType logType = ApplicationConfig.LOGGING_DATA_TYPE;
+        String logPath = ApplicationConfig.LOGGING_OUTPUT_PATH;
+
         try {
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
@@ -68,6 +74,10 @@ public class CommandLineConfigParser {
                     case "-batches" -> batches = Integer.parseInt(args[++i]);
                     case "-batchSize" -> batchSize = Integer.parseInt(args[++i]);
                     case "-warmUp" -> warmUp = Integer.parseInt(args[++i]);
+                    case "-logEnabled" -> logEnabled = Boolean.parseBoolean(args[++i]);
+                    case "-logFormat" -> logFormat = LoggingFormat.valueOf(args[++i].toUpperCase());
+                    case "-logType" -> logType = LoggingDataType.valueOf(args[++i].toUpperCase());
+                    case "-logPath" -> logPath = args[++i];
                     case "-h", "--help" -> { printUsage(); System.exit(0); }
                     default -> { System.err.println("Unknown parameter: " + args[i]); printUsage(); System.exit(1); }
                 }
@@ -87,7 +97,8 @@ public class CommandLineConfigParser {
             new ApplicationConfig.ClusterConfig(webServers, minServers, maxServers, true),
             new ApplicationConfig.ScalingConfig(scaleUpLimit, scaleDownLimit, scaleInterval, cooldown, 
                                                spikeUpperThreshold, spikeLowerThreshold, spikeCpu, true, true),
-            new ApplicationConfig.ExecutionConfig(method, seed, replications, maxTime, 0, batches, batchSize, warmUp)
+            new ApplicationConfig.ExecutionConfig(method, seed, replications, maxTime, 0, batches, batchSize, warmUp),
+            new ApplicationConfig.LoggingConfig(logEnabled, logFormat, logType, logPath)
         );
     }
 
@@ -118,5 +129,9 @@ public class CommandLineConfigParser {
         System.out.println("  -batches <int>                    Number of batches");
         System.out.println("  -batchSize <int>                  Jobs per batch");
         System.out.println("  -warmUp <int>                     Jobs for warm-up period");
+        System.out.println("  -logEnabled <boolean>             Enable/disable state logging");
+        System.out.println("  -logFormat <CSV|JSON>             Output format for logs");
+        System.out.println("  -logType <LOAD_COMPARISON|SYSTEM_METRICS> Type of data to log");
+        System.out.println("  -logPath <path>                   Output file path for logs");
     }
 }

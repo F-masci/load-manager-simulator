@@ -3,6 +3,11 @@ package it.uniroma2.pmcsn.builder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.controller.SimulationController;
+import it.uniroma2.pmcsn.controller.Simulator;
+import it.uniroma2.pmcsn.controller.decorator.data.LoadComparisonDecorator;
+import it.uniroma2.pmcsn.controller.decorator.data.SystemMetricsDecorator;
+import it.uniroma2.pmcsn.controller.decorator.storage.CsvStorageDecorator;
+import it.uniroma2.pmcsn.controller.decorator.storage.JsonStorageDecorator;
 import it.uniroma2.pmcsn.model.event.source.EventSource;
 import it.uniroma2.pmcsn.model.event.source.ExponentialEventSource;
 import it.uniroma2.pmcsn.model.event.source.HyperexponentialEventSource;
@@ -29,7 +34,7 @@ import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import java.io.IOException;
 
 /**
- * Fluent builder for configuring and creating a SimulationController.
+ * Fluent builder for configuring and creating a Simulator.
  * Relies strictly on ApplicationConfig to ensure that every build() call 
  * creates fresh, independent instances of all simulation components.
  */
@@ -60,10 +65,10 @@ public class SimulationBuilder {
     }
 
     /**
-     * Builds and returns a fresh SimulationController using the current configuration.
+     * Builds and returns a fresh Simulator using the current configuration.
      * All stateful components are instantiated from scratch.
      */
-    public SimulationController build() {
+    public Simulator build() {
         long seed = config.execution().seed();
 
         // Event Source
@@ -82,6 +87,7 @@ public class SimulationBuilder {
 
         // WebServerCluster
         WebServerCluster cluster = new WebServerCluster(config.cluster().minServers(), config.cluster().maxServers());
+        
         WebServerRoutingStrategy wsStrategy = switch (config.load().routingPolicy()) {
             case RoutingPolicy.ROUND_ROBIN -> new RoundRobinRoutingStrategy();
             case RoutingPolicy.LEAST_LOADED -> new LeastLoadedRoutingStrategy();
@@ -109,6 +115,23 @@ public class SimulationBuilder {
         // LoadManager
         LoadManager loadManager = new LoadManager(hScaler, vScaler, router);
 
-        return new SimulationController(config.execution().maxTime(), eventSource, cluster, spikeServer, loadManager);
+        Simulator controller = new SimulationController(config.execution().maxTime(), eventSource, cluster, spikeServer, loadManager);
+
+        // Dynamic decoration
+        if (config.logging().enabled()) {
+            // First: Data collection decorator (What to save)
+            controller = switch (config.logging().dataType()) {
+                case LOAD_COMPARISON -> new LoadComparisonDecorator(controller);
+                case SYSTEM_METRICS -> new SystemMetricsDecorator(controller);
+            };
+
+            // Second: Storage decorator (How to save)
+            controller = switch (config.logging().format()) {
+                case JSON -> new JsonStorageDecorator(controller, config.logging().outputPath());
+                case CSV -> new CsvStorageDecorator(controller, config.logging().outputPath());
+            };
+        }
+
+        return controller;
     }
 }

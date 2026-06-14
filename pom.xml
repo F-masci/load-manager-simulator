@@ -17,6 +17,8 @@
         <slf4j-api.version>2.0.18</slf4j-api.version>
         <logback-classic.version>1.5.34</logback-classic.version>
 
+        <jfreechart.version>1.5.6</jfreechart.version>
+
         <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
 
         <junit-jupiter.version>6.1.0</junit-jupiter.version>
@@ -44,6 +46,13 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback-classic.version}</version>
+        </dependency>
+
+        <!-- Charting dependencies -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>${jfreechart.version}</version>
         </dependency>
 
         <!-- Testing dependencies -->

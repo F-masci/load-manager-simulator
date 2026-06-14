@@ -20,7 +20,7 @@ import java.util.PriorityQueue;
 /**
  * Controller class managing the next-event driven simulation with Processor Sharing.
  */
-public class SimulationController {
+public class SimulationController implements Simulator {
     private static final Logger logger = LoggerFactory.getLogger(SimulationController.class);
 
     private double clock = 0.0;
@@ -38,6 +38,7 @@ public class SimulationController {
     private int totalJobsArrived = 0;
     private int totalJobsDiverted = 0;
     private int totalJobsCompleted = 0;
+    private EventType lastEventType = null;
 
     // System-wide time-weighted statistics
     private final TimedWelford systemJisStat = new TimedWelford();
@@ -53,33 +54,7 @@ public class SimulationController {
         this.loadController = loadController;
     }
 
-    /**
-     * Execute the simulation based on a specific stop condition.
-     *
-     * @param condition Specifies when the simulation segment should terminate.
-     */
-    public void run(StopCondition condition) {
-        scheduleInitialEvents();
-
-        int targetJobs = Integer.MAX_VALUE;
-        double targetTime = Double.MAX_VALUE;
-
-        // Get the stop condition
-        switch (condition.criteria()) {
-            case JOBS_COMPLETED -> targetJobs = totalJobsCompleted + (int) condition.targetValue();
-            case TIME_ELAPSED -> targetTime = clock + condition.targetValue();
-            case QUEUE_EMPTY -> { /* Use default infinite value */ }
-        }
-
-        // Simulation loop
-        while (totalJobsCompleted < targetJobs && clock < targetTime && processNextEvent());
-
-        // Report finalization - ALWAYS finalize to close last intervals
-        webServerCluster.finalizeStatistics(clock);
-        spikeServer.updateStatistics(clock);
-        updateSystemStats(clock);
-    }
-
+    @Override
     public void scheduleInitialEvents() {
         if (clock == 0.0 && eventQueue.isEmpty()) {
             webServerCluster.updateStatistics(0.0);
@@ -93,10 +68,20 @@ public class SimulationController {
         }
     }
 
+    @Override
+    public void finalizeSimulation() {
+        // Report finalization - ALWAYS finalize to close last intervals
+        webServerCluster.finalizeStatistics(clock);
+        spikeServer.updateStatistics(clock);
+        updateSystemStats(clock);
+    }
+
+    @Override
     public boolean processNextEvent() {
         if (eventQueue.isEmpty()) return false;
 
         Event event = eventQueue.poll();
+        this.lastEventType = event.getType();
         double nextTime = event.getTime();
 
         if (nextTime > maxTime) {
@@ -218,7 +203,13 @@ public class SimulationController {
         systemUtilStat.updateToTime(time, currentUtil);
     }
 
+    @Override
     public long getSeed() { return eventSource.getSeed(); }
+
+    @Override
+    public EventType getLastEventType() {
+        return lastEventType;
+    }
     public void plantSeeds(long seed) { eventSource.plantSeeds(seed); }
 
     public double getClock() { return clock; }
