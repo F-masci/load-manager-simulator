@@ -6,7 +6,8 @@ package it.uniroma2.pmcsn.model.event;
 public enum EventType {
     ARRIVAL,
     COMPLETION,
-    SCALE_CHECK;
+    SCALE_CHECK_HORIZONTAL,
+    SCALE_CHECK_VERTICAL;
 
     /**
      * Overloaded equals method to allow direct comparison with string representations.

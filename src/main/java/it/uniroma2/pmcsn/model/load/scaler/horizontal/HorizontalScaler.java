@@ -28,6 +28,11 @@ public abstract class HorizontalScaler {
      */
     public abstract boolean evaluateScaling(double clock, WebServerCluster cluster);
 
+    /**
+     * Returns the current value of the metric used for scaling decisions.
+     */
+    public abstract double getCurrentMetric(double clock);
+
     public double getScaleUpThreshold() {
         return scaleUpThreshold;
     }
@@ -42,6 +47,10 @@ public abstract class HorizontalScaler {
 
     public double getLastScalingTime() {
         return lastScalingTime;
+    }
+
+    public double getRemainingCooldown(double clock) {
+        return Math.max(0.0, cooldown - (clock - lastScalingTime));
     }
 
     public void resetStatistics() {

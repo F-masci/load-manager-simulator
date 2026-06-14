@@ -31,13 +31,17 @@ public class LoadManager {
     }
 
     /**
-     * Triggers horizontal and vertical autoscaling checks.
      * Returns true if any scaling action occurred.
      */
-    public boolean evaluateScaling(double clock, WebServerCluster cluster, SpikeServer spikeServer) {
-        boolean hScaled = horizontalScaler.evaluateScaling(clock, cluster);
-        boolean vScaled = verticalScaler.evaluateScaling(clock, spikeServer);
-        return hScaled || vScaled;
+    public boolean evaluateScaling(double clock, WebServerCluster cluster) {
+        return horizontalScaler.evaluateScaling(clock, cluster);
+    }
+
+    /**
+     * Returns true if any scaling action occurred.
+     */
+    public boolean evaluateScaling(double clock, SpikeServer spikeServer) {
+        return verticalScaler.evaluateScaling(clock, spikeServer);
     }
 
     public HorizontalScaler getHorizontalScaler() {

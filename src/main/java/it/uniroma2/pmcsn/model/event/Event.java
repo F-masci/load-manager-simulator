@@ -53,10 +53,11 @@ public class Event implements Comparable<Event> {
 
     private int getPriority(EventType type) {
         switch (type) {
-            case COMPLETION: return 1;
-            case ARRIVAL:    return 2;
-            case SCALE_CHECK:return 3;
-            default:         return 4;
+            case COMPLETION:                return 1;
+            case ARRIVAL:                   return 2;
+            case SCALE_CHECK_HORIZONTAL:    return 3;
+            case SCALE_CHECK_VERTICAL:      return 4;
+            default:                        return 5;
         }
     }
 

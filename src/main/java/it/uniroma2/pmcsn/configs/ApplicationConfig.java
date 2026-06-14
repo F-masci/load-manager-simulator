@@ -33,8 +33,8 @@ public record ApplicationConfig(
     // Autoscaling configuration constants
     public static final double SCALE_UP_LIMIT = 1.0;
     public static final double SCALE_DOWN_LIMIT = 0.05;
-    public static final double SCALE_INTERVAL = 300.0;
     public static final double COOLDOWN = 300.0;
+    public static final double SCALE_INTERVAL = COOLDOWN;
     public static final int MIN_SERVERS = 1;
     public static final int MAX_SERVERS = 1_000;
     public static final double SPIKE_UPPER_THRESHOLD = 50;
@@ -135,7 +135,11 @@ public record ApplicationConfig(
         }
 
         public static ClusterConfig fixedServer(int numServers) {
-            return new ClusterConfig(numServers, numServers, numServers, false);
+            return fixedServer(numServers, false);
+        }
+
+        public static ClusterConfig fixedServer(int numServers, boolean spikeEnabled) {
+            return new ClusterConfig(numServers, numServers, numServers, spikeEnabled);
         }
     }
 
@@ -156,6 +160,14 @@ public record ApplicationConfig(
         public ScalingConfig() {
             this(SCALE_UP_LIMIT, SCALE_DOWN_LIMIT, SCALE_INTERVAL, COOLDOWN, 
                  SPIKE_UPPER_THRESHOLD, SPIKE_LOWER_THRESHOLD, SPIKE_CPU_PERCENTAGE, true, true);
+        }
+
+        public static ScalingConfig onlyHorizontal(double scaleUpLimit, double scaleDownLimit, double cooldown) {
+            return new ScalingConfig(scaleUpLimit, scaleDownLimit, cooldown, cooldown, 0, 0, 0, true, false);
+        }
+
+        public static ScalingConfig onlyVertical(double spikeUpperThreshold, double spikeLowerThreshold, double spikeCpuPercentage, double cooldown) {
+            return new ScalingConfig(0, 0, cooldown, cooldown, spikeUpperThreshold, spikeLowerThreshold, spikeCpuPercentage, false, true);
         }
 
         public static ScalingConfig disabled() {

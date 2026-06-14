@@ -12,5 +12,10 @@ public enum LoggingDataType {
     /**
      * Basic system-wide metrics (Response Time, JIS, etc.).
      */
-    SYSTEM_METRICS
+    SYSTEM_METRICS,
+    
+    /**
+     * Scaling metrics and thresholds for horizontal and vertical scalers.
+     */
+    SCALING_METRICS
 }

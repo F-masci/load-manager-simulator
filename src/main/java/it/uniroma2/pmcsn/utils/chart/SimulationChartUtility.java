@@ -4,6 +4,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
@@ -128,6 +129,219 @@ public class SimulationChartUtility {
         try {
             ChartUtils.saveChartAsPNG(new File(outputPath), chart, 1200, 800);
             logger.info("Enhanced focused load comparison chart generated at: {}", outputPath);
+        } catch (IOException e) {
+            logger.error("Failed to save chart image: {}", outputPath, e);
+        }
+    }
+
+    public static void generateHorizontalScalingChart(String csvPath, String outputPath) {
+        XYSeries activeServersSeries = new XYSeries("Active Web Servers");
+        XYSeries hMetricSeries = new XYSeries("Avg Response Time (Window)");
+        XYSeries cooldownSeries = new XYSeries("Residual Cooldown");
+
+        double scaleUpLimit = 0;
+        double scaleDownLimit = 0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(csvPath))) {
+            String line = reader.readLine(); // Skip header
+            if (line == null) return;
+
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length < 11) continue;
+
+                double clock = Double.parseDouble(parts[0]);
+                int activeWebServers = Integer.parseInt(parts[2]);
+                double hMetric = Double.parseDouble(parts[3]);
+                scaleUpLimit = Double.parseDouble(parts[4]);
+                scaleDownLimit = Double.parseDouble(parts[5]);
+                double hCooldown = Double.parseDouble(parts[6]);
+
+                if (clock > 500.0) continue; 
+
+                activeServersSeries.add(clock, activeWebServers);
+                hMetricSeries.add(clock, hMetric);
+                cooldownSeries.add(clock, hCooldown);
+            }
+        } catch (IOException | NumberFormatException e) {
+            logger.error("Error reading scaling metrics file: {}", csvPath, e);
+            return;
+        }
+
+        XYSeriesCollection dataset1 = new XYSeriesCollection(activeServersSeries);
+        XYSeriesCollection dataset2 = new XYSeriesCollection(hMetricSeries);
+        XYSeriesCollection dataset3 = new XYSeriesCollection(cooldownSeries);
+
+        // Subplot 1: Active Servers
+        NumberAxis rangeAxis1 = new NumberAxis("Active Servers");
+        rangeAxis1.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        XYStepAreaRenderer stepRenderer = new XYStepAreaRenderer(XYStepAreaRenderer.AREA);
+        stepRenderer.setSeriesPaint(0, new Color(94, 129, 172, 120)); // Nord Frost Blue
+        XYPlot subplot1 = new XYPlot(dataset1, null, rangeAxis1, stepRenderer);
+        subplot1.setBackgroundPaint(Color.WHITE);
+        subplot1.setRangeGridlinePaint(new Color(230, 230, 230));
+
+        // Subplot 2: Metric (Avg Response Time)
+        NumberAxis rangeAxis2 = new NumberAxis("Avg Response Time");
+        XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
+        lineRenderer.setSeriesPaint(0, new Color(191, 97, 106)); // Nord Aurora Red
+        lineRenderer.setSeriesStroke(0, new BasicStroke(2.0f));
+        XYPlot subplot2 = new XYPlot(dataset2, null, rangeAxis2, lineRenderer);
+        subplot2.setBackgroundPaint(Color.WHITE);
+        subplot2.setRangeGridlinePaint(new Color(230, 230, 230));
+
+        // Subplot 3: Residual Cooldown
+        NumberAxis rangeAxis3 = new NumberAxis("Cooldown (s)");
+        XYLineAndShapeRenderer cooldownRenderer = new XYLineAndShapeRenderer(true, false);
+        cooldownRenderer.setSeriesPaint(0, new Color(136, 192, 208)); // Nord Frost Light Blue
+        XYPlot subplot3 = new XYPlot(dataset3, null, rangeAxis3, cooldownRenderer);
+        subplot3.setBackgroundPaint(Color.WHITE);
+        subplot3.setRangeGridlinePaint(new Color(230, 230, 230));
+
+        // Threshold Markers on Subplot 2
+        if (scaleUpLimit > 0) {
+            ValueMarker upMarker = new ValueMarker(scaleUpLimit);
+            upMarker.setPaint(new Color(220, 20, 60));
+            upMarker.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{10, 5}, 0));
+            upMarker.setLabel("Scale UP Limit (" + String.format("%.2f", scaleUpLimit) + ")");
+            upMarker.setLabelAnchor(org.jfree.chart.ui.RectangleAnchor.TOP_RIGHT);
+            upMarker.setLabelTextAnchor(org.jfree.chart.ui.TextAnchor.BOTTOM_RIGHT);
+            subplot2.addRangeMarker(upMarker, org.jfree.chart.ui.Layer.FOREGROUND);
+        }
+
+        if (scaleDownLimit > 0) {
+            ValueMarker downMarker = new ValueMarker(scaleDownLimit);
+            downMarker.setPaint(new Color(34, 139, 34)); // Forest Green
+            downMarker.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{10, 5}, 0));
+            downMarker.setLabel("Scale DOWN Limit (" + String.format("%.2f", scaleDownLimit) + ")");
+            downMarker.setLabelAnchor(org.jfree.chart.ui.RectangleAnchor.BOTTOM_RIGHT);
+            downMarker.setLabelTextAnchor(org.jfree.chart.ui.TextAnchor.TOP_RIGHT);
+            subplot2.addRangeMarker(downMarker, org.jfree.chart.ui.Layer.FOREGROUND);
+        }
+
+        NumberAxis domainAxis = new NumberAxis("Time (seconds)");
+        CombinedDomainXYPlot plot = new CombinedDomainXYPlot(domainAxis);
+        plot.setGap(10.0);
+        plot.add(subplot1, 2); 
+        plot.add(subplot2, 2);
+        plot.add(subplot3, 1); 
+        plot.setOrientation(PlotOrientation.VERTICAL);
+
+        JFreeChart chart = new JFreeChart("Horizontal Scaling Dynamics", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+        chart.setBackgroundPaint(Color.WHITE);
+
+        try {
+            ChartUtils.saveChartAsPNG(new File(outputPath), chart, 1200, 1000);
+            logger.info("Horizontal scaling chart generated at: {}", outputPath);
+        } catch (IOException e) {
+            logger.error("Failed to save chart image: {}", outputPath, e);
+        }
+    }
+
+    /**
+     * Generates a chart for Vertical Scaling dynamics.
+     *
+     * @param csvPath    Path to the input CSV file containing ScalingMetrics.
+     * @param outputPath Path where the chart image (PNG) will be saved.
+     */
+    public static void generateVerticalScalingChart(String csvPath, String outputPath) {
+        XYSeries spikeSpeedSeries = new XYSeries("Spike Server Speed Multiplier");
+        XYSeries vMetricSeries = new XYSeries("Spike Server Metric (e.g. Load/Utilization)");
+        XYSeries cooldownSeries = new XYSeries("Residual Cooldown");
+
+        double vUpperLimit = 0;
+        double vLowerLimit = 0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(csvPath))) {
+            String line = reader.readLine(); // Skip header
+            if (line == null) return;
+
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length < 11) continue;
+
+                double clock = Double.parseDouble(parts[0]);
+                double spikeSpeed = Double.parseDouble(parts[7]);
+                double vMetric = Double.parseDouble(parts[8]);
+                vUpperLimit = Double.parseDouble(parts[9]);
+                vLowerLimit = Double.parseDouble(parts[10]);
+                double vCooldown = Double.parseDouble(parts[11]);
+
+                if (clock > 500.0) continue;
+
+                spikeSpeedSeries.add(clock, spikeSpeed);
+                vMetricSeries.add(clock, vMetric);
+                cooldownSeries.add(clock, vCooldown);
+            }
+        } catch (IOException | NumberFormatException e) {
+            logger.error("Error reading scaling metrics file: {}", csvPath, e);
+            return;
+        }
+
+        XYSeriesCollection dataset1 = new XYSeriesCollection(spikeSpeedSeries);
+        XYSeriesCollection dataset2 = new XYSeriesCollection(vMetricSeries);
+        XYSeriesCollection dataset3 = new XYSeriesCollection(cooldownSeries);
+
+        // Subplot 1: Speed Multiplier
+        NumberAxis rangeAxis1 = new NumberAxis("Speed Multiplier");
+        XYStepAreaRenderer stepRenderer = new XYStepAreaRenderer(XYStepAreaRenderer.AREA);
+        stepRenderer.setSeriesPaint(0, new Color(163, 190, 140, 120)); // Nord Aurora Green
+        XYPlot subplot1 = new XYPlot(dataset1, null, rangeAxis1, stepRenderer);
+        subplot1.setBackgroundPaint(Color.WHITE);
+        subplot1.setRangeGridlinePaint(new Color(230, 230, 230));
+
+        // Subplot 2: Vertical Metric
+        NumberAxis rangeAxis2 = new NumberAxis("Scaling Metric");
+        XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
+        lineRenderer.setSeriesPaint(0, new Color(208, 135, 112)); // Nord Aurora Orange
+        lineRenderer.setSeriesStroke(0, new BasicStroke(2.0f));
+        XYPlot subplot2 = new XYPlot(dataset2, null, rangeAxis2, lineRenderer);
+        subplot2.setBackgroundPaint(Color.WHITE);
+        subplot2.setRangeGridlinePaint(new Color(230, 230, 230));
+
+        // Subplot 3: Residual Cooldown
+        NumberAxis rangeAxis3 = new NumberAxis("Cooldown (s)");
+        XYLineAndShapeRenderer cooldownRenderer = new XYLineAndShapeRenderer(true, false);
+        cooldownRenderer.setSeriesPaint(0, new Color(180, 142, 173)); // Nord Aurora Purple
+        XYPlot subplot3 = new XYPlot(dataset3, null, rangeAxis3, cooldownRenderer);
+        subplot3.setBackgroundPaint(Color.WHITE);
+        subplot3.setRangeGridlinePaint(new Color(230, 230, 230));
+
+        // Threshold Markers on Subplot 2
+        if (vUpperLimit > 0) {
+            ValueMarker upMarker = new ValueMarker(vUpperLimit);
+            upMarker.setPaint(new Color(220, 20, 60));
+            upMarker.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{10, 5}, 0));
+            upMarker.setLabel("Scale UP Limit (" + String.format("%.2f", vUpperLimit) + ")");
+            upMarker.setLabelAnchor(org.jfree.chart.ui.RectangleAnchor.TOP_RIGHT);
+            upMarker.setLabelTextAnchor(org.jfree.chart.ui.TextAnchor.BOTTOM_RIGHT);
+            subplot2.addRangeMarker(upMarker, org.jfree.chart.ui.Layer.FOREGROUND);
+        }
+
+        if (vLowerLimit > 0) {
+            ValueMarker downMarker = new ValueMarker(vLowerLimit);
+            downMarker.setPaint(new Color(34, 139, 34)); // Forest Green
+            downMarker.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{10, 5}, 0));
+            downMarker.setLabel("Scale DOWN Limit (" + String.format("%.2f", vLowerLimit) + ")");
+            downMarker.setLabelAnchor(org.jfree.chart.ui.RectangleAnchor.BOTTOM_RIGHT);
+            downMarker.setLabelTextAnchor(org.jfree.chart.ui.TextAnchor.TOP_RIGHT);
+            subplot2.addRangeMarker(downMarker, org.jfree.chart.ui.Layer.FOREGROUND);
+        }
+
+        NumberAxis domainAxis = new NumberAxis("Time (seconds)");
+        CombinedDomainXYPlot plot = new CombinedDomainXYPlot(domainAxis);
+        plot.setGap(10.0);
+        plot.add(subplot1, 2);
+        plot.add(subplot2, 2);
+        plot.add(subplot3, 1);
+        plot.setOrientation(PlotOrientation.VERTICAL);
+
+        JFreeChart chart = new JFreeChart("Vertical Scaling Dynamics", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+        chart.setBackgroundPaint(Color.WHITE);
+
+        try {
+            ChartUtils.saveChartAsPNG(new File(outputPath), chart, 1200, 1000);
+            logger.info("Vertical scaling chart generated at: {}", outputPath);
         } catch (IOException e) {
             logger.error("Failed to save chart image: {}", outputPath, e);
         }

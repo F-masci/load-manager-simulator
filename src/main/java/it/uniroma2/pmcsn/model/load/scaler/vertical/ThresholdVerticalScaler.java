@@ -28,7 +28,7 @@ abstract public class ThresholdVerticalScaler extends VerticalScaler {
             return false;
         }
 
-        double currentMetric = getThresholdMetric(clock, spikeServer);
+        double currentMetric = getCurrentMetric(clock, spikeServer);
         if (!isScaled && currentMetric >= upperThreshold) {
             spikeServer.setSpeedMultiplier(scaledSpeed, clock);
             isScaled = true;
@@ -43,6 +43,11 @@ abstract public class ThresholdVerticalScaler extends VerticalScaler {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public double getCurrentMetric(double clock, SpikeServer spikeServer) {
+        return getThresholdMetric(clock, spikeServer);
     }
 
     abstract protected double getThresholdMetric(double clock, SpikeServer spikeServer);

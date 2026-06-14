@@ -15,6 +15,7 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
 
     private final double windowSize;
     private final Queue<JobCompletionRecord> window = new LinkedList<>();
+    private boolean hasNewDataSinceLastEvaluation = false;
 
     private record JobCompletionRecord(double completionTime, double responseTime) {}
 
@@ -36,30 +37,30 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
     @Override
     public void recordCompletion(double clock, double responseTime) {
         window.add(new JobCompletionRecord(clock, responseTime));
+        while (window.size() > windowSize) {
+            window.poll();
+        }
+        hasNewDataSinceLastEvaluation = true;
     }
 
     @Override
     public boolean evaluateScaling(double clock, WebServerCluster cluster) {
-        double cutoff = clock - windowSize;
-        while (!window.isEmpty() && window.peek().completionTime() < cutoff) {
-            window.poll();
-        }
-
-        if (window.isEmpty()) {
+        if (!hasNewDataSinceLastEvaluation) {
             return false;
         }
-
-        double sum = 0.0;
-        for (JobCompletionRecord r : window) {
-            sum += r.responseTime();
-        }
-        double avgResponse = sum / window.size();
-
-        logger.debug("Horizontal scaling evaluation: avgResponseTime = {}, activeWindowSize = {}", avgResponse, window.size());
 
         if (clock - lastScalingTime < cooldown) {
             return false;
         }
+        
+        hasNewDataSinceLastEvaluation = false;
+
+        double avgResponse = getCurrentMetric(clock);
+        if (window.isEmpty()) {
+            return false;
+        }
+
+        logger.debug("Horizontal scaling evaluation: avgResponseTime = {}, activeWindowSize = {}", avgResponse, window.size());
 
         if (avgResponse >= scaleUpThreshold) {
             boolean scaled = cluster.scaleOut(clock);
@@ -78,8 +79,22 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
     }
 
     @Override
+    public double getCurrentMetric(double clock) {
+        if (window.isEmpty()) {
+            return 0.0;
+        }
+
+        double sum = 0.0;
+        for (JobCompletionRecord r : window) {
+            sum += r.responseTime();
+        }
+        return sum / window.size();
+    }
+
+    @Override
     public void resetStatistics() {
         window.clear();
+        hasNewDataSinceLastEvaluation = false;
     }
 
     public double getWindowSize() {

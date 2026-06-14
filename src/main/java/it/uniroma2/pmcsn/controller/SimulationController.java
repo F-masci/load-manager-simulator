@@ -6,7 +6,6 @@ import it.uniroma2.pmcsn.model.event.Event;
 import it.uniroma2.pmcsn.model.event.EventType;
 import it.uniroma2.pmcsn.model.event.source.EventSource;
 import it.uniroma2.pmcsn.model.load.LoadManager;
-import it.uniroma2.pmcsn.model.load.scaler.horizontal.MovingWindowHorizontalScaler;
 import it.uniroma2.pmcsn.model.server.Server;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServer;
@@ -43,15 +42,17 @@ public class SimulationController implements Simulator {
     // System-wide time-weighted statistics
     private final TimedWelford systemJisStat = new TimedWelford();
     private final TimedWelford systemUtilStat = new TimedWelford();
+    private final double scaleInterval;
 
     public SimulationController(double maxTime, EventSource eventSource,
                                 WebServerCluster webServerCluster, SpikeServer spikeServer,
-                                LoadManager loadController) {
+                                LoadManager loadController, double scaleInterval) {
         this.maxTime = maxTime;
         this.eventSource = eventSource;
         this.webServerCluster = webServerCluster;
         this.spikeServer = spikeServer;
         this.loadController = loadController;
+        this.scaleInterval = scaleInterval;
     }
 
     @Override
@@ -61,9 +62,10 @@ public class SimulationController implements Simulator {
             spikeServer.updateStatistics(0.0);
             updateSystemStats(0.0);
             scheduleNextArrival();
-            double scaleInterval = getScaleInterval();
+            
             if (scaleInterval > 0.0) {
-                eventQueue.add(new Event(scaleInterval, EventType.SCALE_CHECK, null, null));
+                eventQueue.add(new Event(scaleInterval, EventType.SCALE_CHECK_HORIZONTAL, null, null));
+                eventQueue.add(new Event(scaleInterval, EventType.SCALE_CHECK_VERTICAL, null, null));
             }
         }
     }
@@ -115,7 +117,8 @@ public class SimulationController implements Simulator {
         switch (event.getType()) {
             case ARRIVAL -> handleArrival(event.getJob());
             case COMPLETION -> handleCompletion(event.getJob(), event.getServer());
-            case SCALE_CHECK -> handleScaleCheck();
+            case SCALE_CHECK_HORIZONTAL -> handleHorizontalScaleCheck();
+            case SCALE_CHECK_VERTICAL -> handleVerticalScaleCheck();
         }
     }
 
@@ -130,6 +133,7 @@ public class SimulationController implements Simulator {
         scheduleNextArrival();
 
         updateSystemStats(clock);
+        checkAndApplyScaling();
     }
 
     private void handleCompletion(Job job, Server server) {
@@ -142,17 +146,52 @@ public class SimulationController implements Simulator {
         rescheduleCompletions(server);
 
         updateSystemStats(clock);
+        checkAndApplyScaling();
     }
 
-    private void handleScaleCheck() {
+    private void checkAndApplyScaling() {
+        checkHorizontalScaling();
+        checkVerticalScaling();
+    }
 
-        if (loadController.evaluateScaling(clock, webServerCluster, spikeServer)) {
+    private void checkHorizontalScaling() {
+        if (loadController.evaluateScaling(clock, webServerCluster)) {
             rescheduleAllCompletions();
             updateSystemStats(clock);
+            
+            // Scaling happened, delay the periodic check by the cooldown
+            double cooldown = loadController.getHorizontalScaler().getCooldown();
+            eventQueue.removeIf(e -> e.getType() == EventType.SCALE_CHECK_HORIZONTAL);
+            eventQueue.add(new Event(clock + cooldown, EventType.SCALE_CHECK_HORIZONTAL, null, null));
         }
+    }
 
-        double interval = getScaleInterval();
-        if (interval > 0.0) eventQueue.add(new Event(clock + interval, EventType.SCALE_CHECK, null, null));
+    private void checkVerticalScaling() {
+        if (loadController.evaluateScaling(clock, spikeServer)) {
+            rescheduleAllCompletions();
+            updateSystemStats(clock);
+            
+            // Scaling happened, delay the periodic check by the cooldown
+            double cooldown = loadController.getVerticalScaler().getCooldown();
+            eventQueue.removeIf(e -> e.getType() == EventType.SCALE_CHECK_VERTICAL);
+            eventQueue.add(new Event(clock + cooldown, EventType.SCALE_CHECK_VERTICAL, null, null));
+        }
+    }
+
+    private void handleHorizontalScaleCheck() {
+        checkHorizontalScaling();
+        boolean hasPending = eventQueue.stream().anyMatch(e -> e.getType() == EventType.SCALE_CHECK_HORIZONTAL);
+        if (!hasPending && scaleInterval > 0.0) {
+            eventQueue.add(new Event(clock + scaleInterval, EventType.SCALE_CHECK_HORIZONTAL, null, null));
+        }
+    }
+
+    private void handleVerticalScaleCheck() {
+        checkVerticalScaling();
+        boolean hasPending = eventQueue.stream().anyMatch(e -> e.getType() == EventType.SCALE_CHECK_VERTICAL);
+        if (!hasPending && scaleInterval > 0.0) {
+            eventQueue.add(new Event(clock + scaleInterval, EventType.SCALE_CHECK_VERTICAL, null, null));
+        }
     }
 
     private void scheduleNextArrival() {
@@ -232,9 +271,6 @@ public class SimulationController implements Simulator {
     }
     public double getSystemUtilization() {
         return systemUtilStat.getMean();
-    }
-    private double getScaleInterval() {
-        return loadController.getHorizontalScaler() instanceof MovingWindowHorizontalScaler m ? m.getWindowSize() : 0;
     }
 
     /**

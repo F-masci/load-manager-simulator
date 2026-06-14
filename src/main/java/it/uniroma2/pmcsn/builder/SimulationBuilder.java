@@ -115,7 +115,14 @@ public class SimulationBuilder {
         // LoadManager
         LoadManager loadManager = new LoadManager(hScaler, vScaler, router);
 
-        Simulator controller = new SimulationController(config.execution().maxTime(), eventSource, cluster, spikeServer, loadManager);
+        Simulator controller = new SimulationController(
+            config.execution().maxTime(), 
+            eventSource, 
+            cluster, 
+            spikeServer, 
+            loadManager,
+            config.scaling().scaleInterval()
+        );
 
         // Dynamic decoration
         if (config.logging().enabled()) {
@@ -123,6 +130,7 @@ public class SimulationBuilder {
             controller = switch (config.logging().dataType()) {
                 case LOAD_COMPARISON -> new LoadComparisonDecorator(controller);
                 case SYSTEM_METRICS -> new SystemMetricsDecorator(controller);
+                case SCALING_METRICS -> new it.uniroma2.pmcsn.controller.decorator.data.ScalingMetricsDecorator(controller);
             };
 
             // Second: Storage decorator (How to save)

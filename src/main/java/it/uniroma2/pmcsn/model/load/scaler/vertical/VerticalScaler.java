@@ -26,6 +26,11 @@ public abstract class VerticalScaler {
      */
     public abstract boolean evaluateScaling(double clock, SpikeServer spikeServer);
 
+    /**
+     * Returns the current value of the metric used for scaling decisions.
+     */
+    public abstract double getCurrentMetric(double clock, SpikeServer spikeServer);
+
     public double getUpperThreshold() {
         return upperThreshold;
     }
@@ -40,6 +45,10 @@ public abstract class VerticalScaler {
 
     public double getLastScalingTime() {
         return lastScalingTime;
+    }
+
+    public double getRemainingCooldown(double clock) {
+        return Math.max(0.0, cooldown - (clock - lastScalingTime));
     }
 
     public int getScaleUpCount() {

@@ -15,4 +15,9 @@ public class NoVerticalScaler extends VerticalScaler {
     public boolean evaluateScaling(double clock, SpikeServer spikeServer) {
         return false;
     }
+
+    @Override
+    public double getCurrentMetric(double clock, SpikeServer spikeServer) {
+        return 0.0;
+    }
 }

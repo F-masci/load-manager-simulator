@@ -20,4 +20,9 @@ public class NoHorizontalScaler extends HorizontalScaler {
     public boolean evaluateScaling(double clock, WebServerCluster cluster) {
         return false;
     }
+
+    @Override
+    public double getCurrentMetric(double clock) {
+        return 0.0;
+    }
 }
