@@ -22,16 +22,19 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
 
     @Override
     public boolean processNextEvent() {
-        double lastHScaling = getLoadManager().getHorizontalScaler().getLastScalingTime();
-        double lastVScaling = getLoadManager().getVerticalScaler().getLastScalingTime();
+        HorizontalScaler hScaler = getLoadManager().getHorizontalScaler();
+        VerticalScaler vScaler = getLoadManager().getVerticalScaler();
+
+        double lastHScaling = hScaler.getLastScalingTime();
+        double lastVScaling = vScaler.getLastScalingTime();
 
         boolean result = super.processNextEvent();
         
-        double currentHScaling = getLoadManager().getHorizontalScaler().getLastScalingTime();
-        double currentVScaling = getLoadManager().getVerticalScaler().getLastScalingTime();
+        double currentHScaling = hScaler.getLastScalingTime();
+        double currentVScaling = vScaler.getLastScalingTime();
         
-        boolean hScaled = currentHScaling > lastHScaling;
-        boolean vScaled = currentVScaling > lastVScaling;
+        boolean hScaled = currentHScaling != lastHScaling;
+        boolean vScaled = currentVScaling != lastVScaling;
 
         // If scaling happened, insert a record with cooldown forced to zero 
         // to show the "bottom" of the saw-tooth wave in the chart.

@@ -6,6 +6,8 @@ import it.uniroma2.pmcsn.model.event.Event;
 import it.uniroma2.pmcsn.model.event.EventType;
 import it.uniroma2.pmcsn.model.event.source.EventSource;
 import it.uniroma2.pmcsn.model.load.LoadManager;
+import it.uniroma2.pmcsn.model.load.scaler.horizontal.HorizontalScaler;
+import it.uniroma2.pmcsn.model.load.scaler.vertical.VerticalScaler;
 import it.uniroma2.pmcsn.model.server.Server;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServer;
@@ -155,24 +157,27 @@ public class SimulationController implements Simulator {
     }
 
     private void checkHorizontalScaling() {
-        if (loadController.evaluateScaling(clock, webServerCluster)) {
+        HorizontalScaler hScaler = loadController.getHorizontalScaler();
+        if (hScaler.evaluateScaling(clock, webServerCluster)) {
+            logger.info("Horizontal scaling triggered at clock={}", clock);
             rescheduleAllCompletions();
             updateSystemStats(clock);
             
             // Scaling happened, delay the periodic check by the cooldown
-            double cooldown = loadController.getHorizontalScaler().getCooldown();
+            double cooldown = hScaler.getCooldown();
             eventQueue.removeIf(e -> e.getType() == EventType.SCALE_CHECK_HORIZONTAL);
             eventQueue.add(new Event(clock + cooldown, EventType.SCALE_CHECK_HORIZONTAL, null, null));
         }
     }
 
     private void checkVerticalScaling() {
-        if (loadController.evaluateScaling(clock, spikeServer)) {
+        VerticalScaler vScaler = loadController.getVerticalScaler();
+        if (vScaler.evaluateScaling(clock, spikeServer)) {
             rescheduleAllCompletions();
             updateSystemStats(clock);
             
             // Scaling happened, delay the periodic check by the cooldown
-            double cooldown = loadController.getVerticalScaler().getCooldown();
+            double cooldown = vScaler.getCooldown();
             eventQueue.removeIf(e -> e.getType() == EventType.SCALE_CHECK_VERTICAL);
             eventQueue.add(new Event(clock + cooldown, EventType.SCALE_CHECK_VERTICAL, null, null));
         }

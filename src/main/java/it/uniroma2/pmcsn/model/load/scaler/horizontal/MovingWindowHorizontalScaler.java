@@ -49,9 +49,8 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
             return false;
         }
 
-        if (clock - lastScalingTime < cooldown) {
-            return false;
-        }
+        final double remainingCooldown = getRemainingCooldown(clock);
+        if (remainingCooldown >= 0.01) return false;
         
         hasNewDataSinceLastEvaluation = false;
 

@@ -50,7 +50,7 @@ public abstract class HorizontalScaler {
     }
 
     public double getRemainingCooldown(double clock) {
-        return Math.max(0.0, cooldown - (clock - lastScalingTime));
+        return Math.round(Math.max(0.0, cooldown - (clock - lastScalingTime)) * 100.0) / 100.0;
     }
 
     public void resetStatistics() {

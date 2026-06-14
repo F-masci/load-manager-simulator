@@ -24,9 +24,8 @@ abstract public class ThresholdVerticalScaler extends VerticalScaler {
 
     @Override
     public boolean evaluateScaling(double clock, SpikeServer spikeServer) {
-        if (clock - lastScalingTime < cooldown) {
-            return false;
-        }
+        final double remainingCooldown = getRemainingCooldown(clock);
+        if (remainingCooldown >= 0.01) return false;
 
         double currentMetric = getCurrentMetric(clock, spikeServer);
         if (!isScaled && currentMetric >= upperThreshold) {

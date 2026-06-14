@@ -134,6 +134,8 @@ public class SimulationChartUtility {
         XYSeries activeServersSeries = new XYSeries("Active Web Servers");
         XYSeries hMetricSeries = new XYSeries("Avg Response Time (Window)");
         XYSeries cooldownSeries = new XYSeries("Residual Cooldown");
+        XYSeries arrivalSeries = new XYSeries("Arrivals");
+        XYSeries completionSeries = new XYSeries("Completions");
 
         double scaleUpLimit = 0;
         double scaleDownLimit = 0;
@@ -147,6 +149,7 @@ public class SimulationChartUtility {
                 if (parts.length < 11) continue;
 
                 double clock = Double.parseDouble(parts[0]);
+                String event = parts[1];
                 int activeWebServers = Integer.parseInt(parts[2]);
                 double hMetric = Double.parseDouble(parts[3]);
                 scaleUpLimit = Double.parseDouble(parts[4]);
@@ -158,6 +161,12 @@ public class SimulationChartUtility {
                 activeServersSeries.add(clock, activeWebServers);
                 hMetricSeries.add(clock, hMetric);
                 cooldownSeries.add(clock, hCooldown);
+
+                if ("ARRIVAL".equalsIgnoreCase(event)) {
+                    arrivalSeries.add(clock, hMetric);
+                } else if ("COMPLETION".equalsIgnoreCase(event)) {
+                    completionSeries.add(clock, hMetric);
+                }
             }
         } catch (IOException | NumberFormatException e) {
             logger.error("Error reading scaling metrics file: {}", csvPath, e);
@@ -167,6 +176,10 @@ public class SimulationChartUtility {
         XYSeriesCollection dataset1 = new XYSeriesCollection(activeServersSeries);
         XYSeriesCollection dataset2 = new XYSeriesCollection(hMetricSeries);
         XYSeriesCollection dataset3 = new XYSeriesCollection(cooldownSeries);
+        
+        XYSeriesCollection eventsDataset = new XYSeriesCollection();
+        eventsDataset.addSeries(arrivalSeries);
+        eventsDataset.addSeries(completionSeries);
 
         // Subplot 1: Active Servers
         NumberAxis rangeAxis1 = new NumberAxis("Active Servers");
@@ -185,6 +198,17 @@ public class SimulationChartUtility {
         XYPlot subplot2 = new XYPlot(dataset2, null, rangeAxis2, lineRenderer);
         subplot2.setBackgroundPaint(Color.WHITE);
         subplot2.setRangeGridlinePaint(new Color(230, 230, 230));
+
+        // Add Events (X and O) on Subplot 2
+        subplot2.setDataset(1, eventsDataset);
+        XYLineAndShapeRenderer eventsRenderer = new XYLineAndShapeRenderer(false, true);
+        // Arrival: Red X
+        eventsRenderer.setSeriesPaint(0, Color.RED);
+        eventsRenderer.setSeriesShape(0, org.jfree.chart.util.ShapeUtils.createDiagonalCross(3, 1));
+        // Completion: Green O
+        eventsRenderer.setSeriesPaint(1, new Color(34, 139, 34)); // Forest Green
+        eventsRenderer.setSeriesShape(1, new java.awt.geom.Ellipse2D.Double(-3, -3, 6, 6));
+        subplot2.setRenderer(1, eventsRenderer);
 
         // Subplot 3: Residual Cooldown
         NumberAxis rangeAxis3 = new NumberAxis("Cooldown (s)");
@@ -244,6 +268,8 @@ public class SimulationChartUtility {
         XYSeries spikeSpeedSeries = new XYSeries("Spike Server Speed Multiplier");
         XYSeries vMetricSeries = new XYSeries("Spike Server Metric (e.g. Load/Utilization)");
         XYSeries cooldownSeries = new XYSeries("Residual Cooldown");
+        XYSeries arrivalSeries = new XYSeries("Arrivals");
+        XYSeries completionSeries = new XYSeries("Completions");
 
         double vUpperLimit = 0;
         double vLowerLimit = 0;
@@ -257,6 +283,7 @@ public class SimulationChartUtility {
                 if (parts.length < 11) continue;
 
                 double clock = Double.parseDouble(parts[0]);
+                String event = parts[1];
                 double spikeSpeed = Double.parseDouble(parts[7]);
                 double vMetric = Double.parseDouble(parts[8]);
                 vUpperLimit = Double.parseDouble(parts[9]);
@@ -268,6 +295,12 @@ public class SimulationChartUtility {
                 spikeSpeedSeries.add(clock, spikeSpeed);
                 vMetricSeries.add(clock, vMetric);
                 cooldownSeries.add(clock, vCooldown);
+
+                if ("ARRIVAL".equalsIgnoreCase(event)) {
+                    arrivalSeries.add(clock, vMetric);
+                } else if ("COMPLETION".equalsIgnoreCase(event)) {
+                    completionSeries.add(clock, vMetric);
+                }
             }
         } catch (IOException | NumberFormatException e) {
             logger.error("Error reading scaling metrics file: {}", csvPath, e);
@@ -277,6 +310,10 @@ public class SimulationChartUtility {
         XYSeriesCollection dataset1 = new XYSeriesCollection(spikeSpeedSeries);
         XYSeriesCollection dataset2 = new XYSeriesCollection(vMetricSeries);
         XYSeriesCollection dataset3 = new XYSeriesCollection(cooldownSeries);
+        
+        XYSeriesCollection eventsDataset = new XYSeriesCollection();
+        eventsDataset.addSeries(arrivalSeries);
+        eventsDataset.addSeries(completionSeries);
 
         // Subplot 1: Speed Multiplier
         NumberAxis rangeAxis1 = new NumberAxis("Speed Multiplier");
@@ -294,6 +331,17 @@ public class SimulationChartUtility {
         XYPlot subplot2 = new XYPlot(dataset2, null, rangeAxis2, lineRenderer);
         subplot2.setBackgroundPaint(Color.WHITE);
         subplot2.setRangeGridlinePaint(new Color(230, 230, 230));
+
+        // Add Events (X and O) on Subplot 2
+        subplot2.setDataset(1, eventsDataset);
+        XYLineAndShapeRenderer eventsRenderer = new XYLineAndShapeRenderer(false, true);
+        // Arrival: Red X
+        eventsRenderer.setSeriesPaint(0, Color.RED);
+        eventsRenderer.setSeriesShape(0, org.jfree.chart.util.ShapeUtils.createDiagonalCross(3, 1));
+        // Completion: Green O
+        eventsRenderer.setSeriesPaint(1, new Color(34, 139, 34)); // Forest Green
+        eventsRenderer.setSeriesShape(1, new java.awt.geom.Ellipse2D.Double(-3, -3, 6, 6));
+        subplot2.setRenderer(1, eventsRenderer);
 
         // Subplot 3: Residual Cooldown
         NumberAxis rangeAxis3 = new NumberAxis("Cooldown (s)");
