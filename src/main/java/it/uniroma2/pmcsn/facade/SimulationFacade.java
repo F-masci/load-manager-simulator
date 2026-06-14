@@ -9,8 +9,7 @@ import it.uniroma2.pmcsn.controller.decorator.storage.JsonStorageDecorator;
 import it.uniroma2.pmcsn.lib.statistics.IntervalEstimator;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
 import it.uniroma2.pmcsn.model.server.WebServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.uniroma2.pmcsn.utils.LogFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +20,7 @@ import java.util.Map;
  * and extract aggregated performance metrics.
  */
 public class SimulationFacade {
-    private static final Logger logger = LoggerFactory.getLogger(SimulationFacade.class);
+    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(SimulationFacade.class, "SIM");
     
     private final ApplicationConfig config;
     private AggregatedResults lastResults;
@@ -96,13 +95,20 @@ public class SimulationFacade {
         for (int i = 0; i < config.execution().numBatches(); i++) {
             controller.run(SimulationController.StopCondition.untilJobsCompleted(config.execution().batchSize()));
             updateAggregators(controller);
-            logger.info("Batch {}/{} completed", i + 1, config.execution().numBatches());
+            
+            int currentBatch = i + 1;
+            int totalBatches = config.execution().numBatches();
+            
+            if (currentBatch % 10 == 0 || currentBatch == totalBatches) {
+                logger.info("Batch {}/{} completed", currentBatch, totalBatches);
+            }
+            
             logger.debug("Batch {}/{} results: " +
                     "Response Time {} | " +
                     "Jobs in System {} | " +
                     "System Utilization {} | " +
                     "Throughput {}",
-                    i + 1, config.execution().numBatches(),
+                    currentBatch, totalBatches,
                     controller.getAverageResponseTime(), controller.getAverageJobsInSystem(),
                     controller.getSystemUtilization(), controller.getThroughput());
             controller.resetStatistics();

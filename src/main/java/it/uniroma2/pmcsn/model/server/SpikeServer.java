@@ -1,14 +1,13 @@
 package it.uniroma2.pmcsn.model.server;
 
 import it.uniroma2.pmcsn.lib.statistics.TimedWelford;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.uniroma2.pmcsn.utils.LogFactory;
 
 /**
  * Represents the Spike Server (Layer 2) using Processor Sharing scheduling.
  */
 public class SpikeServer extends Server {
-    private static final Logger logger = LoggerFactory.getLogger(SpikeServer.class);
+    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(SpikeServer.class, "SERVER");
     private final TimedWelford speedMultiplierStat = new TimedWelford();
 
     public SpikeServer(int id, double speedMultiplier) {

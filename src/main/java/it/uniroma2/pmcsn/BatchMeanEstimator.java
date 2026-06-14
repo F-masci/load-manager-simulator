@@ -9,8 +9,7 @@ import it.uniroma2.pmcsn.lib.statistics.AutoCorrelation;
 import it.uniroma2.pmcsn.lib.statistics.IntervalEstimator;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.uniroma2.pmcsn.utils.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.List;
  */
 public class BatchMeanEstimator {
 
-    private static final Logger logger = LoggerFactory.getLogger(BatchMeanEstimator.class);
+    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(BatchMeanEstimator.class, "SIM");
 
     // Statistical threshold configurations
     private static final double TARGET_PRECISION = 0.01;    // Relative precision epsilon

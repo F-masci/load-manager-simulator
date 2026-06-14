@@ -1,15 +1,14 @@
 package it.uniroma2.pmcsn.model.load.routing.spike;
 
 import it.uniroma2.pmcsn.model.server.WebServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.uniroma2.pmcsn.utils.LogFactory;
 
 /**
  * Implementation of SpikeServerRoutingStrategy based on a threshold value (siMax) compared
  * to the target Web Server's Spike Indicator load.
  */
 public class ThresholdSpikeServerRoutingStrategy implements SpikeServerRoutingStrategy {
-    private static final Logger logger = LoggerFactory.getLogger(ThresholdSpikeServerRoutingStrategy.class);
+    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(ThresholdSpikeServerRoutingStrategy.class, "ROUTER");
 
     @Override
     public boolean shouldRouteToSpike(WebServer targetServer, int siMax) {

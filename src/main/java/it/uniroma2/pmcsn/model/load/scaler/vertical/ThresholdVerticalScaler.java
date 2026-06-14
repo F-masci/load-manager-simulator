@@ -1,15 +1,14 @@
 package it.uniroma2.pmcsn.model.load.scaler.vertical;
 
 import it.uniroma2.pmcsn.model.server.SpikeServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.uniroma2.pmcsn.utils.LogFactory;
 
 /**
  * Concrete vertical scaler that dynamically adjusts SpikeServer speed multiplier
  * based on its utilization thresholds.
  */
 abstract public class ThresholdVerticalScaler extends VerticalScaler {
-    private static final Logger logger = LoggerFactory.getLogger(ThresholdVerticalScaler.class);
+    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(ThresholdVerticalScaler.class, "SCALER");
 
     private final double baseSpeed;
     private final double scaledSpeed;

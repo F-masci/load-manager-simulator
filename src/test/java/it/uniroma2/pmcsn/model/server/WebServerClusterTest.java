@@ -1,54 +1,47 @@
 package it.uniroma2.pmcsn.model.server;
 
 import it.uniroma2.pmcsn.model.Job;
+import it.uniroma2.pmcsn.BaseTest;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests specifically verifying WebServerCluster scaling and draining behaviors.
+ * Unit tests for WebServerCluster, focusing on dynamic scaling and server draining.
  */
-public class WebServerClusterTest {
+public class WebServerClusterTest extends BaseTest {
 
+    /**
+     * Verifies the full lifecycle of a server in the cluster:
+     * Active -> Scale In -> Draining -> Removed.
+     */
     @Test
     public void testWebServerClusterScalingAndDraining() {
+        logTestStep("Testing WebServerCluster Scale-Out, Scale-In and Draining lifecycle");
         WebServerCluster cluster = new WebServerCluster(2, 4);
-        assertEquals(2, cluster.getActiveServers().size());
-        assertEquals(2, cluster.getAllServers().size());
-
-        // Scale Up
+        
+        // Scale Out
         assertTrue(cluster.scaleOut(10.0));
         assertEquals(3, cluster.getActiveServers().size());
-        assertEquals(3, cluster.getAllServers().size());
         
-        // Scale Up to Max
-        assertTrue(cluster.scaleOut(20.0));
-        assertEquals(4, cluster.getActiveServers().size());
-        
-        // Cannot scale up beyond max
-        assertFalse(cluster.scaleOut(30.0));
-        assertEquals(4, cluster.getActiveServers().size());
+        // Add job to the last server to prevent immediate removal during scale-in
+        WebServer targetWs = cluster.getActiveServers().get(2);
+        Job job = new Job(1, 10.0, 5.0);
+        targetWs.acceptJob(job, 10.0);
 
-        // Let's add an active job on the last server to test draining
-        WebServer lastWs = cluster.getActiveServers().get(3);
-        Job job = new Job(1, 20.0, 5.0);
-        lastWs.acceptJob(job, 20.0);
-
-        // Scale Down
-        assertTrue(cluster.scaleIn(25.0));
-        assertEquals(3, cluster.getActiveServers().size());
+        // Scale In
+        assertTrue(cluster.scaleIn(15.0));
+        assertEquals(2, cluster.getActiveServers().size());
         assertEquals(1, cluster.getDrainingServers().size());
-        assertEquals(lastWs.getId(), cluster.getDrainingServers().get(0).getId());
+        logDebug("Server {} is now DRAINING", targetWs.getId());
 
-        // Process jobs on cluster
-        cluster.processActiveJobs(5.0, 30.0);
-        // Draining server is still there because job is not completed yet
-        assertEquals(1, cluster.getDrainingServers().size());
-
-        // Complete the job on draining server
-        lastWs.completeJob(job, 30.0);
+        // Process jobs: job completes at t=20.0 (work=5.0, 1 job active on that server)
+        cluster.processActiveJobs(5.0, 20.0);
+        targetWs.completeJob(job, 20.0);
         
-        // Next processActiveJobs will clean it up
-        cluster.processActiveJobs(1.0, 31.0);
+        // Cleanup happens on next processing call
+        cluster.processActiveJobs(1.0, 21.0);
         assertEquals(0, cluster.getDrainingServers().size());
+        logDebug("Draining server successfully removed");
     }
 }

@@ -2,8 +2,7 @@ package it.uniroma2.pmcsn.model.load.scaler.horizontal;
 
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.uniroma2.pmcsn.utils.LogFactory;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -11,7 +10,7 @@ import java.util.Queue;
  * Concrete sliding-window implementation of the HorizontalScaler.
  */
 public class MovingWindowHorizontalScaler extends HorizontalScaler {
-    private static final Logger logger = LoggerFactory.getLogger(MovingWindowHorizontalScaler.class);
+    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(MovingWindowHorizontalScaler.class, "SCALER");
 
     private final double windowSize;
     private final Queue<JobCompletionRecord> window = new LinkedList<>();

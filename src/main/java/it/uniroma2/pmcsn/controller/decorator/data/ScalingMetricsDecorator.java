@@ -36,19 +36,29 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
         boolean hScaled = currentHScaling != lastHScaling;
         boolean vScaled = currentVScaling != lastVScaling;
 
-        // If scaling happened, insert a record with cooldown forced to zero 
-        // to show the "bottom" of the saw-tooth wave in the chart.
-        if (hScaled || vScaled) {
-            captureState(hScaled, vScaled);
+        // Determine which scaler was checked based on event type
+        it.uniroma2.pmcsn.model.event.EventType lastEvent = getDecorated().getLastEventType();
+        String checkType = "NONE";
+        if (lastEvent != null) {
+            switch (lastEvent) {
+                case ARRIVAL, COMPLETION -> checkType = "BOTH";
+                case SCALE_CHECK_HORIZONTAL -> checkType = "HORIZONTAL";
+                case SCALE_CHECK_VERTICAL -> checkType = "VERTICAL";
+            }
         }
 
-        // Standard capture of the new state (with reset cooldowns)
-        captureState(false, false);
+        // If scaling happened, insert a record with cooldown forced to zero 
+        if (hScaled || vScaled) {
+            captureState(hScaled, vScaled, checkType);
+        }
+
+        // Standard capture
+        captureState(false, false, checkType);
         
         return result;
     }
 
-    private void captureState(boolean forceHZero, boolean forceVZero) {
+    private void captureState(boolean forceHZero, boolean forceVZero, String checkType) {
         Map<String, Object> snapshot = new LinkedHashMap<>();
         double clock = getClock();
         
@@ -57,6 +67,7 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
 
         snapshot.put("clock", clock);
         snapshot.put("event", getDecorated().getLastEventType());
+        snapshot.put("scalingCheck", checkType);
         
         // Horizontal Scaling Metrics
         snapshot.put("activeWebServers", getWebServerCluster().getActiveServers().size());
@@ -83,7 +94,7 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
     @Override
     public String[] getHeaders() {
         return new String[]{
-            "clock", "event", 
+            "clock", "event", "scalingCheck",
             "activeWebServers", "hMetric", "hScaleUpLimit", "hScaleDownLimit", "hCooldown",
             "spikeSpeed", "vMetric", "vUpperLimit", "vLowerLimit", "vCooldown"
         };

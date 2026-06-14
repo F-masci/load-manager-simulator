@@ -44,8 +44,8 @@ public record ApplicationConfig(
     public static final SimulationMethod SIMULATION_METHOD = SimulationMethod.INDEPENDENT_REPLICATIONS;
     public static final int NUM_REPLICATIONS = 10;
     public static final double MAX_TIME = Integer.MAX_VALUE;
-    public static final int NUM_BATCHES = 64;
-    public static final int BATCH_SIZE = 256;
+    public static final int NUM_BATCHES = 128;
+    public static final int BATCH_SIZE = 8192;
     public static final int WARM_UP_JOBS = 0;
 
     // Logging configuration constants

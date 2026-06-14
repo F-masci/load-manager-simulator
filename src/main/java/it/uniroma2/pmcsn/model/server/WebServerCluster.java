@@ -1,7 +1,6 @@
 package it.uniroma2.pmcsn.model.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.uniroma2.pmcsn.utils.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.List;
  * Handles dynamic capacity scaling (scaleOut and scaleIn) and deallocation draining.
  */
 public class WebServerCluster {
-    private static final Logger logger = LoggerFactory.getLogger(WebServerCluster.class);
+    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(WebServerCluster.class, "SERVER");
 
     private final List<WebServer> activeServers;
     private final List<WebServer> drainingServers;

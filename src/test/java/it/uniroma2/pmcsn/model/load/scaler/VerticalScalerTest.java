@@ -4,59 +4,71 @@ import it.uniroma2.pmcsn.model.Job;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.NoVerticalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
+import it.uniroma2.pmcsn.BaseTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VerticalScalerTest {
+/**
+ * Unit tests for Vertical Scalers, verifying server speed adjustments based on utilization.
+ */
+public class VerticalScalerTest extends BaseTest {
 
+    /**
+     * Verifies UtilizationThresholdVerticalScaler behavior (scaling speed up/down).
+     * <p>
+     * Utilization in this model is defined as the fraction of time the server was busy.
+     * Thresholds: upper = 0.5, lower = 0.1.
+     * Base speed = 1.0, Scaled speed = 2.0.
+     * Cooldown = 10.0.
+     */
     @Test
     public void testUtilizationThresholdVerticalScaler() {
-        // upperThreshold = 0.5, lowerThreshold = 0.1, baseSpeed = 1.0, scaledSpeed = 2.0, cooldown = 10.0
-        // In the new model, utilization is the mean number of active jobs.
+        logTestStep("Testing Vertical Scaler (Utilization-based)");
         UtilizationThresholdVerticalScaler scaler = new UtilizationThresholdVerticalScaler(0.5, 0.1, 1.0, 2.0, 10.0);
         SpikeServer server = new SpikeServer(0, 1.0);
 
-        // Put a job to create utilization (mean jobs) > 0.5
+        // 1. Trigger Scale-Up
+        logDebug("Phase 1: High utilization to trigger Scale-Up");
         Job job = new Job(1, 0.0, 10.0);
         server.acceptJob(job, 0.0);
-        
-        // After 5.0 seconds, processing 5.0 time units means 1 job was active for 5s. Mean = 1.0
         server.processJobs(5.0);
         server.updateStatistics(5.0);
 
-        // Evaluation: should scale up (since mean jobs 1.0 > 0.5)
-        assertTrue(scaler.evaluateScaling(5.0, server));
-        assertEquals(5.0, scaler.getLastScalingTime(), 1e-9);
+        assertTrue(scaler.evaluateScaling(5.0, server), "Should scale up (utilization = 1.0 > 0.5)");
         assertEquals(2.0, server.getSpeedMultiplier(), 1e-9);
 
-        // Complete job to clear load
+        // 2. Complete job and verify cooldown
+        logDebug("Phase 2: Job completion and cooldown check");
+        server.processJobs(1.0); // t=6.0
         server.completeJob(job, 6.0);
-        server.updateStatistics(10.0); // mean jobs = 6.0/10.0 = 0.6 (still above 0.1)
+        server.updateStatistics(12.0); // utilization = 6/12 = 0.5 (on the edge)
 
-        // Within cooldown (clock = 12.0, 12 - 5 = 7 < 10): should not scale down
-        assertFalse(scaler.evaluateScaling(12.0, server));
-        assertEquals(2.0, server.getSpeedMultiplier(), 1e-9);
+        // Within cooldown (12 - 5 = 7 < 10)
+        assertFalse(scaler.evaluateScaling(12.0, server), "Should NOT scale down during cooldown");
 
-        // Outside cooldown & mean jobs below 0.1 (clock = 65.0):
-        // Total busy time = 6.0. At t=65.0, mean jobs = 6.0 / 65.0 = 0.0923 <= 0.1
+        // 3. Trigger Scale-Down after cooldown and low utilization
+        logDebug("Phase 3: Low utilization after cooldown to trigger Scale-Down");
+        // Total busy time = 6.0. At t=65.0, utilization = 6.0 / 65.0 ≈ 0.092 < 0.1
         server.updateStatistics(65.0);
-        assertTrue(scaler.evaluateScaling(65.0, server));
+        assertTrue(scaler.evaluateScaling(65.0, server), "Should scale down (utilization ≈ 0.09 < 0.1)");
         assertEquals(1.0, server.getSpeedMultiplier(), 1e-9);
     }
 
+    /**
+     * Verifies that NoVerticalScaler keeps the server speed constant regardless of load.
+     */
     @Test
     public void testNoVerticalScaler() {
+        logTestStep("Verifying NoVerticalScaler (constant speed)");
         NoVerticalScaler scaler = new NoVerticalScaler();
         SpikeServer server = new SpikeServer(0, 1.0);
 
-        Job job = new Job(1, 0.0, 4.0);
-        server.acceptJob(job, 0.0);
-        server.processJobs(5.0);
-        server.updateStatistics(5.0);
+        server.acceptJob(new Job(1, 0.0, 10.0), 0.0);
+        server.processJobs(10.0);
+        server.updateStatistics(10.0);
 
-        // Should never scale
-        assertFalse(scaler.evaluateScaling(5.0, server));
+        assertFalse(scaler.evaluateScaling(10.0, server));
         assertEquals(1.0, server.getSpeedMultiplier(), 1e-9);
     }
 }

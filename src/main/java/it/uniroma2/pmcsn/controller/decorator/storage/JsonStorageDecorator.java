@@ -3,8 +3,7 @@ package it.uniroma2.pmcsn.controller.decorator.storage;
 import it.uniroma2.pmcsn.controller.Simulator;
 import it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator;
 import it.uniroma2.pmcsn.controller.decorator.data.DataExporter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.uniroma2.pmcsn.utils.LogFactory;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,7 +15,7 @@ import java.util.Map;
  * Decorator that persists captured simulation data to a JSON file.
  */
 public class JsonStorageDecorator extends SimulatorDecorator {
-    private static final Logger logger = LoggerFactory.getLogger(JsonStorageDecorator.class);
+    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(JsonStorageDecorator.class, "STORAGE");
     private final String outputPath;
 
     public JsonStorageDecorator(Simulator decorated, String outputPath) {

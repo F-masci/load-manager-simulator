@@ -12,8 +12,7 @@ import it.uniroma2.pmcsn.model.server.Server;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.uniroma2.pmcsn.utils.LogFactory;
 
 import java.util.List;
 import java.util.PriorityQueue;
@@ -22,7 +21,7 @@ import java.util.PriorityQueue;
  * Controller class managing the next-event driven simulation with Processor Sharing.
  */
 public class SimulationController implements Simulator {
-    private static final Logger logger = LoggerFactory.getLogger(SimulationController.class);
+    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(SimulationController.class, "SIM");
 
     private double clock = 0.0;
     private double clockSinceReset = 0.0;
