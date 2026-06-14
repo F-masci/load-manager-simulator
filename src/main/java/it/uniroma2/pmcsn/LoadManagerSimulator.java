@@ -21,24 +21,24 @@ public class LoadManagerSimulator {
 
         try {
 
-            switch(config.workloadType()) {
-                case WorkloadType.TRACE -> logger.info("Running TRACE-DRIVEN simulation using file: {}", config.tracePath());
+            switch(config.load().workloadType()) {
+                case WorkloadType.TRACE -> logger.info("Running TRACE-DRIVEN simulation using file: {}", config.load().tracePath());
                 case WorkloadType.HYPEREXPONENTIAL -> logger.info("Running HYPEREXPONENTIAL DISTRIBUTION-DRIVEN simulation.");
                 case WorkloadType.EXPONENTIAL  -> logger.info("Running EXPONENTIAL-DRIVEN simulation.");
             }
 
-            if (config.workloadType().isDistributionWorkload()) {
+            if (config.load().workloadType().isDistributionWorkload()) {
                 logger.info("Parameters:");
-                logger.info("  Seed: {}", config.seed());
-                logger.info("  Mean Interarrival Time: {}", config.meanInterarrival());
-                logger.info("  Mean Service Time: {}", config.meanService());
+                logger.info("  Seed: {}", config.execution().seed());
+                logger.info("  Mean Interarrival Time: {}", config.load().meanInterarrival());
+                logger.info("  Mean Service Time: {}", config.load().meanService());
             }
 
-            logger.info("  Max Time:              {}", config.maxTime());
-            logger.info("  SI_max Threshold:      {}", config.siMax());
-            logger.info("  Web Servers count:     {}", config.webServersCount());
-            logger.info("  Routing Policy:        {}", config.routingPolicy());
-            logger.info("  Simulation Method:     {}", config.simulationMethod());
+            logger.info("  Max Time:              {}", config.execution().maxTime());
+            logger.info("  SI_max Threshold:      {}", config.load().siMax());
+            logger.info("  Web Servers count:     {}", config.cluster().webServersCount());
+            logger.info("  Routing Policy:        {}", config.load().routingPolicy());
+            logger.info("  Simulation Method:     {}", config.execution().method());
 
             SimulationFacade simulator = new SimulationFacade(config);
             simulator.runSimulation();

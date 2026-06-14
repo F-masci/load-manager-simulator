@@ -10,274 +10,103 @@ import it.uniroma2.pmcsn.model.event.source.TraceEventSource;
 import it.uniroma2.pmcsn.model.load.LoadManager;
 import it.uniroma2.pmcsn.model.load.routing.Router;
 import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
+import it.uniroma2.pmcsn.model.load.routing.webserver.DeterministicRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.LeastLoadedRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.RoundRobinRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.WebServerRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.HorizontalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.MovingWindowHorizontalScaler;
+import it.uniroma2.pmcsn.model.load.scaler.horizontal.NoHorizontalScaler;
+import it.uniroma2.pmcsn.model.load.scaler.vertical.NoVerticalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.VerticalScaler;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
-import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Fluent builder for configuring and creating a SimulationController.
- * Simplifies configuring the simulation with default values and custom overrides.
+ * Relies strictly on ApplicationConfig to ensure that every build() call 
+ * creates fresh, independent instances of all simulation components.
  */
 public class SimulationBuilder {
-    private double maxTime = 1000.0;
-    private EventSource eventSource;
-    private HorizontalScaler horizontalScaler;
-    private VerticalScaler verticalScaler;
-    private SpikeServer spikeServer;
-    private WebServerCluster webServerCluster;
-    private Router router;
-    private RoutingPolicy routingPolicy = RoutingPolicy.ROUND_ROBIN;
-
-    // Default configuration values
-    private long seed = 123456789L;
-    private double meanInterarrival = 2.0;
-    private double meanService = 1.0;
-    private int siMax = 5;
-    private int webServerCount = 3;
-    private double spikeCpuPercentage = 0.4;
-    private WorkloadType workloadType = WorkloadType.HYPEREXPONENTIAL;
-    private String tracePath = null;
-
-    // Scaling configurations
-    private double scaleUpLimit = 8.0;
-    private double scaleDownLimit = 2.0;
-    private double scaleInterval = 30.0;
-    private double cooldown = 30.0;
-    private int minServers = 1;
-    private int maxServers = 10;
-    private double spikeUpperThreshold = 0.70;
-    private double spikeLowerThreshold = 0.30;
+    private ApplicationConfig config;
 
     /**
-     * Applies configuration settings from an ApplicationConfig object.
+     * Initializes the builder with default configuration constants.
+     */
+    public SimulationBuilder() {
+        this.config = new ApplicationConfig();
+    }
+
+    /**
+     * Replaces the entire configuration with a provided ApplicationConfig.
      */
     public SimulationBuilder config(ApplicationConfig config) {
-        this.maxTime = config.maxTime();
-        this.seed = config.seed();
-        this.meanInterarrival = config.meanInterarrival();
-        this.meanService = config.meanService();
-        this.siMax = config.siMax();
-        this.webServerCount = config.webServersCount();
-        this.routingPolicy = config.routingPolicy();
-        this.spikeCpuPercentage = config.spikeCpuPercentage();
-        this.workloadType = config.workloadType();
-        
-        // Scaling config
-        this.scaleUpLimit = config.scaleUpLimit();
-        this.scaleDownLimit = config.scaleDownLimit();
-        this.scaleInterval = config.scaleInterval();
-        this.cooldown = config.cooldown();
-        this.minServers = config.minServers();
-        this.maxServers = config.maxServers();
-        
-        // Vertical scaling config
-        this.spikeUpperThreshold = config.spikeUpperThreshold();
-        this.spikeLowerThreshold = config.spikeLowerThreshold();
-        this.tracePath = config.tracePath();
-
+        this.config = config;
         return this;
     }
 
-    public SimulationBuilder maxTime(double maxTime) {
-        this.maxTime = maxTime;
-        return this;
-    }
-
+    /**
+     * Overrides the seed for the next build.
+     */
     public SimulationBuilder seed(long seed) {
-        this.seed = seed;
-        return this;
-    }
-
-    public SimulationBuilder meanInterarrival(double meanInterarrival) {
-        this.meanInterarrival = meanInterarrival;
-        return this;
-    }
-
-    public SimulationBuilder meanService(double meanService) {
-        this.meanService = meanService;
-        return this;
-    }
-
-    public SimulationBuilder siMax(int siMax) {
-        this.siMax = siMax;
-        return this;
-    }
-
-    public SimulationBuilder webServerCount(int count) {
-        this.webServerCount = count;
-        return this;
-    }
-
-    public SimulationBuilder routingPolicy(RoutingPolicy policy) {
-        this.routingPolicy = policy;
-        return this;
-    }
-
-    public SimulationBuilder eventSource(EventSource source) {
-        this.eventSource = source;
-        return this;
-    }
-
-    public SimulationBuilder scaleUpLimit(double limit) {
-        this.scaleUpLimit = limit;
-        return this;
-    }
-
-    public SimulationBuilder scaleDownLimit(double limit) {
-        this.scaleDownLimit = limit;
-        return this;
-    }
-
-    public SimulationBuilder scaleInterval(double interval) {
-        this.scaleInterval = interval;
-        return this;
-    }
-
-    public SimulationBuilder cooldown(double cooldown) {
-        this.cooldown = cooldown;
-        return this;
-    }
-
-    public SimulationBuilder minServers(int min) {
-        this.minServers = min;
-        return this;
-    }
-
-    public SimulationBuilder maxServers(int max) {
-        this.maxServers = max;
-        return this;
-    }
-
-    public SimulationBuilder spikeUpperThreshold(double threshold) {
-        this.spikeUpperThreshold = threshold;
-        return this;
-    }
-
-    public SimulationBuilder spikeLowerThreshold(double threshold) {
-        this.spikeLowerThreshold = threshold;
+        this.config = config.withSeed(seed);
         return this;
     }
 
     /**
-     * Configures the simulation to read from a trace file.
-     */
-    public SimulationBuilder traceFile(String filePath) throws IOException {
-        this.eventSource = new TraceEventSource(filePath);
-        return this;
-    }
-
-    /**
-     * Sets a custom pre-built HorizontalScaler.
-     */
-    public SimulationBuilder horizontalScaler(HorizontalScaler scaler) {
-        this.horizontalScaler = scaler;
-        return this;
-    }
-
-    /**
-     * Sets a custom pre-built VerticalScaler.
-     */
-    public SimulationBuilder verticalScaler(VerticalScaler verticalScaler) {
-        this.verticalScaler = verticalScaler;
-        return this;
-    }
-
-    /**
-     * Sets a custom pre-built SpikeServer.
-     */
-    public SimulationBuilder spikeServer(SpikeServer spikeServer) {
-        this.spikeServer = spikeServer;
-        return this;
-    }
-
-    /**
-     * Set a custom pre-built WebServerCluster.
-     */
-    public SimulationBuilder webServerCluster(WebServerCluster webServerCluster) {
-        this.webServerCluster = webServerCluster;
-        return this;
-    }
-
-    /**
-     * Set a custom pre-built Router.
-     */
-    public SimulationBuilder router(Router router) {
-        this.router = router;
-        return this;
-    }
-
-    /**
-     * Builds and returns a SimulationController configured with builder options.
+     * Builds and returns a fresh SimulationController using the current configuration.
+     * All stateful components are instantiated from scratch.
      */
     public SimulationController build() {
-        if (eventSource == null) {
-                switch (workloadType) {
-                    case TRACE -> {
-                        if (tracePath != null) {
-                            try {
-                                this.eventSource = new TraceEventSource(tracePath);
-                            } catch (IOException e) {
-                                throw new IllegalArgumentException("Failed to load trace file from path: " + tracePath, e);
-                            }
-                        } else {
-                            // If workload type is TRACE but no trace path provided,
-                            // fallback to exponential with warning
-                            this.eventSource = new ExponentialEventSource(seed, meanInterarrival, meanService);
-                        }
-                    }
-                    case HYPEREXPONENTIAL -> this.eventSource = new HyperexponentialEventSource(seed, meanInterarrival, meanService);
-                    default -> this.eventSource = new ExponentialEventSource(seed, meanInterarrival, meanService);
-                }
+        long seed = config.execution().seed();
+
+        // Event Source
+        EventSource eventSource;
+        try {
+            if (config.load().workloadType() == WorkloadType.TRACE && config.load().tracePath() != null) {
+                eventSource = new TraceEventSource(config.load().tracePath());
+            } else if (config.load().workloadType() == WorkloadType.HYPEREXPONENTIAL) {
+                eventSource = new HyperexponentialEventSource(seed, config.load().meanInterarrival(), config.load().meanService());
+            } else {
+                eventSource = new ExponentialEventSource(seed, config.load().meanInterarrival(), config.load().meanService());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to initialize EventSource", e);
         }
 
         // WebServerCluster
-        if (webServerCluster == null) {
-            int finalMin = Math.max(minServers, webServerCount);
-            int finalMax = Math.max(maxServers, finalMin);
-            webServerCluster = new WebServerCluster(finalMin, finalMax);
-        }
+        WebServerCluster cluster = new WebServerCluster(config.cluster().minServers(), config.cluster().maxServers());
 
-        // Build Horizontal Scaler if not custom configured
-        if (horizontalScaler == null) {
-            horizontalScaler = new MovingWindowHorizontalScaler(scaleUpLimit, scaleDownLimit, scaleInterval, cooldown);
-        }
+        // SpikeServer
+        double baseSpeed = config.scaling().spikeCpuPercentage() / 0.4;
+        SpikeServer spikeServer = new SpikeServer(0, baseSpeed);
 
-        // Build SpikeServer if not custom configured
-        if (spikeServer == null) {
-            double speedMultiplier = spikeCpuPercentage / 0.4;
-            spikeServer = new SpikeServer(0, speedMultiplier);
-        }
+        // Router
+        WebServerRoutingStrategy wsStrategy = switch (config.load().routingPolicy()) {
+            case RoutingPolicy.ROUND_ROBIN -> new RoundRobinRoutingStrategy();
+            case RoutingPolicy.LEAST_LOADED -> new LeastLoadedRoutingStrategy();
+            case RoutingPolicy.DETERMINISTIC -> new DeterministicRoutingStrategy();
+        };
+        Router router = new Router(config.load().siMax(), wsStrategy);
 
-        // Build Vertical Scaler if not custom configured
-        if (verticalScaler == null) {
-            double baseSpeed = spikeServer.getSpeedMultiplier();
-            double scaledSpeed = baseSpeed * 2.0; // Double capacity share on vertical scale up
-            verticalScaler = new UtilizationThresholdVerticalScaler(spikeUpperThreshold, spikeLowerThreshold, baseSpeed, scaledSpeed, cooldown);
-        }
+        // Scalers
+        HorizontalScaler hScaler = config.scaling().horizontalEnabled()
+            ? new MovingWindowHorizontalScaler(config.scaling().scaleUpLimit(), config.scaling().scaleDownLimit(),
+                                              config.scaling().scaleInterval(), config.scaling().cooldown())
+            : new NoHorizontalScaler();
 
-        // Build Router
-        if(router == null) {
-            switch(routingPolicy) {
-                case RoutingPolicy.ROUND_ROBIN -> router = new Router(siMax, new RoundRobinRoutingStrategy());
-                case RoutingPolicy.LEAST_LOADED -> router = new Router(siMax, new LeastLoadedRoutingStrategy());
-                default -> throw new IllegalArgumentException("Unsupported routing policy: " + routingPolicy);
-            }
-        }
+        double spikeBaseSpeed = spikeServer.getSpeedMultiplier();
+        VerticalScaler vScaler = config.scaling().verticalEnabled()
+            ? new UtilizationThresholdVerticalScaler(config.scaling().spikeUpperThreshold(), config.scaling().spikeLowerThreshold(),
+                                                    spikeBaseSpeed, spikeBaseSpeed * 2.0, config.scaling().cooldown())
+            : new NoVerticalScaler();
 
         // LoadManager
-        LoadManager loadController = new LoadManager(horizontalScaler, verticalScaler, router);
+        LoadManager loadManager = new LoadManager(hScaler, vScaler, router);
 
-        return new SimulationController(maxTime, eventSource, webServerCluster, spikeServer, loadController);
+        return new SimulationController(config.execution().maxTime(), eventSource, cluster, spikeServer, loadManager);
     }
 }

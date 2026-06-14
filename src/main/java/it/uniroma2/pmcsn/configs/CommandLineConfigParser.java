@@ -10,13 +10,15 @@ public class CommandLineConfigParser {
 
     /**
      * Parses command-line arguments and returns an ApplicationConfig instance.
-     * Ends program execution if help is requested or configuration parsing fails.
      */
     public static ApplicationConfig parse(String[] args) {
+        // Initialize with default values from constants
         double maxTime = ApplicationConfig.MAX_TIME;
         long seed = ApplicationConfig.SEED;
-        double interarrival = ApplicationConfig.MEAN_INTERARRIVAL;
-        double service = ApplicationConfig.MEAN_SERVICE;
+        double meanInterarrival = ApplicationConfig.MEAN_INTERARRIVAL;
+        double cvInterarrival = ApplicationConfig.CV_INTERARRIVAL;
+        double meanService = ApplicationConfig.MEAN_SERVICE;
+        double cvService = ApplicationConfig.CV_SERVICE;
         int siMax = ApplicationConfig.SI_MAX;
         int webServers = ApplicationConfig.WEB_SERVER_COUNT;
         RoutingPolicy policy = ApplicationConfig.ROUTING_POLICY;
@@ -40,85 +42,34 @@ public class CommandLineConfigParser {
         try {
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
-                    case "-time":
-                        maxTime = Double.parseDouble(args[++i]);
-                        break;
-                    case "-seed":
-                        seed = Long.parseLong(args[++i]);
-                        break;
-                    case "-interarrival":
-                        interarrival = Double.parseDouble(args[++i]);
-                        break;
-                    case "-service":
-                        service = Double.parseDouble(args[++i]);
-                        break;
-                    case "-simax":
-                        siMax = Integer.parseInt(args[++i]);
-                        break;
-                    case "-webservers":
-                        webServers = Integer.parseInt(args[++i]);
-                        break;
-                    case "-policy":
-                        policy = RoutingPolicy.valueOf(args[++i].toUpperCase());
-                        break;
-                    case "-trace":
-                        tracePath = args[++i];
-                        workload = WorkloadType.TRACE;
-                        break;
-                    case "-share":
-                        spikeCpu = Double.parseDouble(args[++i]);
-                        break;
-                    case "-workload":
-                        workload = WorkloadType.valueOf(args[++i].toUpperCase());
-                        break;
-                    case "-scaleUpLimit":
-                        scaleUpLimit = Double.parseDouble(args[++i]);
-                        break;
-                    case "-scaleDownLimit":
-                        scaleDownLimit = Double.parseDouble(args[++i]);
-                        break;
-                    case "-scaleInterval":
-                        scaleInterval = Double.parseDouble(args[++i]);
-                        break;
-                    case "-cooldown":
-                        cooldown = Double.parseDouble(args[++i]);
-                        break;
-                    case "-minServers":
-                        minServers = Integer.parseInt(args[++i]);
-                        break;
-                    case "-maxServers":
-                        maxServers = Integer.parseInt(args[++i]);
-                        break;
-                    case "-spikeUpperThreshold":
-                        spikeUpperThreshold = Double.parseDouble(args[++i]);
-                        break;
-                    case "-spikeLowerThreshold":
-                        spikeLowerThreshold = Double.parseDouble(args[++i]);
-                        break;
-                    case "-method":
-                        method = SimulationMethod.valueOf(args[++i].toUpperCase());
-                        break;
-                    case "-replications":
-                        replications = Integer.parseInt(args[++i]);
-                        break;
-                    case "-batches":
-                        batches = Integer.parseInt(args[++i]);
-                        break;
-                    case "-batchSize":
-                        batchSize = Integer.parseInt(args[++i]);
-                        break;
-                    case "-warmUp":
-                        warmUp = Integer.parseInt(args[++i]);
-                        break;
-                    case "-h":
-                    case "--help":
-                        printUsage();
-                        System.exit(0);
-                        break;
-                    default:
-                        System.err.println("Unknown parameter: " + args[i]);
-                        printUsage();
-                        System.exit(1);
+                    case "-time" -> maxTime = Double.parseDouble(args[++i]);
+                    case "-seed" -> seed = Long.parseLong(args[++i]);
+                    case "-meanInterarrival" -> meanInterarrival = Double.parseDouble(args[++i]);
+                    case "-cvInterarrival" -> cvInterarrival = Double.parseDouble(args[++i]);
+                    case "-meanService" -> meanService = Double.parseDouble(args[++i]);
+                    case "-cvService" -> cvService = Double.parseDouble(args[++i]);
+                    case "-simax" -> siMax = Integer.parseInt(args[++i]);
+                    case "-webservers" -> webServers = Integer.parseInt(args[++i]);
+                    case "-policy" -> policy = RoutingPolicy.valueOf(args[++i].toUpperCase());
+                    case "-trace" -> { tracePath = args[++i]; workload = WorkloadType.TRACE; }
+                    case "-share" -> spikeCpu = Double.parseDouble(args[++i]);
+                    case "-workload" -> workload = WorkloadType.valueOf(args[++i].toUpperCase());
+                    case "-scaleUpLimit" -> scaleUpLimit = Double.parseDouble(args[++i]);
+                    case "-scaleDownLimit" -> scaleDownLimit = Double.parseDouble(args[++i]);
+                    case "-scaleInterval" -> scaleInterval = Double.parseDouble(args[++i]);
+                    case "-cooldown" -> cooldown = Double.parseDouble(args[++i]);
+                    case "-minServers" -> minServers = Integer.parseInt(args[++i]);
+                    case "-maxServers" -> maxServers = Integer.parseInt(args[++i]);
+                    case "-spikeUpperThreshold" -> spikeUpperThreshold = Double.parseDouble(args[++i]);
+                    case "-spikeLowerThreshold" -> spikeLowerThreshold = Double.parseDouble(args[++i]);
+                    case "-method" -> method = SimulationMethod.valueOf(args[++i].toUpperCase());
+                    case "-replications" -> replications = Integer.parseInt(args[++i]);
+                    case "-maxTime" -> maxTime = Long.parseLong(args[++i]);
+                    case "-batches" -> batches = Integer.parseInt(args[++i]);
+                    case "-batchSize" -> batchSize = Integer.parseInt(args[++i]);
+                    case "-warmUp" -> warmUp = Integer.parseInt(args[++i]);
+                    case "-h", "--help" -> { printUsage(); System.exit(0); }
+                    default -> { System.err.println("Unknown parameter: " + args[i]); printUsage(); System.exit(1); }
                 }
             }
         } catch (Exception e) {
@@ -127,48 +78,45 @@ public class CommandLineConfigParser {
             System.exit(1);
         }
 
-        if (minServers == -1) {
+        if (minServers == 1 && webServers != ApplicationConfig.WEB_SERVER_COUNT) {
             minServers = webServers;
         }
 
         return new ApplicationConfig(
-            maxTime, seed, interarrival, service, siMax,
-            webServers, policy, tracePath,
-            spikeCpu, workload, scaleUpLimit, scaleDownLimit,
-            scaleInterval, cooldown, minServers, maxServers,
-            spikeUpperThreshold, spikeLowerThreshold,
-            method, replications, batches, batchSize, warmUp
+            new ApplicationConfig.LoadConfig(meanInterarrival, cvInterarrival, meanService, cvService, siMax, policy, workload, tracePath),
+            new ApplicationConfig.ClusterConfig(webServers, minServers, maxServers),
+            new ApplicationConfig.ScalingConfig(scaleUpLimit, scaleDownLimit, scaleInterval, cooldown, 
+                                               spikeUpperThreshold, spikeLowerThreshold, spikeCpu, true, true),
+            new ApplicationConfig.ExecutionConfig(method, seed, replications, maxTime, batches, batchSize, warmUp)
         );
     }
 
-    /**
-     * Prints the help instructions to standard output.
-     */
     public static void printUsage() {
-        System.out.println("Usage: java it.pmcsn.HorizontalScalerSimulator [options]");
+        System.out.println("Usage: java it.pmcsn.LoadManagerSimulator [options]");
         System.out.println("Options:");
-        System.out.println("  -time <double>                    Max simulation time (default 10000.0)");
-        System.out.println("  -seed <long>                      RNG seed (default 123456789)");
-        System.out.println("  -interarrival <double>            Mean interarrival time (default 2.0)");
-        System.out.println("  -service <double>                 Mean service time (default 1.5)");
-        System.out.println("  -simax <int>                      SI_max threshold for spike server redirection (default 5)");
-        System.out.println("  -webservers <int>                 Number of active Web Servers (default 3)");
-        System.out.println("  -policy <ROUND_ROBIN|LEAST_LOADED> Load routing policy (default ROUND_ROBIN)");
-        System.out.println("  -trace <path>                     Path to trace file (absolute or relative to workspace)");
-        System.out.println("  -share <double>                   Spike Server CPU capacity share (e.g. 0.4 or 0.8, default 0.4)");
-        System.out.println("  -workload <DISTRIBUTION|HYPEREXPONENTIAL|TRACE> Workload generation type (default DISTRIBUTION)");
-        System.out.println("  -scaleUpLimit <double>            System response time threshold to scale up (default 8.0)");
-        System.out.println("  -scaleDownLimit <double>          System response time threshold to scale down (default 2.0)");
-        System.out.println("  -scaleInterval <double>           Moving window size for horizontal scaling (default 30.0)");
-        System.out.println("  -cooldown <double>                Minimum time between scaling actions (default 30.0)");
-        System.out.println("  -minServers <int>                 Minimum number of Web Servers (default: webservers value)");
-        System.out.println("  -maxServers <int>                 Maximum number of Web Servers (default 10)");
-        System.out.println("  -spikeUpperThreshold <double>     Spike Server utilization threshold to scale up CPU (default 0.70)");
-        System.out.println("  -spikeLowerThreshold <double>     Spike Server utilization threshold to scale down CPU (default 0.30)");
-        System.out.println("  -method <INDEPENDENT_REPLICATIONS|BATCH_MEANS> Simulation execution method (default INDEPENDENT_REPLICATIONS)");
-        System.out.println("  -replications <int>               Number of independent replications for INDEPENDENT_REPLICATIONS method (default 1)");
-        System.out.println("  -batches <int>                    Number of batches for BATCH_MEANS method (default 64)");
-        System.out.println("  -batchSize <int>                  Jobs per batch for BATCH_MEANS method (default 1024)");
-        System.out.println("  -warmUp <int>                     Jobs for warm-up period in BATCH_MEANS method (default 1000)");
+        System.out.println("  -time <double>                    Max simulation time");
+        System.out.println("  -seed <long>                      RNG seed");
+        System.out.println("  -interarrival <double>            Mean interarrival time");
+        System.out.println("  -service <double>                 Mean service time");
+        System.out.println("  -simax <int>                      SI_max threshold for spike server redirection");
+        System.out.println("  -webservers <int>                 Number of active Web Servers");
+        System.out.println("  -policy <ROUND_ROBIN|LEAST_LOADED> Load routing policy");
+        System.out.println("  -trace <path>                     Path to trace file");
+        System.out.println("  -share <double>                   Spike Server CPU capacity share");
+        System.out.println("  -workload <DISTRIBUTION|HYPEREXPONENTIAL|TRACE> Workload type");
+        System.out.println("  -scaleUpLimit <double>            System response time threshold to scale up");
+        System.out.println("  -scaleDownLimit <double>          System response time threshold to scale down");
+        System.out.println("  -scaleInterval <double>           Moving window size for horizontal scaling");
+        System.out.println("  -cooldown <double>                Minimum time between scaling actions");
+        System.out.println("  -minServers <int>                 Minimum number of Web Servers");
+        System.out.println("  -maxServers <int>                 Maximum number of Web Servers");
+        System.out.println("  -spikeUpperThreshold <double>     Spike Server utilization threshold to scale up CPU");
+        System.out.println("  -spikeLowerThreshold <double>     Spike Server utilization threshold to scale down CPU");
+        System.out.println("  -method <INDEPENDENT_REPLICATIONS|BATCH_MEANS> Simulation method");
+        System.out.println("  -replications <int>               Number of independent replications");
+        System.out.println("  -maxTime <double>                 Max simulation time");
+        System.out.println("  -batches <int>                    Number of batches");
+        System.out.println("  -batchSize <int>                  Jobs per batch");
+        System.out.println("  -warmUp <int>                     Jobs for warm-up period");
     }
 }

@@ -2,8 +2,10 @@ package it.uniroma2.pmcsn.facade;
 
 import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
+import it.uniroma2.pmcsn.configs.SimulationMethod;
 import it.uniroma2.pmcsn.controller.SimulationController;
 import it.uniroma2.pmcsn.lib.statistics.IntervalEstimator;
+import it.uniroma2.pmcsn.lib.statistics.Welford;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,11 +39,6 @@ public class SimulationFacade {
      */
     public SimulationFacade(ApplicationConfig config) {
         this.config = config;
-
-        rt.reset();
-        jis.reset();
-        util.reset();
-        thr.reset();
     }
 
     /**
@@ -49,7 +46,7 @@ public class SimulationFacade {
      * @return The aggregated results of the experiment.
      */
     public AggregatedResults runSimulation() {
-        AggregatedResults results = switch (config.simulationMethod()) {
+        AggregatedResults results = switch (config.execution().method()) {
             case BATCH_MEANS -> runBatchMeansSimulation();
             case INDEPENDENT_REPLICATIONS -> runIndependentReplicationsSimulation();
         };
@@ -72,60 +69,71 @@ public class SimulationFacade {
      */
     public AggregatedResults runBatchMeansSimulation(SimulationBuilder builder) {
         
-        // Prevent early exit in Infinite horizon simulation
-        builder.maxTime(Double.MAX_VALUE);
+        // Infinite horizon simulation
         SimulationController controller = builder.build();
 
-        logger.info("Starting BATCH MEANS simulation (Infinite Horizon)... Warm-up: {} jobs", config.warmUpJobs());
-        controller.run(SimulationController.StopCondition.untilJobsCompleted(config.warmUpJobs()));
+        logger.info("Starting BATCH MEANS simulation (Infinite Horizon)... Warm-up: {} jobs", config.execution().warmUpJobs());
+        if (config.execution().warmUpJobs() > 0) {
+            controller.run(SimulationController.StopCondition.untilJobsCompleted(config.execution().warmUpJobs()));
+        }
 
-        logger.info("Warm-up completed. Running {} batches of {} jobs...", config.numBatches(), config.batchSize());
+        logger.info("Warm-up completed. Running {} batches of {} jobs...", config.execution().numBatches(), config.execution().batchSize());
         controller.resetStatistics();
 
-        for (int i = 0; i < config.numBatches(); i++) {
-            controller.run(SimulationController.StopCondition.untilJobsCompleted(config.batchSize()));
+        for (int i = 0; i < config.execution().numBatches(); i++) {
+            controller.run(SimulationController.StopCondition.untilJobsCompleted(config.execution().batchSize()));
             updateAggregators(controller, rt, jis, util, thr);
-            logger.info("Batch {}/{} completed", i + 1, config.numBatches());
+            logger.info("Batch {}/{} completed", i + 1, config.execution().numBatches());
             logger.debug("Batch {}/{} results:" +
                     "Response Time {} | " +
                     "Jobs in System {} | " +
                     "System Utilization {} | " +
                     "Throughput {}",
-                    i + 1, config.numBatches(),
+                    i + 1, config.execution().numBatches(),
                     controller.getAverageResponseTime(), controller.getAverageJobsInSystem(),
                     controller.getSystemUtilization(), controller.getThroughput());
             controller.resetStatistics();
         }
 
-        return createResults("BATCH MEANS (STEADY STATE)", config.numBatches(), rt, jis, util, thr);
+        return createResults("BATCH MEANS (STEADY STATE)", config.execution().numBatches(), rt, jis, util, thr);
     }
 
     /**
      * Runs a terminating simulation using the Independent Replications method.
-     *
      * @return Aggregated results over all replications.
      */
     public AggregatedResults runIndependentReplicationsSimulation() {
+        return runIndependentReplicationsSimulation(new SimulationBuilder().config(config));
+    }
 
-        logger.info("Starting {} independent replications...", config.numReplications());
+    /**
+     * Runs a terminating simulation using the Independent Replications method with a custom builder.
+     * @param builder The configured builder.
+     * @return Aggregated results over all replications.
+     */
+    public AggregatedResults runIndependentReplicationsSimulation(SimulationBuilder builder) {
+
+        logger.info("Starting {} independent replications...", config.execution().numReplications());
 
         // Setting starting seed
-        long currentSeed = config.seed();
+        long currentSeed = config.execution().seed();
 
-        for (int i = 0; i < config.numReplications(); i++) {
-            // Update seed for new run
-            SimulationBuilder builder = new SimulationBuilder().config(config).seed(currentSeed);
-            SimulationController controller = builder.build();
+        for (int i = 0; i < config.execution().numReplications(); i++) {
 
-            logger.info("Running replication {}/{} with seed {}...", i + 1, config.numReplications(), currentSeed);
-            controller.run(SimulationController.StopCondition.untilQueueEmpty());
-            logger.debug("Running replication {}/{} completed", i + 1, config.numReplications());
+            // Ensure independence by creating a fresh controller with a specific seed for each replication
+            SimulationController controller = new SimulationBuilder()
+                .config(config.withSeed(currentSeed))
+                .build();
+
+            logger.info("Running replication {}/{} with seed {}...", i + 1, config.execution().numReplications(), currentSeed);
+            controller.run(SimulationController.StopCondition.untilTimeElapsed(config.execution().maxTime()));
+            logger.debug("Running replication {}/{} completed", i + 1, config.execution().numReplications());
             logger.debug("Batch {}/{} results:" +
                             "Response Time {} | " +
                             "Jobs in System {} | " +
                             "System Utilization {} | " +
                             "Throughput {}",
-                    i + 1, config.numBatches(),
+                    i + 1, config.execution().numReplications(),
                     controller.getAverageResponseTime(), controller.getAverageJobsInSystem(),
                     controller.getSystemUtilization(), controller.getThroughput());
             updateAggregators(controller, rt, jis, util, thr);
@@ -134,7 +142,7 @@ public class SimulationFacade {
             currentSeed = controller.getSeed();
         }
 
-        return createResults("INDEPENDENT REPLICATIONS (FINITE HORIZON)", config.numReplications(), rt, jis, util, thr);
+        return createResults("INDEPENDENT REPLICATIONS (FINITE HORIZON)", config.execution().numReplications(), rt, jis, util, thr);
     }
 
     /**
@@ -149,6 +157,7 @@ public class SimulationFacade {
      * Updates statistical aggregators with metrics from a completed simulation segment.
      */
     private void updateAggregators(SimulationController c, Welford rt, Welford jis, Welford util, Welford thr) {
+        double duration = c.getClockSinceReset();
         rt.update(c.getAverageResponseTime());
         jis.update(c.getAverageJobsInSystem());
         util.update(c.getSystemUtilization());
@@ -166,15 +175,14 @@ public class SimulationFacade {
             IntervalEstimator.estimate(util.getCount(), util.getMean(), util.getStandardDeviation(), 0.95),
             IntervalEstimator.estimate(thr.getCount(), thr.getMean(), thr.getStandardDeviation(), 0.95)
         );
-        logger.info("Simulation results:\n{}", results.toString());
-        this.lastResults = results;
+        logger.info("\n" + results.toString());
         return results;
     }
 
     /**
      * Encapsulates the aggregated statistical results of a simulation experiment.
      */
-    public record AggregatedResults(
+    public static record AggregatedResults(
         String methodLabel,
         int sampleCount,
         IntervalEstimator.IntervalResult responseTime,
