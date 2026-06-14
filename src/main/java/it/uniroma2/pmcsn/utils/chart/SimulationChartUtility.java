@@ -16,11 +16,17 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utility class to generate professional charts from simulation data.
@@ -56,8 +62,6 @@ public class SimulationChartUtility {
                 int ssJobs = Integer.parseInt(parts[3]);
                 siMaxVal = Double.parseDouble(parts[6]); // Extract fixed threshold
 
-                if (clock > 300.0) continue;
-
                 wsSeries.add(clock, wsJobs);
                 ssSeries.add(clock, ssJobs);
 
@@ -77,7 +81,7 @@ public class SimulationChartUtility {
         stateDataset.addSeries(ssSeries);
 
         JFreeChart chart = ChartFactory.createXYLineChart(
-                "System Load Dynamics: Web Server vs Spike Server (300s window)",
+                "System Load Dynamics: Web Server vs Spike Server",
                 "Time (seconds)",
                 "Number of Jobs",
                 stateDataset,
@@ -117,14 +121,6 @@ public class SimulationChartUtility {
         arrivalRenderer.setSeriesPaint(0, new Color(0, 255, 0)); 
         arrivalRenderer.setSeriesShape(0, new java.awt.geom.Ellipse2D.Double(-4, -4, 8, 8)); // Larger (8x8)
         plot.setRenderer(1, arrivalRenderer);
-
-        // Axis Zoom and Formatting
-        NumberAxis domainAxis = (NumberAxis) plot.getDomainAxis();
-        domainAxis.setRange(0, 300); 
-        
-        NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-        rangeAxis.setRange(0, Math.max(10, maxJobsSeen + 2));
-        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         try {
             ChartUtils.saveChartAsPNG(new File(outputPath), chart, 1200, 800);
@@ -342,6 +338,98 @@ public class SimulationChartUtility {
         try {
             ChartUtils.saveChartAsPNG(new File(outputPath), chart, 1200, 1000);
             logger.info("Vertical scaling chart generated at: {}", outputPath);
+        } catch (IOException e) {
+            logger.error("Failed to save chart image: {}", outputPath, e);
+        }
+    }
+
+    /**
+     * Generates a chart to validate Routing Balance among Web Servers.
+     * Uses a CombinedDomainXYPlot to show each server in its own vertical subplot.
+     *
+     * @param csvPath    Path to the input CSV file containing RoutingBalance metrics.
+     * @param outputPath Path where the chart image (PNG) will be saved.
+     */
+    public static void generateRoutingBalanceChart(String csvPath, String outputPath) {
+        Map<Integer, XYSeries> serverSeriesMap = new HashMap<>();
+        List<String> serverNames = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(csvPath))) {
+            String header = reader.readLine();
+            if (header == null) return;
+            String[] headers = header.split(",");
+            
+            // Find server columns
+            for (int i = 0; i < headers.length; i++) {
+                if (headers[i].startsWith("server_")) {
+                    XYSeries series = new XYSeries(headers[i]);
+                    serverSeriesMap.put(i, series);
+                    serverNames.add(headers[i]);
+                }
+            }
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                double clock = Double.parseDouble(parts[0]);
+                
+                for (Map.Entry<Integer, XYSeries> entry : serverSeriesMap.entrySet()) {
+                    double jobs = Double.parseDouble(parts[entry.getKey()]);
+                    entry.getValue().add(clock, jobs);
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            logger.error("Error reading routing balance file: {}", csvPath, e);
+            return;
+        }
+
+        NumberAxis domainAxis = new NumberAxis("Time (seconds)");
+        CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(domainAxis);
+        combinedPlot.setGap(10.0);
+        combinedPlot.setOrientation(PlotOrientation.VERTICAL);
+
+        // Predefined colors for servers (Nord Theme inspired)
+        Color[] colors = {
+            new Color(94, 129, 172),  // Blue
+            new Color(191, 97, 106),  // Red
+            new Color(163, 190, 140), // Green
+            new Color(208, 135, 112), // Orange
+            new Color(180, 142, 173), // Purple
+            new Color(235, 203, 139)  // Yellow
+        };
+
+        // Create a subplot for each server
+        int colorIdx = 0;
+        for (XYSeries series : serverSeriesMap.values()) {
+            XYSeriesCollection dataset = new XYSeriesCollection(series);
+            NumberAxis rangeAxis = new NumberAxis("Jobs (" + series.getKey() + ")");
+            rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+            
+            // Use XYStepAreaRenderer for a solid "histogram-style" area
+            XYStepAreaRenderer renderer = new XYStepAreaRenderer(XYStepAreaRenderer.AREA);
+            renderer.setSeriesPaint(0, colors[colorIdx % colors.length]);
+            
+            XYPlot subplot = new XYPlot(dataset, null, rangeAxis, renderer);
+            subplot.setBackgroundPaint(Color.WHITE);
+            subplot.setRangeGridlinePaint(new Color(230, 230, 230));
+            
+            combinedPlot.add(subplot, 1);
+            colorIdx++;
+        }
+
+        JFreeChart chart = new JFreeChart(
+                "Routing Balance Validation (Individual Server Load)",
+                JFreeChart.DEFAULT_TITLE_FONT,
+                combinedPlot,
+                true
+        );
+        chart.setBackgroundPaint(Color.WHITE);
+
+        try {
+            // Increase height based on number of servers (300px per server + margin)
+            int height = Math.max(800, serverSeriesMap.size() * 250);
+            ChartUtils.saveChartAsPNG(new File(outputPath), chart, 1200, height);
+            logger.info("Decomposed routing balance chart generated at: {}", outputPath);
         } catch (IOException e) {
             logger.error("Failed to save chart image: {}", outputPath, e);
         }

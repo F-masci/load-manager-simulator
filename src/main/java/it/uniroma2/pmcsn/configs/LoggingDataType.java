@@ -17,5 +17,10 @@ public enum LoggingDataType {
     /**
      * Scaling metrics and thresholds for horizontal and vertical scalers.
      */
-    SCALING_METRICS
+    SCALING_METRICS,
+    
+    /**
+     * Per-server job counts to validate routing balance.
+     */
+    ROUTING_BALANCE
 }

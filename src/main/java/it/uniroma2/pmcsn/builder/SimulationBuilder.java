@@ -20,6 +20,8 @@ import it.uniroma2.pmcsn.model.load.routing.spike.SpikeServerRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.spike.ThresholdSpikeServerRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.DeterministicRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.LeastLoadedRoutingStrategy;
+import it.uniroma2.pmcsn.model.load.routing.webserver.PowerOfTwoChoicesRoutingStrategy;
+import it.uniroma2.pmcsn.model.load.routing.webserver.RandomRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.RoundRobinRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.WebServerRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.HorizontalScaler;
@@ -92,6 +94,8 @@ public class SimulationBuilder {
             case RoutingPolicy.ROUND_ROBIN -> new RoundRobinRoutingStrategy();
             case RoutingPolicy.LEAST_LOADED -> new LeastLoadedRoutingStrategy();
             case RoutingPolicy.DETERMINISTIC -> new DeterministicRoutingStrategy();
+            case RoutingPolicy.RANDOM -> new RandomRoutingStrategy(seed);
+            case RoutingPolicy.POWER_OF_TWO -> new PowerOfTwoChoicesRoutingStrategy(seed);
         };
 
         // SpikeServer
@@ -131,6 +135,7 @@ public class SimulationBuilder {
                 case LOAD_COMPARISON -> new LoadComparisonDecorator(controller);
                 case SYSTEM_METRICS -> new SystemMetricsDecorator(controller);
                 case SCALING_METRICS -> new it.uniroma2.pmcsn.controller.decorator.data.ScalingMetricsDecorator(controller);
+                case ROUTING_BALANCE -> new it.uniroma2.pmcsn.controller.decorator.data.RoutingBalanceDecorator(controller);
             };
 
             // Second: Storage decorator (How to save)
