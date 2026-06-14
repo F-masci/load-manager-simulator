@@ -4,14 +4,14 @@ import it.uniroma2.pmcsn.utils.LogFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYStepAreaRenderer;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.chart.ui.RectangleAnchor;
 import org.jfree.chart.ui.TextAnchor;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import java.awt.*;
 import java.io.File;
@@ -25,7 +25,12 @@ public abstract class BaseChartUtility {
     protected static final LogFactory.ModuleLogger logger = LogFactory.getLogger(BaseChartUtility.class, "CHART");
 
     /**
-     * Creates a step-area subplot for discrete states (e.g., active servers, speed).
+     * Creates a step-area subplot for visualizing discrete state transitions.
+     *
+     * @param series The data series to plot.
+     * @param label  Label for the range (Y) axis.
+     * @param color  Primary color for the area fill.
+     * @return A configured XYPlot instance.
      */
     protected static XYPlot createAreaSubplot(XYSeries series, String label, Color color) {
         XYSeriesCollection dataset = new XYSeriesCollection(series);
@@ -39,7 +44,12 @@ public abstract class BaseChartUtility {
     }
 
     /**
-     * Creates a line subplot for continuous metrics (e.g., response time, utilization).
+     * Creates a line subplot for visualizing continuous performance metrics.
+     *
+     * @param series The data series to plot.
+     * @param label  Label for the range (Y) axis.
+     * @param color  Color for the metric line.
+     * @return A configured XYPlot instance.
      */
     protected static XYPlot createLineSubplot(XYSeries series, String label, Color color) {
         XYSeriesCollection dataset = new XYSeriesCollection(series);
@@ -54,51 +64,42 @@ public abstract class BaseChartUtility {
     }
 
     /**
-     * Applies threshold horizontal lines to a plot.
+     * Applies horizontal dashed lines representing system thresholds to a plot.
+     *
+     * @param plot      The plot to annotate.
+     * @param up        Value for the upper threshold.
+     * @param down      Value for the lower threshold.
+     * @param upLabel   Text label for the upper threshold.
+     * @param downLabel Text label for the lower threshold.
      */
     protected static void applyThresholds(XYPlot plot, double up, double down, String upLabel, String downLabel) {
-        Color transparentColor = new Color(0, 0, 0, 0);
-        if (up > 0 && upLabel != null) {
-            Color outColor = new Color(220, 20, 60);
+        if (up > 0) {
             ValueMarker upMarker = new ValueMarker(up);
-            upMarker.setPaint(outColor);
+            upMarker.setPaint(new Color(220, 20, 60));
             upMarker.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{10, 5}, 0));
-            upMarker.setLabel(upLabel + ": " + String.format("%.2f", up));
+            upMarker.setLabel(upLabel + " Limit (" + String.format("%.2f", up) + ")");
             upMarker.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
             upMarker.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
-
-            upMarker.setLabelBackgroundColor(transparentColor);
-            upMarker.setLabelPaint(outColor);
-            upMarker.setLabelFont(new Font("SansSerif", Font.BOLD, 11));
-
             plot.addRangeMarker(upMarker);
         }
-        if (down > 0 && downLabel != null) {
-            Color inColor = new Color(34, 139, 34);
+        if (down > 0) {
             ValueMarker downMarker = new ValueMarker(down);
-            downMarker.setPaint(inColor);
+            downMarker.setPaint(new Color(34, 139, 34));
             downMarker.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{10, 5}, 0));
-            downMarker.setLabel(downLabel + ": " + String.format("%.2f", down));
+            downMarker.setLabel(downLabel + " Limit (" + String.format("%.2f", down) + ")");
             downMarker.setLabelAnchor(RectangleAnchor.BOTTOM_RIGHT);
             downMarker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
-
-            downMarker.setLabelBackgroundColor(transparentColor);
-            downMarker.setLabelPaint(inColor);
-            downMarker.setLabelFont(new Font("SansSerif", Font.BOLD, 11));
-
             plot.addRangeMarker(downMarker);
         }
     }
 
     /**
-     * Applies a single threshold horizontal limit line to a plot by reusing applyThresholds.
-     */
-    protected static void applyLimit(XYPlot plot, double limit, String label, Color color) {
-        applyThresholds(plot, limit, 0.0, label, null);
-    }
-
-    /**
-     * Applies semi-transparent event markers (Arrivals, Completions, Scaling Checks) to a plot.
+     * Applies semi-transparent foreground markers for Arrivals, Completions, and Logic Checks.
+     *
+     * @param plot        The plot to annotate.
+     * @param arrivals    Series containing job arrival points.
+     * @param completions Series containing job completion points.
+     * @param checks      Series containing scaling logic evaluation points.
      */
     protected static void applyEventMarkers(XYPlot plot, XYSeries arrivals, XYSeries completions, XYSeries checks) {
         XYSeriesCollection eventsDataset = new XYSeriesCollection();
@@ -126,7 +127,12 @@ public abstract class BaseChartUtility {
     }
 
     /**
-     * Saves the chart as a PNG image.
+     * Persists the generated chart as a PNG image file.
+     *
+     * @param chart  The JFreeChart instance to save.
+     * @param path   The target filesystem path.
+     * @param width  Image width in pixels.
+     * @param height Image height in pixels.
      */
     protected static void saveChart(JFreeChart chart, String path, int width, int height) {
         try {

@@ -15,30 +15,30 @@ public abstract class BaseTest {
 
     /**
      * Logs a high-level test step using the TEST marker.
-     * RANK: Between INFO and WARN (conceptually).
+     * Use this for tracing significant logical checkpoints in a test.
      *
-     * @param message The message to log.
-     * @param args Optional arguments for the message.
+     * @param message The message template to log.
+     * @param args    Optional arguments for variable substitution.
      */
     protected void logTestStep(String message, Object... args) {
         logger.info(TEST_MARKER, message, args);
     }
 
     /**
-     * Logs technical details at DEBUG level.
+     * Logs technical details or intermediate values at the DEBUG level.
      *
-     * @param message The message to log.
-     * @param args Optional arguments for the message.
+     * @param message The message template to log.
+     * @param args    Optional arguments for variable substitution.
      */
     protected void logDebug(String message, Object... args) {
         logger.debug(message, args);
     }
 
     /**
-     * Ensures that the specified directories exist, creating them if necessary.
-     * Useful for setup phases to prepare output folders.
+     * Ensures that the specified directories exist on the filesystem.
+     * Creates any missing parent directories as well.
      *
-     * @param paths Paths to ensure existence for.
+     * @param paths Varargs list of directory paths to verify or create.
      */
     protected static void ensureDirectories(String... paths) {
         for (String path : paths) {

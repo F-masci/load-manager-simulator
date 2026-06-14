@@ -25,12 +25,15 @@ public class RoutingSimulationTest extends BaseSimulationTest {
     private static final String BASE_CHART_DIR = "data/chart/routing/";
     private static String commonTracePath;
 
+    /**
+     * Prepares the shared environment for routing simulations.
+     *
+     * @throws IOException If trace file creation fails.
+     */
     @BeforeAll
     public static void setup() throws IOException {
-        // Ensure output directories exist using BaseTest utility
         ensureDirectories(BASE_RES_DIR, BASE_CHART_DIR);
 
-        // Define a common workload for routing tests
         List<String> trace = new ArrayList<>();
         trace.add("5.0 4.0"); trace.add("6.0 4.0"); trace.add("7.0 4.0");
         trace.add("15.0 15.0");
@@ -42,19 +45,22 @@ public class RoutingSimulationTest extends BaseSimulationTest {
         commonTracePath = tempTrace.toAbsolutePath().toString();
     }
 
+    /**
+     * Executes a routing simulation and generates the balance chart.
+     *
+     * @param policy The routing policy to evaluate.
+     * @param name   Label for identifying output files.
+     */
     private void runRoutingTest(RoutingPolicy policy, String name) {
         logTestStep("Running Routing Simulation for policy: {}", policy);
         String csvPath = BASE_RES_DIR + name + ".csv";
         String chartPath = BASE_CHART_DIR + name + ".png";
 
-        // Configure simulation
         ApplicationConfig config = TestConfigs.routing(commonTracePath, policy, 4, csvPath);
 
-        // Execute simulation via Facade
         SimulationFacade facade = new SimulationFacade(config);
         facade.runSingleSimulation();
 
-        // Generate visual chart
         logDebug("Generating chart for {}: {}", policy, chartPath);
         RoutingChartUtility.generateRoutingBalanceChart(policy, csvPath, chartPath);
     }
@@ -64,13 +70,17 @@ public class RoutingSimulationTest extends BaseSimulationTest {
     @Test public void testLeastLoadedRouting() { runRoutingTest(RoutingPolicy.LEAST_LOADED, "least_loaded"); }
     @Test public void testPowerOfTwoChoicesRouting() { runRoutingTest(RoutingPolicy.POWER_OF_TWO, "power_of_two"); }
 
+    /**
+     * Verifies Spike Server diversion using a trace-driven simulation.
+     *
+     * @throws IOException If trace file creation fails.
+     */
     @Test
     public void testSpikeServerRoutingDiversion() throws IOException {
         logTestStep("Testing Spike Server diversion with sawtooth workload");
         final int SI_MAX = 5;
         List<String> trace = new ArrayList<>();
 
-        // Generate high-intensity jobs to trigger diversion
         for (int i = 0; i < 12; i++) trace.add(String.format(Locale.US, "%.4f 2.0", (i * 0.4)));
         trace.add("8.0 0.5");
         for (int i = 0; i < 8; i++) trace.add(String.format(Locale.US, "%.4f 1.0", (20.0 + i * 0.6)));
@@ -79,10 +89,8 @@ public class RoutingSimulationTest extends BaseSimulationTest {
         String csvPath = "data/res/spike_diversion.csv";
         String chartPath = "data/chart/spike_diversion_chart.png";
         
-        // Ensure main output directories exist
         ensureDirectories("data/res", "data/chart");
 
-        // Custom config to compare Layer 1 and Layer 2 loads
         ApplicationConfig baseConfig = TestConfigs.routing(tracePath, RoutingPolicy.DETERMINISTIC, 1, csvPath);
         ApplicationConfig testConfig = new ApplicationConfig(
             new ApplicationConfig.LoadConfig(0.0, 0.0, 0.0, 0.0, SI_MAX, RoutingPolicy.DETERMINISTIC, it.uniroma2.pmcsn.configs.WorkloadType.TRACE, tracePath),
@@ -96,7 +104,6 @@ public class RoutingSimulationTest extends BaseSimulationTest {
         SimulationFacade facade = new SimulationFacade(testConfig);
         facade.runSingleSimulation();
 
-        // Verify diversion logic visually
         SystemChartUtility.generateLoadComparisonChart(csvPath, chartPath);
     }
 }

@@ -1,7 +1,7 @@
 package it.uniroma2.pmcsn.model.server;
 
-import it.uniroma2.pmcsn.model.Job;
 import it.uniroma2.pmcsn.BaseTest;
+import it.uniroma2.pmcsn.model.Job;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

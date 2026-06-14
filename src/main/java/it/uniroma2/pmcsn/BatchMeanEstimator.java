@@ -8,8 +8,8 @@ import it.uniroma2.pmcsn.controller.decorator.TimeSerieCollector;
 import it.uniroma2.pmcsn.lib.statistics.AutoCorrelation;
 import it.uniroma2.pmcsn.lib.statistics.IntervalEstimator;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
-import org.jetbrains.annotations.NotNull;
 import it.uniroma2.pmcsn.utils.LogFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;

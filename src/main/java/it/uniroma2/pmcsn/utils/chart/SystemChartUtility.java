@@ -3,7 +3,6 @@ package it.uniroma2.pmcsn.utils.chart;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYStepAreaRenderer;
@@ -25,14 +24,14 @@ public class SystemChartUtility extends BaseChartUtility {
 
     /**
      * Generates a comparison chart of Web Server vs Spike Server load.
-     * Includes a prominent line for Total System Load and semi-transparent event markers.
+     * Highlights job diversions and individual workload events.
      *
      * @param csvPath Path to the CSV source file.
      * @param outputPath Path for the generated PNG.
      */
     public static void generateLoadComparisonChart(String csvPath, String outputPath) {
         XYSeries wsSeries = new XYSeries("Web Server (Active Jobs)");
-        XYSeries ssSeries = new XYSeries("Spike Server (Active Jobs)");
+        XYSeries ssSeries = new XYSeries("Spike Server (Overflow)");
         XYSeries totalSeries = new XYSeries("Total System Load");
         XYSeries arrivalSeries = new XYSeries("Arrivals");
         XYSeries completionSeries = new XYSeries("Completions");
@@ -89,22 +88,22 @@ public class SystemChartUtility extends BaseChartUtility {
         areaRenderer.setSeriesPaint(1, new Color(191, 97, 106, 140)); // Nord Red
         plot.setRenderer(0, areaRenderer);
 
-        // Dataset 1: Total System Load Line
+        // Dataset 1: Total System Load Line (Bold and High-Contrast)
         XYSeriesCollection totalDataset = new XYSeriesCollection(totalSeries);
         plot.setDataset(1, totalDataset);
         XYStepRenderer totalRenderer = new XYStepRenderer();
-        totalRenderer.setSeriesPaint(0, new Color(200, 200, 200)); // Light gray for contrast
-        totalRenderer.setSeriesStroke(0, new BasicStroke(1.5f)); // Thick line for visibility
+        totalRenderer.setSeriesPaint(0, new Color(46, 52, 64)); // Nord Dark Night
+        totalRenderer.setSeriesStroke(0, new BasicStroke(3.0f)); // Thick line for visibility
         plot.setRenderer(1, totalRenderer);
 
-        // Dataset 2: Event Markers
+        // Dataset 2: Event Markers (Hidden from Legend to reduce clutter)
         XYSeriesCollection markerDataset = new XYSeriesCollection();
         markerDataset.addSeries(arrivalSeries);
         markerDataset.addSeries(completionSeries);
         plot.setDataset(2, markerDataset);
         XYLineAndShapeRenderer markerRenderer = new XYLineAndShapeRenderer(false, true);
-        // markerRenderer.setSeriesVisibleInLegend(0, false);
-        // markerRenderer.setSeriesVisibleInLegend(1, false);
+        markerRenderer.setSeriesVisibleInLegend(0, false);
+        markerRenderer.setSeriesVisibleInLegend(1, false);
         
         // Arrivals: Red X
         markerRenderer.setSeriesPaint(0, new Color(191, 97, 106, 180)); 
@@ -121,8 +120,8 @@ public class SystemChartUtility extends BaseChartUtility {
         plot.setDomainGridlinePaint(new Color(230, 230, 230));
         plot.setRangeGridlinePaint(new Color(230, 230, 230));
 
-        // Capacity Limit Line
-        applyLimit(plot, siMaxVal, "SI Max", null);
+        // Capacity Limit Line using base utility
+        applyThresholds(plot, siMaxVal, 0, "SI Max", null);
 
         JFreeChart chart = new JFreeChart("System Load Dynamics", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
         chart.setBackgroundPaint(Color.WHITE);

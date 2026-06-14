@@ -1,5 +1,6 @@
 package it.uniroma2.pmcsn.model.load.routing;
 
+import it.uniroma2.pmcsn.BaseTest;
 import it.uniroma2.pmcsn.model.Job;
 import it.uniroma2.pmcsn.model.load.routing.spike.ThresholdSpikeServerRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.routing.webserver.LeastLoadedRoutingStrategy;
@@ -8,7 +9,6 @@ import it.uniroma2.pmcsn.model.server.Server;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
-import it.uniroma2.pmcsn.BaseTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
