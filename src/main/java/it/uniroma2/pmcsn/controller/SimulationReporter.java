@@ -1,9 +1,9 @@
 package it.uniroma2.pmcsn.controller;
 
+import it.uniroma2.pmcsn.model.load.LoadManager;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
-import it.uniroma2.pmcsn.model.load.LoadManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

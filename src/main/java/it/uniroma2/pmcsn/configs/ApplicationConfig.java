@@ -25,7 +25,7 @@ public record ApplicationConfig(
     public static final int WEB_SERVER_COUNT = 1;
     public static final RoutingPolicy ROUTING_POLICY = RoutingPolicy.ROUND_ROBIN;
     public static final String TRACE_PATH = null;
-    public static final double SPIKE_CPU_PERCENTAGE = 0.4;
+    public static final double SPIKE_CPU_PERCENTAGE = 1.0;
     public static final WorkloadType WORKLOAD_TYPE = WorkloadType.HYPEREXPONENTIAL;
 
     // Autoscaling configuration constants
@@ -35,8 +35,8 @@ public record ApplicationConfig(
     public static final double COOLDOWN = 30.0;
     public static final int MIN_SERVERS = 1;
     public static final int MAX_SERVERS = 10;
-    public static final double SPIKE_UPPER_THRESHOLD = 0.70;
-    public static final double SPIKE_LOWER_THRESHOLD = 0.30;
+    public static final double SPIKE_UPPER_THRESHOLD = 20;
+    public static final double SPIKE_LOWER_THRESHOLD = 2;
 
     // Simulation configuration constants
     public static final SimulationMethod SIMULATION_METHOD = SimulationMethod.INDEPENDENT_REPLICATIONS;

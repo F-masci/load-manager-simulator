@@ -2,10 +2,8 @@ package it.uniroma2.pmcsn.facade;
 
 import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
-import it.uniroma2.pmcsn.configs.SimulationMethod;
 import it.uniroma2.pmcsn.controller.SimulationController;
 import it.uniroma2.pmcsn.lib.statistics.IntervalEstimator;
-import it.uniroma2.pmcsn.lib.statistics.Welford;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,19 +97,10 @@ public class SimulationFacade {
     }
 
     /**
-     * Runs a terminating simulation using the Independent Replications method.
+     * Runs a terminating simulation using the Independent Replications method with a custom builder.
      * @return Aggregated results over all replications.
      */
     public AggregatedResults runIndependentReplicationsSimulation() {
-        return runIndependentReplicationsSimulation(new SimulationBuilder().config(config));
-    }
-
-    /**
-     * Runs a terminating simulation using the Independent Replications method with a custom builder.
-     * @param builder The configured builder.
-     * @return Aggregated results over all replications.
-     */
-    public AggregatedResults runIndependentReplicationsSimulation(SimulationBuilder builder) {
 
         logger.info("Starting {} independent replications...", config.execution().numReplications());
 

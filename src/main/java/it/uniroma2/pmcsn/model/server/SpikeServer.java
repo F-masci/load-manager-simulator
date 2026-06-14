@@ -1,7 +1,6 @@
 package it.uniroma2.pmcsn.model.server;
 
 import it.uniroma2.pmcsn.lib.statistics.TimedWelford;
-import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +17,8 @@ public class SpikeServer extends Server {
 
     public void setSpeedMultiplier(double speedMultiplier, double clock) {
         logger.info(this.speedMultiplier < speedMultiplier
-                    ? "Scale Up: SpikeServer speed set to {} at clock={} (utilization={})"
-                    : "Scale Down: SpikeServer speed restored to {} at clock={} (utilization={})", speedMultiplier, clock, getAverageUtilization(clock));
+                    ? "Scale Up: SpikeServer speed set to {} at clock={} (load={})"
+                    : "Scale Down: SpikeServer speed restored to {} at clock={} (load={})", speedMultiplier, clock, getActiveJobs().size());
         super.setSpeedMultiplier(speedMultiplier);
 
     }

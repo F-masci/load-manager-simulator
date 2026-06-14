@@ -17,8 +17,8 @@ import it.uniroma2.pmcsn.model.load.routing.webserver.WebServerRoutingStrategy;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.HorizontalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.MovingWindowHorizontalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.NoHorizontalScaler;
+import it.uniroma2.pmcsn.model.load.scaler.vertical.LoadThresholdVerticalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.NoVerticalScaler;
-import it.uniroma2.pmcsn.model.load.scaler.vertical.UtilizationThresholdVerticalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.VerticalScaler;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
@@ -81,7 +81,7 @@ public class SimulationBuilder {
         WebServerCluster cluster = new WebServerCluster(config.cluster().minServers(), config.cluster().maxServers());
 
         // SpikeServer
-        double baseSpeed = config.scaling().spikeCpuPercentage() / 0.4;
+        double baseSpeed = config.scaling().spikeCpuPercentage();
         SpikeServer spikeServer = new SpikeServer(0, baseSpeed);
 
         // Router
@@ -100,7 +100,7 @@ public class SimulationBuilder {
 
         double spikeBaseSpeed = spikeServer.getSpeedMultiplier();
         VerticalScaler vScaler = config.scaling().verticalEnabled()
-            ? new UtilizationThresholdVerticalScaler(config.scaling().spikeUpperThreshold(), config.scaling().spikeLowerThreshold(),
+            ? new LoadThresholdVerticalScaler(config.scaling().spikeUpperThreshold(), config.scaling().spikeLowerThreshold(),
                                                     spikeBaseSpeed, spikeBaseSpeed * 2.0, config.scaling().cooldown())
             : new NoVerticalScaler();
 

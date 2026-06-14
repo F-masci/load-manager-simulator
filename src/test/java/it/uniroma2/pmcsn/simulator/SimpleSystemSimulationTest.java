@@ -1,18 +1,13 @@
 package it.uniroma2.pmcsn.simulator;
 
-import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
-import it.uniroma2.pmcsn.configs.SimulationMethod;
-import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
-import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SimpleSystemSimulationTest {
 
-    private static final long SEED = 123456789L;
     private static final double ARRIVAL_MEAN = 0.40; // lambda = 2.5
     private static final double SERVICE_MEAN = 0.25; // mu = 4.0
     // rho = lambda / mu = 2.5 / 4 = 0.625

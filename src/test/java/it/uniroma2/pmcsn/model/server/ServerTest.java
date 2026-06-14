@@ -2,7 +2,9 @@ package it.uniroma2.pmcsn.model.server;
 
 import it.uniroma2.pmcsn.model.Job;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Unit tests for Server classes, verifying Processor Sharing CPU execution.

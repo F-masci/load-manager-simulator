@@ -75,10 +75,10 @@ public class WebServerCluster {
             activeServers.add(ws);
             allServers.add(ws);
             scaleUpCount++;
-            logger.info("Scale In: WebServer #{} added at clock={} (Active servers={})", nextId, clock, activeServers.size());
+            logger.info("Scale Out: WebServer #{} added at clock={} (Active servers={})", nextId, clock, activeServers.size());
             return true;
         }
-        logger.debug("Scale In: Ignored (already at maximum servers={}) at clock={}", maxServers, clock);
+        logger.debug("Scale Out: Ignored (already at maximum servers={}) at clock={}", maxServers, clock);
         return false;
     }
 
@@ -93,13 +93,13 @@ public class WebServerCluster {
             scaleDownCount++;
             if (!ws.getActiveJobs().isEmpty()) {
                 drainingServers.add(ws);
-                logger.info("[Horizontal Scaling] Scale Out: WebServer #{} entered draining state at clock={} (Active servers={})", ws.getId(), clock, activeServers.size());
+                logger.info("Scale In: WebServer #{} entered draining state at clock={} (Active servers={})", ws.getId(), clock, activeServers.size());
             } else {
-                logger.info("[Horizontal Scaling] Scale Out: Deallocated idle WebServer #{} at clock={} (Active servers={})", ws.getId(), clock, activeServers.size());
+                logger.info("Scale In: Deallocated idle WebServer #{} at clock={} (Active servers={})", ws.getId(), clock, activeServers.size());
             }
             return true;
         }
-        logger.debug("Scale Out: Ignored (already at minimum servers={}) at clock={}", minServers, clock);
+        logger.debug("Scale In: Ignored (already at minimum servers={}) at clock={}", minServers, clock);
         return false;
     }
 

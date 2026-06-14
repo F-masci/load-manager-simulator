@@ -3,7 +3,6 @@ package it.uniroma2.pmcsn.model.load.routing.webserver;
 import it.uniroma2.pmcsn.model.Job;
 import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
-import java.util.List;
 
 /**
  * Implementation of WebServerRoutingStrategy selecting Web Servers in a deterministic fashion based on a fixed target server index.
