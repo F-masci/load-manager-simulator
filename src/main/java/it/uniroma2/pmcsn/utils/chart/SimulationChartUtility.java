@@ -16,9 +16,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

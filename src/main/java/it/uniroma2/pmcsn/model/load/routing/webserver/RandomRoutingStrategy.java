@@ -8,7 +8,6 @@ import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
 
 import java.util.List;
-import java.util.Random;
 
 /**
  * Randomly selects a Web Server from the active ones.

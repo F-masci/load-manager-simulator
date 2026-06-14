@@ -3,10 +3,7 @@ package it.uniroma2.pmcsn.simulator;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.configs.LoggingDataType;
 import it.uniroma2.pmcsn.configs.LoggingFormat;
-import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
-import it.uniroma2.pmcsn.model.event.source.EventSource;
-import it.uniroma2.pmcsn.model.event.source.ExponentialEventSource;
 import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
 import it.uniroma2.pmcsn.utils.chart.SimulationChartUtility;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,9 +19,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Individual tests for validating different routing policies.
