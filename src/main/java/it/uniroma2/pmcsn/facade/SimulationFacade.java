@@ -206,8 +206,8 @@ public class SimulationFacade {
         diverted.update(c.getTotalJobsDiverted());
         
         // Horizontal Scaling
-        scaleOuts.update(c.getWebServerCluster().getScaleUpCount());
-        scaleIns.update(c.getWebServerCluster().getScaleDownCount());
+        scaleOuts.update(c.getWebServerCluster().getScaleOutCount());
+        scaleIns.update(c.getWebServerCluster().getScaleInCount());
 
         // Vertical Scaling
         scaleUps.update(c.getLoadManager().getVerticalScaler().getScaleUpCount());

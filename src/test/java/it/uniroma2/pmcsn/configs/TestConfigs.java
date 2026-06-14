@@ -30,11 +30,11 @@ public class TestConfigs {
     /**
      * Generates a configuration for testing Horizontal Scaling (Scale-out/Scale-in).
      */
-    public static ApplicationConfig horizontalScaling(String tracePath, double upThreshold, double downThreshold, double cooldown, String csvPath) {
+    public static ApplicationConfig horizontalScaling(String tracePath, double outThreshold, double inThreshold, double cooldown, String csvPath) {
         return new ApplicationConfig(
             ApplicationConfig.LoadConfig.traceDriven(tracePath, RoutingPolicy.ROUND_ROBIN),
             new ApplicationConfig.ClusterConfig(1, 1, 5, false),
-            ApplicationConfig.ScalingConfig.onlyHorizontal(upThreshold, downThreshold, cooldown),
+            ApplicationConfig.ScalingConfig.onlyHorizontal(outThreshold, inThreshold, cooldown),
             ApplicationConfig.ExecutionConfig.singleRun(H_SCALING_MAX_TIME),
             new ApplicationConfig.LoggingConfig(true, LoggingFormat.CSV, LoggingDataType.SCALING_METRICS, csvPath)
         );

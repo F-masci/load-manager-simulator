@@ -6,14 +6,14 @@ import it.uniroma2.pmcsn.model.server.WebServerCluster;
  * Base abstract class representing a Horizontal WebServer Scaler.
  */
 public abstract class HorizontalScaler {
-    protected final double scaleUpThreshold;
-    protected final double scaleDownThreshold;
+    protected final double scaleOutThreshold;
+    protected final double scaleInThreshold;
     protected final double cooldown;
     protected double lastScalingTime = 0.0;
 
-    protected HorizontalScaler(double scaleUpThreshold, double scaleDownThreshold, double cooldown) {
-        this.scaleUpThreshold = scaleUpThreshold;
-        this.scaleDownThreshold = scaleDownThreshold;
+    protected HorizontalScaler(double scaleOutThreshold, double scaleInThreshold, double cooldown) {
+        this.scaleOutThreshold = scaleOutThreshold;
+        this.scaleInThreshold = scaleInThreshold;
         this.cooldown = cooldown;
     }
 
@@ -23,7 +23,7 @@ public abstract class HorizontalScaler {
     public abstract void recordCompletion(double clock, double responseTime);
 
     /**
-     * Evaluates whether to scale the cluster up or down.
+     * Evaluates whether to scale the cluster out or in.
      * Returns true if a scaling action occurred, false otherwise.
      */
     public abstract boolean evaluateScaling(double clock, WebServerCluster cluster);
@@ -33,12 +33,12 @@ public abstract class HorizontalScaler {
      */
     public abstract double getCurrentMetric(double clock);
 
-    public double getScaleUpThreshold() {
-        return scaleUpThreshold;
+    public double getScaleOutThreshold() {
+        return scaleOutThreshold;
     }
 
-    public double getScaleDownThreshold() {
-        return scaleDownThreshold;
+    public double getScaleInThreshold() {
+        return scaleInThreshold;
     }
 
     public double getCooldown() {

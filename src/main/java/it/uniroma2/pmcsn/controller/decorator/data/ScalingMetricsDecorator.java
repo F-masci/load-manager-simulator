@@ -72,8 +72,8 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
         // Horizontal Scaling Metrics
         snapshot.put("activeWebServers", getWebServerCluster().getActiveServers().size());
         snapshot.put("hMetric", hScaler.getCurrentMetric(clock));
-        snapshot.put("hScaleUpLimit", hScaler.getScaleUpThreshold());
-        snapshot.put("hScaleDownLimit", hScaler.getScaleDownThreshold());
+        snapshot.put("hScaleOutLimit", hScaler.getScaleOutThreshold());
+        snapshot.put("hScaleInLimit", hScaler.getScaleInThreshold());
         snapshot.put("hCooldown", forceHZero ? 0.0 : hScaler.getRemainingCooldown(clock));
 
         // Vertical Scaling Metrics
@@ -95,7 +95,7 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
     public String[] getHeaders() {
         return new String[]{
             "clock", "event", "scalingCheck",
-            "activeWebServers", "hMetric", "hScaleUpLimit", "hScaleDownLimit", "hCooldown",
+            "activeWebServers", "hMetric", "hScaleOutLimit", "hScaleInLimit", "hCooldown",
             "spikeSpeed", "vMetric", "vUpperLimit", "vLowerLimit", "vCooldown"
         };
     }

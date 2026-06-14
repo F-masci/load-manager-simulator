@@ -19,8 +19,8 @@ public class WebServerCluster {
     private final int minServers;
     private final int maxServers;
 
-    private int scaleUpCount = 0;
-    private int scaleDownCount = 0;
+    private int scaleOutCount = 0;
+    private int scaleInCount = 0;
 
     public WebServerCluster(int minServers, int maxServers) {
         this.minServers = minServers;
@@ -73,7 +73,7 @@ public class WebServerCluster {
             WebServer ws = new WebServer(nextId);
             activeServers.add(ws);
             allServers.add(ws);
-            scaleUpCount++;
+            scaleOutCount++;
             logger.info("Scale Out: WebServer #{} added at clock={} (Active servers={})", nextId, clock, activeServers.size());
             return true;
         }
@@ -89,7 +89,7 @@ public class WebServerCluster {
         if (activeServers.size() > minServers) {
             WebServer ws = activeServers.remove(activeServers.size() - 1);
             ws.updateStatistics(clock);
-            scaleDownCount++;
+            scaleInCount++;
             if (!ws.getActiveJobs().isEmpty()) {
                 drainingServers.add(ws);
                 logger.info("Scale In: WebServer #{} entered draining state at clock={} (Active servers={})", ws.getId(), clock, activeServers.size());
@@ -143,15 +143,15 @@ public class WebServerCluster {
         for (WebServer ws : allServers) {
             ws.resetStatistics(clock);
         }
-        scaleUpCount = 0;
-        scaleDownCount = 0;
+        scaleOutCount = 0;
+        scaleInCount = 0;
     }
 
-    public int getScaleUpCount() {
-        return scaleUpCount;
+    public int getScaleOutCount() {
+        return scaleOutCount;
     }
 
-    public int getScaleDownCount() {
-        return scaleDownCount;
+    public int getScaleInCount() {
+        return scaleInCount;
     }
 }

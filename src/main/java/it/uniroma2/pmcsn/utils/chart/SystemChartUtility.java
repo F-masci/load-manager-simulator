@@ -1,46 +1,47 @@
 package it.uniroma2.pmcsn.utils.chart;
 
-import it.uniroma2.pmcsn.utils.LogFactory;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYStepAreaRenderer;
+import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import java.awt.*;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
 /**
  * Utility for generating system-level charts, such as load comparisons.
+ * Extends BaseChartUtility for shared styling and export logic.
  */
-public class SystemChartUtility {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(SystemChartUtility.class, "CHART");
+public class SystemChartUtility extends BaseChartUtility {
 
     /**
      * Generates a comparison chart of Web Server vs Spike Server load.
-     * Marks job diversions to the Spike Server.
+     * Includes a prominent line for Total System Load and semi-transparent event markers.
+     *
+     * @param csvPath Path to the CSV source file.
+     * @param outputPath Path for the generated PNG.
      */
     public static void generateLoadComparisonChart(String csvPath, String outputPath) {
         XYSeries wsSeries = new XYSeries("Web Server (Active Jobs)");
-        XYSeries ssSeries = new XYSeries("Spike Server (Overflow)");
-        XYSeries diversionSeries = new XYSeries("Diverted Job Start");
+        XYSeries ssSeries = new XYSeries("Spike Server (Active Jobs)");
+        XYSeries totalSeries = new XYSeries("Total System Load");
         XYSeries arrivalSeries = new XYSeries("Arrivals");
         XYSeries completionSeries = new XYSeries("Completions");
 
         double siMaxVal = 0;
-        int lastSsJobs = 0;
 
+        // Parse load comparison data
         try (BufferedReader reader = new BufferedReader(new FileReader(csvPath))) {
-            String line = reader.readLine(); // Skip header
+            String line = reader.readLine(); 
             if (line == null) return;
 
             while ((line = reader.readLine()) != null) {
@@ -55,84 +56,77 @@ public class SystemChartUtility {
 
                 wsSeries.add(clock, wsJobs);
                 ssSeries.add(clock, ssJobs);
+                totalSeries.add(clock, wsJobs + ssJobs);
 
+                // Track discrete workload events for markers
                 if ("ARRIVAL".equalsIgnoreCase(event)) {
                     arrivalSeries.add(clock, (double) (wsJobs + ssJobs));
-                    if (ssJobs > lastSsJobs) {
-                        diversionSeries.add(clock, (double) ssJobs);
-                    }
                 } else if ("COMPLETION".equalsIgnoreCase(event)) {
                     completionSeries.add(clock, (double) (wsJobs + ssJobs));
                 }
-                
-                lastSsJobs = ssJobs;
             }
         } catch (IOException | NumberFormatException e) {
             logger.error("Error reading simulation state file: {}", csvPath, e);
             return;
         }
 
-        XYSeriesCollection stateDataset = new XYSeriesCollection();
-        stateDataset.addSeries(wsSeries);
-        stateDataset.addSeries(ssSeries);
+        // Initialize Plot with specific axes
+        NumberAxis xAxis = new NumberAxis("Time (seconds)");
+        NumberAxis yAxis = new NumberAxis("Number of Jobs");
+        XYPlot plot = new XYPlot();
+        plot.setDomainAxis(xAxis);
+        plot.setRangeAxis(yAxis);
+        plot.setOrientation(PlotOrientation.VERTICAL);
+        plot.setAxisOffset(new RectangleInsets(10, 10, 10, 10));
 
-        JFreeChart chart = ChartFactory.createXYLineChart(
-                "System Load Dynamics: Web Server vs Spike Server",
-                "Time (seconds)",
-                "Number of Jobs",
-                stateDataset,
-                PlotOrientation.VERTICAL,
-                true, true, false
-        );
+        // Dataset 0: Area contribution of each server layer
+        XYSeriesCollection areaDataset = new XYSeriesCollection();
+        areaDataset.addSeries(wsSeries);
+        areaDataset.addSeries(ssSeries);
+        plot.setDataset(0, areaDataset);
+        XYStepAreaRenderer areaRenderer = new XYStepAreaRenderer(XYStepAreaRenderer.AREA);
+        areaRenderer.setSeriesPaint(0, new Color(94, 129, 172, 140)); // Nord Blue
+        areaRenderer.setSeriesPaint(1, new Color(191, 97, 106, 140)); // Nord Red
+        plot.setRenderer(0, areaRenderer);
 
-        chart.setBackgroundPaint(Color.WHITE);
-        XYPlot plot = chart.getXYPlot();
+        // Dataset 1: Total System Load Line
+        XYSeriesCollection totalDataset = new XYSeriesCollection(totalSeries);
+        plot.setDataset(1, totalDataset);
+        XYStepRenderer totalRenderer = new XYStepRenderer();
+        totalRenderer.setSeriesPaint(0, new Color(200, 200, 200)); // Light gray for contrast
+        totalRenderer.setSeriesStroke(0, new BasicStroke(1.5f)); // Thick line for visibility
+        plot.setRenderer(1, totalRenderer);
+
+        // Dataset 2: Event Markers
+        XYSeriesCollection markerDataset = new XYSeriesCollection();
+        markerDataset.addSeries(arrivalSeries);
+        markerDataset.addSeries(completionSeries);
+        plot.setDataset(2, markerDataset);
+        XYLineAndShapeRenderer markerRenderer = new XYLineAndShapeRenderer(false, true);
+        // markerRenderer.setSeriesVisibleInLegend(0, false);
+        // markerRenderer.setSeriesVisibleInLegend(1, false);
+        
+        // Arrivals: Red X
+        markerRenderer.setSeriesPaint(0, new Color(191, 97, 106, 180)); 
+        markerRenderer.setSeriesShape(0, org.jfree.chart.util.ShapeUtils.createDiagonalCross(5.0f, 1.5f));
+        
+        // Completions: Green Circle
+        markerRenderer.setSeriesPaint(1, new Color(34, 139, 34, 180)); 
+        markerRenderer.setSeriesShape(1, new java.awt.geom.Ellipse2D.Double(-4, -4, 8, 8));
+        plot.setRenderer(2, markerRenderer);
+
+        // Final Plot and Chart Polish
+        plot.setDatasetRenderingOrder(org.jfree.chart.plot.DatasetRenderingOrder.FORWARD);
         plot.setBackgroundPaint(Color.WHITE);
         plot.setDomainGridlinePaint(new Color(230, 230, 230));
         plot.setRangeGridlinePaint(new Color(230, 230, 230));
-        plot.setAxisOffset(new RectangleInsets(10, 10, 10, 10));
 
-        // State Renderer (Step Area)
-        XYStepAreaRenderer stepRenderer = new XYStepAreaRenderer(XYStepAreaRenderer.AREA);
-        stepRenderer.setSeriesPaint(0, new Color(94, 129, 172, 150));  // Blue
-        stepRenderer.setSeriesPaint(1, new Color(191, 97, 106, 150));  // Red
-        plot.setRenderer(0, stepRenderer);
+        // Capacity Limit Line
+        applyLimit(plot, siMaxVal, "SI Max", null);
 
-        // Limit Marker
-        ValueMarker thresholdMarker = new ValueMarker(siMaxVal);
-        thresholdMarker.setPaint(new Color(220, 20, 60));
-        thresholdMarker.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{15, 5}, 0));
-        thresholdMarker.setLabel("LIMIT (SI Max = " + (int)siMaxVal + ")");
-        plot.addRangeMarker(thresholdMarker);
+        JFreeChart chart = new JFreeChart("System Load Dynamics", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+        chart.setBackgroundPaint(Color.WHITE);
 
-        // Event Markers (Arrivals, Completions, Diversions)
-        XYSeriesCollection eventDataset = new XYSeriesCollection();
-        eventDataset.addSeries(arrivalSeries);
-        eventDataset.addSeries(completionSeries);
-        eventDataset.addSeries(diversionSeries);
-        
-        plot.setDataset(1, eventDataset);
-        XYLineAndShapeRenderer eventRenderer = new XYLineAndShapeRenderer(false, true);
-        
-        // Arrivals: Red X (Alpha 0.7)
-        eventRenderer.setSeriesPaint(0, new Color(191, 97, 106, 180));
-        eventRenderer.setSeriesShape(0, org.jfree.chart.util.ShapeUtils.createDiagonalCross(4.0f, 1.2f));
-        
-        // Completions: Green Dots (Alpha 0.7)
-        eventRenderer.setSeriesPaint(1, new Color(34, 139, 34, 180));
-        eventRenderer.setSeriesShape(1, new java.awt.geom.Ellipse2D.Double(-3, -3, 6, 6));
-        
-        // Diversions: Green Diamonds (Alpha 0.8 for visibility)
-        eventRenderer.setSeriesPaint(2, new Color(163, 190, 140, 210));
-        eventRenderer.setSeriesShape(2, new java.awt.geom.Ellipse2D.Double(-5, -5, 10, 10)); 
-        
-        plot.setRenderer(1, eventRenderer);
-
-        try {
-            ChartUtils.saveChartAsPNG(new File(outputPath), chart, 1200, 800);
-            logger.info("Load comparison chart generated at: {}", outputPath);
-        } catch (IOException e) {
-            logger.error("Failed to save chart image: {}", outputPath, e);
-        }
+        saveChart(chart, outputPath, 1200, 800);
     }
 }

@@ -31,8 +31,8 @@ public record ApplicationConfig(
     public static final boolean SPIKE_ENABLED = true;
 
     // Autoscaling configuration constants
-    public static final double SCALE_UP_LIMIT = 1.0;
-    public static final double SCALE_DOWN_LIMIT = 0.05;
+    public static final double SCALE_OUT_LIMIT = 1.0;
+    public static final double SCALE_IN_LIMIT = 0.05;
     public static final double COOLDOWN = 300.0;
     public static final double SCALE_INTERVAL = COOLDOWN;
     public static final int MIN_SERVERS = 1;
@@ -147,8 +147,8 @@ public record ApplicationConfig(
      * Group of parameters related to autoscaling thresholds and resource shares.
      */
     public record ScalingConfig(
-        double scaleUpLimit,
-        double scaleDownLimit,
+        double scaleOutLimit,
+        double scaleInLimit,
         double scaleInterval,
         double cooldown,
         double spikeUpperThreshold,
@@ -158,12 +158,12 @@ public record ApplicationConfig(
         boolean verticalEnabled
     ) {
         public ScalingConfig() {
-            this(SCALE_UP_LIMIT, SCALE_DOWN_LIMIT, SCALE_INTERVAL, COOLDOWN, 
+            this(SCALE_OUT_LIMIT, SCALE_IN_LIMIT, SCALE_INTERVAL, COOLDOWN, 
                  SPIKE_UPPER_THRESHOLD, SPIKE_LOWER_THRESHOLD, SPIKE_CPU_PERCENTAGE, true, true);
         }
 
-        public static ScalingConfig onlyHorizontal(double scaleUpLimit, double scaleDownLimit, double cooldown) {
-            return new ScalingConfig(scaleUpLimit, scaleDownLimit, cooldown, cooldown, 0, 0, 0, true, false);
+        public static ScalingConfig onlyHorizontal(double scaleOutLimit, double scaleInLimit, double cooldown) {
+            return new ScalingConfig(scaleOutLimit, scaleInLimit, cooldown, cooldown, 0, 0, 0, true, false);
         }
 
         public static ScalingConfig onlyVertical(double spikeUpperThreshold, double spikeLowerThreshold, double spikeCpuPercentage, double cooldown) {

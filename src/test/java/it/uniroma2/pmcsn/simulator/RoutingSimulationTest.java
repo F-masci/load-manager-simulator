@@ -56,7 +56,7 @@ public class RoutingSimulationTest extends BaseSimulationTest {
 
         // Generate visual chart
         logDebug("Generating chart for {}: {}", policy, chartPath);
-        RoutingChartUtility.generateRoutingBalanceChart(csvPath, chartPath);
+        RoutingChartUtility.generateRoutingBalanceChart(policy, csvPath, chartPath);
     }
 
     @Test public void testRoundRobinRouting() { runRoutingTest(RoutingPolicy.ROUND_ROBIN, "round_robin"); }

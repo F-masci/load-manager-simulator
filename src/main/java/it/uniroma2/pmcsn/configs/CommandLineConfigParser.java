@@ -25,8 +25,8 @@ public class CommandLineConfigParser {
         String tracePath = ApplicationConfig.TRACE_PATH;
         double spikeCpu = ApplicationConfig.SPIKE_CPU_PERCENTAGE;
         WorkloadType workload = ApplicationConfig.WORKLOAD_TYPE;
-        double scaleUpLimit = ApplicationConfig.SCALE_UP_LIMIT;
-        double scaleDownLimit = ApplicationConfig.SCALE_DOWN_LIMIT;
+        double scaleOutLimit = ApplicationConfig.SCALE_OUT_LIMIT;
+        double scaleInLimit = ApplicationConfig.SCALE_IN_LIMIT;
         double scaleInterval = ApplicationConfig.SCALE_INTERVAL;
         double cooldown = ApplicationConfig.COOLDOWN;
         int minServers = ApplicationConfig.MIN_SERVERS;
@@ -60,8 +60,8 @@ public class CommandLineConfigParser {
                     case "-trace" -> { tracePath = args[++i]; workload = WorkloadType.TRACE; }
                     case "-share" -> spikeCpu = Double.parseDouble(args[++i]);
                     case "-workload" -> workload = WorkloadType.valueOf(args[++i].toUpperCase());
-                    case "-scaleUpLimit" -> scaleUpLimit = Double.parseDouble(args[++i]);
-                    case "-scaleDownLimit" -> scaleDownLimit = Double.parseDouble(args[++i]);
+                    case "-scaleOutLimit" -> scaleOutLimit = Double.parseDouble(args[++i]);
+                    case "-scaleInLimit" -> scaleInLimit = Double.parseDouble(args[++i]);
                     case "-scaleInterval" -> scaleInterval = Double.parseDouble(args[++i]);
                     case "-cooldown" -> cooldown = Double.parseDouble(args[++i]);
                     case "-minServers" -> minServers = Integer.parseInt(args[++i]);
@@ -95,7 +95,7 @@ public class CommandLineConfigParser {
         return new ApplicationConfig(
             new ApplicationConfig.LoadConfig(meanInterarrival, cvInterarrival, meanService, cvService, siMax, policy, workload, tracePath),
             new ApplicationConfig.ClusterConfig(webServers, minServers, maxServers, true),
-            new ApplicationConfig.ScalingConfig(scaleUpLimit, scaleDownLimit, scaleInterval, cooldown, 
+            new ApplicationConfig.ScalingConfig(scaleOutLimit, scaleInLimit, scaleInterval, cooldown, 
                                                spikeUpperThreshold, spikeLowerThreshold, spikeCpu, true, true),
             new ApplicationConfig.ExecutionConfig(method, seed, replications, maxTime, 0, batches, batchSize, warmUp),
             new ApplicationConfig.LoggingConfig(logEnabled, logFormat, logType, logPath)
@@ -115,8 +115,8 @@ public class CommandLineConfigParser {
         System.out.println("  -trace <path>                     Path to trace file");
         System.out.println("  -share <double>                   Spike Server CPU capacity share");
         System.out.println("  -workload <DISTRIBUTION|HYPEREXPONENTIAL|TRACE> Workload type");
-        System.out.println("  -scaleUpLimit <double>            System response time threshold to scale up");
-        System.out.println("  -scaleDownLimit <double>          System response time threshold to scale down");
+        System.out.println("  -scaleOutLimit <double>           System response time threshold to scale out");
+        System.out.println("  -scaleInLimit <double>            System response time threshold to scale in");
         System.out.println("  -scaleInterval <double>           Moving window size for horizontal scaling");
         System.out.println("  -cooldown <double>                Minimum time between scaling actions");
         System.out.println("  -minServers <int>                 Minimum number of Web Servers");

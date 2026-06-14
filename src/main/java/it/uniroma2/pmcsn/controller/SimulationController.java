@@ -158,7 +158,6 @@ public class SimulationController implements Simulator {
     private void checkHorizontalScaling() {
         HorizontalScaler hScaler = loadController.getHorizontalScaler();
         if (hScaler.evaluateScaling(clock, webServerCluster)) {
-            logger.info("Horizontal scaling triggered at clock={}", clock);
             rescheduleAllCompletions();
             updateSystemStats(clock);
             

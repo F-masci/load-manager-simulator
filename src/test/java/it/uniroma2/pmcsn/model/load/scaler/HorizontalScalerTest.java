@@ -14,22 +14,22 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HorizontalScalerTest extends BaseTest {
 
     /**
-     * Verifies that the MovingWindowHorizontalScaler correctly triggers scale-up
+     * Verifies that the MovingWindowHorizontalScaler correctly triggers scale-out
      * and respects the cooldown period.
      */
     @Test
-    public void testMovingWindowHorizontalScalerScaleUpAndCooldown() {
-        logTestStep("Testing Horizontal Scale-Up and Cooldown behavior");
-        double upLimit = 4.0;
+    public void testMovingWindowHorizontalScalerScaleOutAndCooldown() {
+        logTestStep("Testing Horizontal Scale-OUT and Cooldown behavior");
+        double outLimit = 4.0;
         double cooldown = 100.0;
-        MovingWindowHorizontalScaler scaler = new MovingWindowHorizontalScaler(upLimit, 1.0, 30.0, cooldown);
+        MovingWindowHorizontalScaler scaler = new MovingWindowHorizontalScaler(outLimit, 1.0, 30.0, cooldown);
         WebServerCluster cluster = new WebServerCluster(1, 5);
 
         // Record high response times: avg = 5.0 > 4.0
         scaler.recordCompletion(1.0, 5.0);
         scaler.recordCompletion(2.0, 5.0);
 
-        assertTrue(scaler.evaluateScaling(10.0, cluster), "Should trigger scale-up");
+        assertTrue(scaler.evaluateScaling(10.0, cluster), "Should trigger scale-out");
         assertEquals(2, cluster.getActiveServers().size());
 
         // Within cooldown (10 + 10 = 20 < 110)
@@ -40,8 +40,8 @@ public class HorizontalScalerTest extends BaseTest {
      * Verifies that the MovingWindowHorizontalScaler correctly triggers scale-in when load is low.
      */
     @Test
-    public void testMovingWindowHorizontalScalerScaleDown() {
-        logTestStep("Testing Horizontal Scale-In behavior");
+    public void testMovingWindowHorizontalScalerScaleIn() {
+        logTestStep("Testing Horizontal Scale-IN behavior");
         MovingWindowHorizontalScaler scaler = new MovingWindowHorizontalScaler(4.0, 1.0, 30.0, 10.0);
         WebServerCluster cluster = new WebServerCluster(1, 5);
         cluster.scaleOut(0.0); // active = 2

@@ -23,12 +23,12 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
     }
 
     public MovingWindowHorizontalScaler(ApplicationConfig.ScalingConfig scalingConfig) {
-        this(scalingConfig.scaleUpLimit(), scalingConfig.scaleDownLimit(),
+        this(scalingConfig.scaleOutLimit(), scalingConfig.scaleInLimit(),
                 scalingConfig.scaleInterval(), scalingConfig.cooldown());
     }
 
-    public MovingWindowHorizontalScaler(double scaleUpThreshold, double scaleDownThreshold, double windowSize, double cooldown) {
-        super(scaleUpThreshold, scaleDownThreshold, cooldown);
+    public MovingWindowHorizontalScaler(double scaleOutThreshold, double scaleInThreshold, double windowSize, double cooldown) {
+        super(scaleOutThreshold, scaleInThreshold, cooldown);
         this.windowSize = windowSize;
         this.lastScalingTime = Double.NEGATIVE_INFINITY;
     }
@@ -60,13 +60,13 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
 
         logger.debug("Horizontal scaling evaluation: avgResponseTime = {}, activeWindowSize = {}", avgResponse, window.size());
 
-        if (avgResponse >= scaleUpThreshold) {
+        if (avgResponse >= scaleOutThreshold) {
             boolean scaled = cluster.scaleOut(clock);
             if (scaled) {
                 lastScalingTime = clock;
                 return true;
             }
-        } else if (avgResponse <= scaleDownThreshold) {
+        } else if (avgResponse <= scaleInThreshold) {
             boolean scaled = cluster.scaleIn(clock);
             if (scaled) {
                 lastScalingTime = clock;

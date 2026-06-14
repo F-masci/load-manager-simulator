@@ -1,7 +1,6 @@
 package it.uniroma2.pmcsn.utils.chart;
 
-import it.uniroma2.pmcsn.utils.LogFactory;
-import org.jfree.chart.ChartUtils;
+import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CombinedDomainXYPlot;
@@ -13,26 +12,28 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import java.awt.*;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Utility for generating routing balance and load distribution charts.
+ * Extends BaseChartUtility for subplot creation and export.
  */
-public class RoutingChartUtility {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(RoutingChartUtility.class, "CHART");
+public class RoutingChartUtility extends BaseChartUtility {
 
     /**
      * Generates a chart showing individual load for each active Web Server.
+     * Useful for validating that the load balancer is properly distributing jobs.
+     *
+     * @param csvPath Path to the CSV source file.
+     * @param outputPath Path for the generated PNG.
      */
-    public static void generateRoutingBalanceChart(String csvPath, String outputPath) {
+    public static void generateRoutingBalanceChart(RoutingPolicy policy, String csvPath, String outputPath) {
         Map<Integer, XYSeries> serverSeriesMap = new HashMap<>();
 
+        // Parse individual server loads from CSV
         try (BufferedReader reader = new BufferedReader(new FileReader(csvPath))) {
             String header = reader.readLine();
             if (header == null) return;
@@ -57,10 +58,12 @@ public class RoutingChartUtility {
             return;
         }
 
+        // Create a vertically stacked chart for comparison
         CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(new NumberAxis("Time (seconds)"));
         combinedPlot.setGap(10.0);
         combinedPlot.setOrientation(PlotOrientation.VERTICAL);
 
+        // Color palette for servers
         Color[] colors = {
             new Color(94, 129, 172), new Color(191, 97, 106), new Color(163, 190, 140),
             new Color(208, 135, 112), new Color(180, 142, 173), new Color(235, 203, 139)
@@ -68,23 +71,22 @@ public class RoutingChartUtility {
 
         int colorIdx = 0;
         for (XYSeries series : serverSeriesMap.values()) {
-            XYPlot subplot = createSubplot(series, colors[colorIdx++ % colors.length]);
+            XYPlot subplot = createRoutingSubplot(series, colors[colorIdx++ % colors.length]);
             combinedPlot.add(subplot, 1);
         }
 
-        JFreeChart chart = new JFreeChart("Routing Balance Validation", JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, true);
+        JFreeChart chart = new JFreeChart("Routing Policy Distribution: " + policy, JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, true);
         chart.setBackgroundPaint(Color.WHITE);
 
-        try {
-            int height = Math.max(800, serverSeriesMap.size() * 250);
-            ChartUtils.saveChartAsPNG(new File(outputPath), chart, 1200, height);
-            logger.info("Routing balance chart generated: {}", outputPath);
-        } catch (IOException e) {
-            logger.error("Failed to save routing chart: {}", outputPath, e);
-        }
+        // Dynamic height based on number of servers
+        int height = Math.max(800, serverSeriesMap.size() * 250);
+        saveChart(chart, outputPath, 1200, height);
     }
 
-    private static XYPlot createSubplot(XYSeries series, Color color) {
+    /**
+     * Helper to create sub-plots for routing balance.
+     */
+    private static XYPlot createRoutingSubplot(XYSeries series, Color color) {
         XYSeriesCollection dataset = new XYSeriesCollection(series);
         NumberAxis rangeAxis = new NumberAxis("Jobs (" + series.getKey() + ")");
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
