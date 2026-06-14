@@ -53,4 +53,17 @@ public interface Simulator {
 
         finalizeSimulation();
     }
+
+    /**
+     * Resumes or runs the simulation loop for a specific number of additional jobs.
+     * Useful for batch means dynamic estimation where the simulation is evaluated in chunks.
+     *
+     * @param remainingJobs The number of additional jobs to process.
+     */
+    default void resumableRun(int remainingJobs) {
+        int targetJobs = getTotalJobsCompleted() + remainingJobs;
+        while (getTotalJobsCompleted() < targetJobs && processNextEvent()) {
+            // Process events continuously until the target completed jobs limit is reached
+        }
+    }
 }

@@ -17,7 +17,7 @@ public class SimpleSystemSimulationTest {
     private static final double ARRIVAL_CV = 4;
     private static final double SERVICE_CV = 4;
 
-    private static final ApplicationConfig.ExecutionConfig EXECUTION_CONFIG = ApplicationConfig.ExecutionConfig.batchRun(64, 256);
+    private static final ApplicationConfig.ExecutionConfig EXECUTION_CONFIG = ApplicationConfig.ExecutionConfig.batchRun(128, 8_192);
     private static final ApplicationConfig.ClusterConfig CLUSTER_CONFIG = ApplicationConfig.ClusterConfig.singleServer();
     private static final ApplicationConfig.ScalingConfig SCALING_CONFIG = ApplicationConfig.ScalingConfig.disabled();
 

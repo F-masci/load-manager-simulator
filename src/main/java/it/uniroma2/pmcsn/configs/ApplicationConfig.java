@@ -31,14 +31,14 @@ public record ApplicationConfig(
     public static final boolean SPIKE_ENABLED = true;
 
     // Autoscaling configuration constants
-    public static final double SCALE_UP_LIMIT = 8.0;
-    public static final double SCALE_DOWN_LIMIT = 2.0;
-    public static final double SCALE_INTERVAL = 30.0;
-    public static final double COOLDOWN = 30.0;
+    public static final double SCALE_UP_LIMIT = 1.0;
+    public static final double SCALE_DOWN_LIMIT = 0.05;
+    public static final double SCALE_INTERVAL = 300.0;
+    public static final double COOLDOWN = 300.0;
     public static final int MIN_SERVERS = 1;
-    public static final int MAX_SERVERS = 10;
-    public static final double SPIKE_UPPER_THRESHOLD = 20;
-    public static final double SPIKE_LOWER_THRESHOLD = 2;
+    public static final int MAX_SERVERS = 1_000;
+    public static final double SPIKE_UPPER_THRESHOLD = 50;
+    public static final double SPIKE_LOWER_THRESHOLD = 5;
 
     // Simulation configuration constants
     public static final SimulationMethod SIMULATION_METHOD = SimulationMethod.INDEPENDENT_REPLICATIONS;
