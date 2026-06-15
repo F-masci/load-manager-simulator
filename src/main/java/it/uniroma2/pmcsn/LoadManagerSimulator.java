@@ -13,7 +13,7 @@ import it.uniroma2.pmcsn.utils.LogFactory;
 public class LoadManagerSimulator {
     private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(LoadManagerSimulator.class, "SIM");
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
 
         // Parse configurations from command line arguments
         ApplicationConfig config = CommandLineConfigParser.parse(args);
@@ -42,12 +42,16 @@ public class LoadManagerSimulator {
             logger.info("  Routing Policy:        {}", config.load().routingPolicy());
             logger.info("  Simulation Method:     {}", config.execution().method());
 
-            SimulationFacade simulator = new SimulationFacade(config);
-            simulator.runSimulation();
+            run(config);
 
         } catch (Exception e) {
             logger.error("Error during simulation execution: ", e);
             System.exit(1);
         }
+    }
+
+    protected static void run(ApplicationConfig config) {
+        SimulationFacade simulator = new SimulationFacade(config);
+        simulator.runSimulation();
     }
 }

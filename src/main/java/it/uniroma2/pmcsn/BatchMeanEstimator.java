@@ -78,7 +78,7 @@ public class BatchMeanEstimator {
      * @return Standardized report containing static batch statistical results.
      */
     private static EstimationReport performAnalyticalEstimation(ApplicationConfig config) {
-        int totalJobs = 10_000_000;
+        int totalJobs = 15_000_000;
 
         // Instantiate simulator wrapped with an in-memory time-series decorator
         SimulationBuilder builder = new SimulationBuilder().config(config);

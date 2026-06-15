@@ -20,7 +20,7 @@ public record ApplicationConfig(
     public static final double CV_INTERARRIVAL = 4.0;
     public static final double MEAN_SERVICE = 0.25;
     public static final double CV_SERVICE = 4.0;
-    public static final int SI_MAX = 30;
+    public static final int SI_MAX = 100;
 
     // Server and routing configuration constants
     public static final int WEB_SERVER_COUNT = 1;
@@ -31,24 +31,26 @@ public record ApplicationConfig(
     public static final boolean SPIKE_ENABLED = true;
 
     // Autoscaling configuration constants
-    public static final double SCALE_OUT_LIMIT = 10.0;
-    public static final double SCALE_IN_LIMIT = 1.0;
+    public static final double SCALE_OUT_LIMIT = 5.0;
+    public static final double SCALE_IN_LIMIT = 2.0;
     public static final double COOLDOWN = 1_000.0;
     public static final double SCALE_INTERVAL = COOLDOWN;
     public static final int MIN_SERVERS = 1;
-    public static final int MAX_SERVERS = 1_000;
+    public static final int MAX_SERVERS = 25;
     public static final boolean HORIZONTAL_SCALER_ENABLED = true;
     public static final double SPIKE_UPPER_THRESHOLD = 50;
-    public static final double SPIKE_LOWER_THRESHOLD = 5;
+    public static final double SPIKE_LOWER_THRESHOLD = 25;
     public static final boolean VERTICAL_SCALER_ENABLED = true;
 
     // Simulation configuration constants
     public static final SimulationMethod SIMULATION_METHOD = SimulationMethod.BATCH_MEANS;
     public static final int NUM_REPLICATIONS = 10;
     public static final double MAX_TIME = Integer.MAX_VALUE;
-    public static final int NUM_BATCHES = 128;
-    public static final int BATCH_SIZE = 8192;
-    public static final int WARM_UP_JOBS = 0;
+    // Parameters established using batch estimators
+    public static final int NUM_BATCHES = 2_048;
+    public static final int BATCH_SIZE = 65_536;
+    // First batch is to warm up
+    public static final int WARM_UP_JOBS = BATCH_SIZE;
 
     // Logging configuration constants
     public static final boolean LOGGING_ENABLED = false;
