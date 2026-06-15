@@ -29,9 +29,12 @@ public class LoadManagerSimulator {
             if (config.load().workloadType().isDistributionWorkload()) {
                 logger.info("Parameters:");
                 logger.info("  Seed: {}", config.execution().seed());
-                logger.info("  Mean Interarrival Time: {}", config.load().meanInterarrival());
-                logger.info("  Mean Service Time: {}", config.load().meanService());
+                logger.info("  Mean Inter Time:       {}", config.load().meanInterarrival());
+                logger.info("  Mean Service Time:     {}", config.load().meanService());
             }
+
+            logger.info("  Horizontal scaler      {}", config.scaling().horizontalEnabled());
+            logger.info("  Vertical scaler        {}", config.scaling().verticalEnabled());
 
             logger.info("  Max Time:              {}", config.execution().maxTime());
             logger.info("  SI_max Threshold:      {}", config.load().siMax());

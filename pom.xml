@@ -92,9 +92,27 @@
                         <version>${exec-maven-plugin.version}</version>
                         <configuration>
                             <mainClass>it.uniroma2.pmcsn.LoadManagerSimulator</mainClass>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>run-simplify</id>
+            <build>
+                <defaultGoal>compile exec:java</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <configuration>
+                            <mainClass>it.uniroma2.pmcsn.LoadManagerSimulator</mainClass>
                             <arguments>
-                                <argument>-time</argument>
-                                <argument>500000</argument>
+                                <argument>-horizontalScalerEnabled</argument>
+                                <argument>false</argument>
+                                <argument>-verticalScalerEnabled</argument>
+                                <argument>false</argument>
                             </arguments>
                         </configuration>
                     </plugin>

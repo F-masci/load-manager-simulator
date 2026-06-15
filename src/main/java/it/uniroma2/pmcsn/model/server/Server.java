@@ -34,10 +34,6 @@ public abstract class Server {
         return id;
     }
 
-    public void setLastEventTime(double lastEventTime) {
-        // No longer needed as TimedWelford handles internal timing
-    }
-
     public void setSpeedMultiplier(double speedMultiplier) {
         this.speedMultiplier = speedMultiplier;
     }

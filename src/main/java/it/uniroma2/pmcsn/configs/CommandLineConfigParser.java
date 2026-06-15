@@ -31,8 +31,10 @@ public class CommandLineConfigParser {
         double cooldown = ApplicationConfig.COOLDOWN;
         int minServers = ApplicationConfig.MIN_SERVERS;
         int maxServers = ApplicationConfig.MAX_SERVERS;
+        boolean horizontalScalerEnabled = ApplicationConfig.HORIZONTAL_SCALER_ENABLED;
         double spikeUpperThreshold = ApplicationConfig.SPIKE_UPPER_THRESHOLD;
         double spikeLowerThreshold = ApplicationConfig.SPIKE_LOWER_THRESHOLD;
+        boolean verticalScalerEnabled = ApplicationConfig.VERTICAL_SCALER_ENABLED;
         SimulationMethod method = ApplicationConfig.SIMULATION_METHOD;
         int replications = ApplicationConfig.NUM_REPLICATIONS;
         int batches = ApplicationConfig.NUM_BATCHES;
@@ -66,8 +68,10 @@ public class CommandLineConfigParser {
                     case "-cooldown" -> cooldown = Double.parseDouble(args[++i]);
                     case "-minServers" -> minServers = Integer.parseInt(args[++i]);
                     case "-maxServers" -> maxServers = Integer.parseInt(args[++i]);
+                    case "-horizontalScalerEnabled" -> horizontalScalerEnabled = Boolean.parseBoolean(args[++i]);
                     case "-spikeUpperThreshold" -> spikeUpperThreshold = Double.parseDouble(args[++i]);
                     case "-spikeLowerThreshold" -> spikeLowerThreshold = Double.parseDouble(args[++i]);
+                    case "-verticalScalerEnabled" -> verticalScalerEnabled = Boolean.parseBoolean(args[++i]);
                     case "-method" -> method = SimulationMethod.valueOf(args[++i].toUpperCase());
                     case "-replications" -> replications = Integer.parseInt(args[++i]);
                     case "-maxTime" -> maxTime = Long.parseLong(args[++i]);
@@ -96,7 +100,7 @@ public class CommandLineConfigParser {
             new ApplicationConfig.LoadConfig(meanInterarrival, cvInterarrival, meanService, cvService, siMax, policy, workload, tracePath),
             new ApplicationConfig.ClusterConfig(webServers, minServers, maxServers, true),
             new ApplicationConfig.ScalingConfig(scaleOutLimit, scaleInLimit, scaleInterval, cooldown, 
-                                               spikeUpperThreshold, spikeLowerThreshold, spikeCpu, true, true),
+                                               spikeUpperThreshold, spikeLowerThreshold, spikeCpu, horizontalScalerEnabled, verticalScalerEnabled),
             new ApplicationConfig.ExecutionConfig(method, seed, replications, maxTime, 0, batches, batchSize, warmUp),
             new ApplicationConfig.LoggingConfig(logEnabled, logFormat, logType, logPath)
         );

@@ -62,10 +62,9 @@ public class ScalingChartUtility extends BaseChartUtility {
                 cooldownSeries.add(clock, hCooldown);
 
                 // Filter discrete events
-                if ("ARRIVAL".equalsIgnoreCase(event)) {
-                    arrivalSeries.add(clock, hMetric);
-                } else if ("COMPLETION".equalsIgnoreCase(event)) {
-                    completionSeries.add(clock, hMetric);
+                switch (event.toUpperCase()) {
+                    case "ARRIVAL" -> arrivalSeries.add(clock, hMetric);
+                    case "COMPLETION" -> completionSeries.add(clock, hMetric);
                 }
                 
                 // Filter scaler-specific check markers

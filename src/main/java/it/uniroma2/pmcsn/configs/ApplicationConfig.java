@@ -31,17 +31,19 @@ public record ApplicationConfig(
     public static final boolean SPIKE_ENABLED = true;
 
     // Autoscaling configuration constants
-    public static final double SCALE_OUT_LIMIT = 1.0;
-    public static final double SCALE_IN_LIMIT = 0.05;
-    public static final double COOLDOWN = 300.0;
+    public static final double SCALE_OUT_LIMIT = 10.0;
+    public static final double SCALE_IN_LIMIT = 1.0;
+    public static final double COOLDOWN = 1_000.0;
     public static final double SCALE_INTERVAL = COOLDOWN;
     public static final int MIN_SERVERS = 1;
     public static final int MAX_SERVERS = 1_000;
+    public static final boolean HORIZONTAL_SCALER_ENABLED = true;
     public static final double SPIKE_UPPER_THRESHOLD = 50;
     public static final double SPIKE_LOWER_THRESHOLD = 5;
+    public static final boolean VERTICAL_SCALER_ENABLED = true;
 
     // Simulation configuration constants
-    public static final SimulationMethod SIMULATION_METHOD = SimulationMethod.INDEPENDENT_REPLICATIONS;
+    public static final SimulationMethod SIMULATION_METHOD = SimulationMethod.BATCH_MEANS;
     public static final int NUM_REPLICATIONS = 10;
     public static final double MAX_TIME = Integer.MAX_VALUE;
     public static final int NUM_BATCHES = 128;

@@ -14,7 +14,9 @@ public class SimpleSystemSimulationTest extends BaseSimulationTest {
 
     private static final double ARRIVAL_MEAN = 0.40; // lambda = 2.5
     private static final double SERVICE_MEAN = 0.25; // mu = 4.0
-    
+
+    private static final double HYPEREXP_CV = 4.0;
+
     /**
      * Validates simulation results against M/M/1 theoretical metrics.
      */
@@ -50,22 +52,32 @@ public class SimpleSystemSimulationTest extends BaseSimulationTest {
      */
     @Test
     public void testSimplifiedHyperexponentialSimulationMetrics() {
-        logTestStep("Validating Little's Law in Hyperexponential system");
+        logTestStep("Validating H2/H2/1 metrics: lambda=2.5, mu=4.0");
 
         ApplicationConfig testConfig = new ApplicationConfig(
-            ApplicationConfig.LoadConfig.singleHyperexponentialServer(ARRIVAL_MEAN, 4.0, SERVICE_MEAN, 4.0),
+            ApplicationConfig.LoadConfig.singleHyperexponentialServer(ARRIVAL_MEAN, HYPEREXP_CV, SERVICE_MEAN, HYPEREXP_CV),
             ApplicationConfig.ClusterConfig.singleServer(),
             ApplicationConfig.ScalingConfig.disabled(),
-            ApplicationConfig.ExecutionConfig.batchRun(128, 8192)
+            // Simulator run for 25_000_000 sample, so we use this to build batch means params
+            ApplicationConfig.ExecutionConfig.batchRun(256, 100_000)
         );
 
         SimulationFacade facade = new SimulationFacade(testConfig);
         SimulationFacade.AggregatedResults results = facade.runSimulation();
 
-        double expectedJis = results.throughput().mean() * results.responseTime().mean();
+        double littleJis = results.throughput().mean() * results.responseTime().mean();
         double realJis = results.jobsInSystem().mean();
 
-        logDebug("Little's Law Check - Real JIS: {}, Expected JIS (X * R): {}", realJis, expectedJis);
-        assertEquals(realJis, expectedJis, results.jobsInSystem().halfWidth(), "Little's Law does not hold");
+        logDebug("Little's Law Check - Real JIS: {}, Expected JIS (X * R): {}", realJis, littleJis);
+        assertEquals(realJis, littleJis, results.jobsInSystem().halfWidth(), "Little's Law does not hold");
+
+        // Expected results taken from book simulator
+        // We use a scaling factor becuse this isn't a theoretical model and the confidence intervals
+        //  are quite large, so we want to be more lenient in the assertions
+        final int scalingFactor = 3;
+        assertEquals(1.2113, results.responseTime().mean(), results.responseTime().halfWidth() * scalingFactor, "Mean Response Time mismatch");
+        assertEquals(3.0118, results.jobsInSystem().mean(), results.jobsInSystem().halfWidth() * scalingFactor, "Mean Jobs in System mismatch");
+        assertEquals(0.6239, results.utilization().mean(), results.utilization().halfWidth() * scalingFactor, "Mean Utilization mismatch");
+        assertEquals(2.5023, results.throughput().mean(), results.throughput().halfWidth() * scalingFactor, "Mean Throughput mismatch");
     }
 }

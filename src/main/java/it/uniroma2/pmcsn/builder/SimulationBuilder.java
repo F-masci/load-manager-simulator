@@ -71,13 +71,18 @@ public class SimulationBuilder {
         // Event Source
         EventSource eventSource;
         try {
-            if (config.load().workloadType() == WorkloadType.TRACE && config.load().tracePath() != null) {
-                eventSource = new TraceEventSource(config.load().tracePath());
-            } else if (config.load().workloadType() == WorkloadType.HYPEREXPONENTIAL) {
-                eventSource = new HyperexponentialEventSource(seed, config.load().meanInterarrival(), config.load().meanService());
-            } else {
-                eventSource = new ExponentialEventSource(seed, config.load().meanInterarrival(), config.load().meanService());
-            }
+            eventSource = switch (config.load().workloadType()) {
+                case TRACE -> {
+                    if (config.load().tracePath() == null) throw new IOException("Trace path missing for TRACE workload");
+                    yield new TraceEventSource(config.load().tracePath());
+                }
+                case HYPEREXPONENTIAL -> new HyperexponentialEventSource(
+                    seed, 
+                    config.load().meanInterarrival(), config.load().cvInterarrival(),
+                    config.load().meanService(), config.load().cvService()
+                );
+                case EXPONENTIAL -> new ExponentialEventSource(seed, config.load().meanInterarrival(), config.load().meanService());
+            };
         } catch (IOException e) {
             throw new RuntimeException("Failed to initialize EventSource", e);
         }
