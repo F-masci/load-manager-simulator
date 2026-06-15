@@ -73,24 +73,48 @@ public abstract class BaseChartUtility {
      * @param downLabel Text label for the lower threshold.
      */
     protected static void applyThresholds(XYPlot plot, double up, double down, String upLabel, String downLabel) {
-        if (up > 0) {
+        Color transparentColor = new Color(0, 0, 0, 0);
+        if (up > 0  && upLabel != null) {
+            Color outColor = new Color(220, 20, 60);
             ValueMarker upMarker = new ValueMarker(up);
-            upMarker.setPaint(new Color(220, 20, 60));
+            upMarker.setPaint(outColor);
             upMarker.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{10, 5}, 0));
-            upMarker.setLabel(upLabel + " Limit (" + String.format("%.2f", up) + ")");
+            upMarker.setLabel(upLabel + ": " + String.format("%.2f", up));
             upMarker.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
             upMarker.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
+
+            upMarker.setLabelBackgroundColor(transparentColor);
+            upMarker.setLabelPaint(outColor);
+            upMarker.setLabelFont(new Font("SansSerif", Font.BOLD, 11));
+
             plot.addRangeMarker(upMarker);
         }
-        if (down > 0) {
+        if (down > 0 && downLabel != null) {
+            Color inColor = new Color(34, 139, 34);
             ValueMarker downMarker = new ValueMarker(down);
-            downMarker.setPaint(new Color(34, 139, 34));
+            downMarker.setPaint(inColor);
             downMarker.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{10, 5}, 0));
-            downMarker.setLabel(downLabel + " Limit (" + String.format("%.2f", down) + ")");
+            downMarker.setLabel(downLabel + ": " + String.format("%.2f", down));
             downMarker.setLabelAnchor(RectangleAnchor.BOTTOM_RIGHT);
             downMarker.setLabelTextAnchor(TextAnchor.TOP_RIGHT);
+
+            downMarker.setLabelBackgroundColor(transparentColor);
+            downMarker.setLabelPaint(inColor);
+            downMarker.setLabelFont(new Font("SansSerif", Font.BOLD, 11));
+
             plot.addRangeMarker(downMarker);
         }
+    }
+
+    /**
+     * Applies horizontal dashed lines representing system thresholds to a plot.
+     *
+     * @param plot      The plot to annotate.
+     * @param limit     Value for the limit threshold.
+     * @param label   Text label for the limit threshold.
+     */
+    protected static void applyLimit(XYPlot plot, double limit, String label) {
+        applyThresholds(plot, limit, 0.0, label, null);
     }
 
     /**

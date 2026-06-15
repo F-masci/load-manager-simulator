@@ -31,7 +31,7 @@ public class SystemChartUtility extends BaseChartUtility {
      */
     public static void generateLoadComparisonChart(String csvPath, String outputPath) {
         XYSeries wsSeries = new XYSeries("Web Server (Active Jobs)");
-        XYSeries ssSeries = new XYSeries("Spike Server (Overflow)");
+        XYSeries ssSeries = new XYSeries("Spike Server (Active Jobs)");
         XYSeries totalSeries = new XYSeries("Total System Load");
         XYSeries arrivalSeries = new XYSeries("Arrivals");
         XYSeries completionSeries = new XYSeries("Completions");
@@ -92,8 +92,8 @@ public class SystemChartUtility extends BaseChartUtility {
         XYSeriesCollection totalDataset = new XYSeriesCollection(totalSeries);
         plot.setDataset(1, totalDataset);
         XYStepRenderer totalRenderer = new XYStepRenderer();
-        totalRenderer.setSeriesPaint(0, new Color(46, 52, 64)); // Nord Dark Night
-        totalRenderer.setSeriesStroke(0, new BasicStroke(3.0f)); // Thick line for visibility
+        totalRenderer.setSeriesPaint(0, new Color(128, 128, 128)); // Light gray for contrast
+        totalRenderer.setSeriesStroke(0, new BasicStroke(1.5f)); // Thick line for visibility
         plot.setRenderer(1, totalRenderer);
 
         // Dataset 2: Event Markers (Hidden from Legend to reduce clutter)
@@ -121,7 +121,7 @@ public class SystemChartUtility extends BaseChartUtility {
         plot.setRangeGridlinePaint(new Color(230, 230, 230));
 
         // Capacity Limit Line using base utility
-        applyThresholds(plot, siMaxVal, 0, "SI Max", null);
+        applyLimit(plot, siMaxVal, "SI Max");
 
         JFreeChart chart = new JFreeChart("System Load Dynamics", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
         chart.setBackgroundPaint(Color.WHITE);
