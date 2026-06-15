@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="1_Exponential_Center.jsimg" timestamp="Mon Jun 15 01:20:00 CEST 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="true" logDecimalSeparator="," logDelimiter=";" logPath="C:\Users\franc\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="25000000" name="1_Exponential_Center.jsimg" polling="2.0" seed="123456789" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass name="Arriv_Req" priority="0" referenceSource="Source 1" softDeadline="0.0" type="open"/>
+        <node name="Source 1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Arriv_Req</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda"><value>2.5</value></subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Arriv_Req</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Sink 1"><section className="JobSink"/></node>
+        <node name="Queue 1">
+            <classSoftDeadlines><softDeadline>0.0</softDeadline></classSoftDeadlines>
+            <quantumSize><quantaSize>0.0</quantaSize></quantumSize>
+            <quantumSwitchoverTime><quantumSwitchoverTime>0.0</quantumSwitchoverTime></quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Arriv_Req</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs"><value>-1</value></parameter>
+                <parameter classPath="java.lang.Integer" name="maxRunning"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Arriv_Req</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda"><value>4.0</value></subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="PSPriorityUsed"><value>false</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.PSStrategy" name="PSStrategy">
+                    <refClass>Arriv_Req</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Arriv_Req</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <measure alpha="0.01" name="System Response Time" type="System Response Time" precision="0.03" verbose="false"/>
+        <measure alpha="0.01" name="System Number of Customers" type="System Number of Customers" precision="0.03" verbose="false"/>
+        <measure alpha="0.01" name="System Throughput" type="System Throughput" precision="0.03" verbose="false"/>
+        <measure alpha="0.01" name="Queue 1_Utilization" nodeType="station" referenceNode="Queue 1" type="Utilization" precision="0.03" verbose="false"/>
+        <connection source="Source 1" target="Queue 1"/>
+        <connection source="Queue 1" target="Sink 1"/>
+    </sim>
+</archive>
