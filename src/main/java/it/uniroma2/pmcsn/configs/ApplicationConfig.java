@@ -16,11 +16,11 @@ public record ApplicationConfig(
 
     // Base configuration constants
     public static final long SEED = 123456789L;
-    public static final double MEAN_INTERARRIVAL = 0.40;
+    public static final double MEAN_INTERARRIVAL = 0.20;
     public static final double CV_INTERARRIVAL = 4.0;
     public static final double MEAN_SERVICE = 0.25;
     public static final double CV_SERVICE = 4.0;
-    public static final int SI_MAX = 100;
+    public static final int SI_MAX = 30;
 
     // Server and routing configuration constants
     public static final int WEB_SERVER_COUNT = 1;
@@ -38,8 +38,9 @@ public record ApplicationConfig(
     public static final int MIN_SERVERS = 1;
     public static final int MAX_SERVERS = 25;
     public static final boolean HORIZONTAL_SCALER_ENABLED = true;
-    public static final double SPIKE_UPPER_THRESHOLD = 50;
-    public static final double SPIKE_LOWER_THRESHOLD = 25;
+    public static final double SPIKE_UPPER_THRESHOLD = (double) SI_MAX / 1.5;
+    public static final double SPIKE_LOWER_THRESHOLD = SPIKE_UPPER_THRESHOLD * 0.8;
+    public static final double VERTICAL_INCREMENT = 0.1;
     public static final boolean VERTICAL_SCALER_ENABLED = true;
 
     // Simulation configuration constants
@@ -47,8 +48,11 @@ public record ApplicationConfig(
     public static final int NUM_REPLICATIONS = 10;
     public static final double MAX_TIME = Integer.MAX_VALUE;
     // Parameters established using batch estimators
-    public static final int NUM_BATCHES = 2_048;
-    public static final int BATCH_SIZE = 65_536;
+    // public static final int NUM_BATCHES = 2_048;
+    // public static final int BATCH_SIZE = 8_192;
+    public static final int NUM_BATCHES = 32;
+    public static final int BATCH_SIZE = 512;
+
     // First batch is to warm up
     public static final int WARM_UP_JOBS = BATCH_SIZE;
 
@@ -67,6 +71,7 @@ public record ApplicationConfig(
         double meanService,
         double cvService,
         int siMax,
+        int siLow,
         RoutingPolicy routingPolicy,
         WorkloadType workloadType,
         String tracePath
@@ -89,7 +94,7 @@ public record ApplicationConfig(
         }
 
         public LoadConfig(WorkloadType workloadType, double meanInterarrival, double meanService, RoutingPolicy routingPolicy, int siMax) {
-            this(meanInterarrival, CV_INTERARRIVAL, meanService, CV_SERVICE, siMax, routingPolicy, workloadType, TRACE_PATH);
+            this(meanInterarrival, CV_INTERARRIVAL, meanService, CV_SERVICE, siMax, -1, routingPolicy, workloadType, TRACE_PATH);
         }
 
         public LoadConfig(WorkloadType workloadType, double meanInterarrival, double cvInterarrival, double meanService, double cvService) {
@@ -97,7 +102,7 @@ public record ApplicationConfig(
         }
 
         public LoadConfig(WorkloadType workloadType, double meanInterarrival, double cvInterarrival, double meanService, double cvService, RoutingPolicy routingPolicy) {
-            this(meanInterarrival, cvInterarrival, meanService, cvService, SI_MAX, routingPolicy, workloadType, TRACE_PATH);
+            this(meanInterarrival, cvInterarrival, meanService, cvService, SI_MAX, -1, routingPolicy, workloadType, TRACE_PATH);
         }
 
         public static LoadConfig singleExponentialServer(double meanInterarrival, double meanService) {
@@ -113,7 +118,7 @@ public record ApplicationConfig(
         }
 
         public static LoadConfig traceDriven(String tracePath, RoutingPolicy policy, int siMax) {
-            return new LoadConfig(0.0, 0.0, 0.0, 0.0, siMax, policy, WorkloadType.TRACE, tracePath);
+            return new LoadConfig(0.0, 0.0, 0.0, 0.0, siMax, -1, policy, WorkloadType.TRACE, tracePath);
         }
 
         public static LoadConfig traceDriven(String tracePath, RoutingPolicy policy) {
@@ -158,24 +163,25 @@ public record ApplicationConfig(
         double spikeUpperThreshold,
         double spikeLowerThreshold,
         double spikeCpuPercentage,
+        double verticalIncrement,
         boolean horizontalEnabled,
         boolean verticalEnabled
     ) {
         public ScalingConfig() {
             this(SCALE_OUT_LIMIT, SCALE_IN_LIMIT, SCALE_INTERVAL, COOLDOWN, 
-                 SPIKE_UPPER_THRESHOLD, SPIKE_LOWER_THRESHOLD, SPIKE_CPU_PERCENTAGE, true, true);
+                 SPIKE_UPPER_THRESHOLD, SPIKE_LOWER_THRESHOLD, SPIKE_CPU_PERCENTAGE, VERTICAL_INCREMENT, true, true);
         }
 
         public static ScalingConfig onlyHorizontal(double scaleOutLimit, double scaleInLimit, double cooldown) {
-            return new ScalingConfig(scaleOutLimit, scaleInLimit, cooldown, cooldown, 0, 0, 0, true, false);
+            return new ScalingConfig(scaleOutLimit, scaleInLimit, cooldown, cooldown, 0, 0, 0, 0, true, false);
         }
 
-        public static ScalingConfig onlyVertical(double spikeUpperThreshold, double spikeLowerThreshold, double spikeCpuPercentage, double cooldown) {
-            return new ScalingConfig(0, 0, cooldown, cooldown, spikeUpperThreshold, spikeLowerThreshold, spikeCpuPercentage, false, true);
+        public static ScalingConfig onlyVertical(double spikeUpperThreshold, double spikeLowerThreshold, double spikeCpuPercentage, double increment, double cooldown) {
+            return new ScalingConfig(0, 0, cooldown, cooldown, spikeUpperThreshold, spikeLowerThreshold, spikeCpuPercentage, increment, false, true);
         }
 
         public static ScalingConfig disabled() {
-            return new ScalingConfig(0, 0, 0, 0, 0, 0, SPIKE_CPU_PERCENTAGE, false, false);
+            return new ScalingConfig(0, 0, 0, 0, 0, 0, SPIKE_CPU_PERCENTAGE, 0, false, false);
         }
     }
 
@@ -214,6 +220,14 @@ public record ApplicationConfig(
 
         public static ExecutionConfig singleRun(int maxJobs) {
             return new ExecutionConfig(SimulationMethod.INDEPENDENT_REPLICATIONS, SEED, 1, MAX_TIME, maxJobs, 0, 0, 0);
+        }
+
+        public static ExecutionConfig replications(int numReplications, int maxJobs) {
+            return new ExecutionConfig(SimulationMethod.INDEPENDENT_REPLICATIONS, SEED, numReplications, MAX_TIME, maxJobs, 0, 0, 0);
+        }
+
+        public static ExecutionConfig replications(int numReplications, double maxTime) {
+            return new ExecutionConfig(SimulationMethod.INDEPENDENT_REPLICATIONS, SEED, numReplications, maxTime, 0, 0, 0, 0);
         }
     }
 

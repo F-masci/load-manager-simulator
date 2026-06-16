@@ -1,5 +1,6 @@
 package it.uniroma2.pmcsn.model.server;
 
+import it.uniroma2.pmcsn.lib.statistics.TimedWelford;
 import it.uniroma2.pmcsn.utils.LogFactory;
 
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ public class WebServerCluster {
 
     private int scaleOutCount = 0;
     private int scaleInCount = 0;
+    
+    private final TimedWelford activeServersStat = new TimedWelford();
 
     public WebServerCluster(int minServers, int maxServers) {
         this.minServers = minServers;
@@ -34,6 +37,7 @@ public class WebServerCluster {
             activeServers.add(ws);
             allServers.add(ws);
         }
+        activeServersStat.updateToTime(0.0, activeServers.size());
     }
 
     public WebServerCluster(int minServers, int maxServers, List<WebServer> initialServers) {
@@ -42,6 +46,15 @@ public class WebServerCluster {
         this.activeServers = new ArrayList<>(initialServers);
         this.drainingServers = new ArrayList<>();
         this.allServers = new ArrayList<>(initialServers);
+        activeServersStat.updateToTime(0.0, activeServers.size());
+    }
+
+    public int getActiveServersCount() {
+        return activeServers.size();
+    }
+
+    public int getDrainingServersCount() {
+        return drainingServers.size();
     }
 
     public List<WebServer> getActiveServers() {
@@ -74,6 +87,7 @@ public class WebServerCluster {
             activeServers.add(ws);
             allServers.add(ws);
             scaleOutCount++;
+            activeServersStat.updateToTime(clock, activeServers.size());
             logger.debug("Scale Out: WebServer #{} added at clock={} (Active servers={})", nextId, clock, activeServers.size());
             return true;
         }
@@ -90,6 +104,7 @@ public class WebServerCluster {
             WebServer ws = activeServers.remove(activeServers.size() - 1);
             ws.updateStatistics(clock);
             scaleInCount++;
+            activeServersStat.updateToTime(clock, activeServers.size());
             if (!ws.getActiveJobs().isEmpty()) {
                 drainingServers.add(ws);
                 logger.debug("Scale In: WebServer #{} entered draining state at clock={} (Active servers={})", ws.getId(), clock, activeServers.size());
@@ -106,6 +121,7 @@ public class WebServerCluster {
      * Updates statistics for all active and draining servers.
      */
     public void updateStatistics(double clock) {
+        activeServersStat.updateToTime(clock, activeServers.size());
         for (WebServer ws : allServers) {
             ws.updateStatistics(clock);
         }
@@ -145,6 +161,8 @@ public class WebServerCluster {
         }
         scaleOutCount = 0;
         scaleInCount = 0;
+        activeServersStat.reset();
+        activeServersStat.updateToTime(clock, activeServers.size());
     }
 
     public int getScaleOutCount() {
@@ -153,5 +171,13 @@ public class WebServerCluster {
 
     public int getScaleInCount() {
         return scaleInCount;
+    }
+
+    /**
+     * Returns the average number of active servers weighted by time.
+     */
+    public double getAverageActiveServers(double currentClock) {
+        activeServersStat.updateToTime(currentClock, activeServers.size());
+        return activeServersStat.getMean();
     }
 }

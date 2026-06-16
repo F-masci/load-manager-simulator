@@ -9,7 +9,6 @@ public enum WorkloadType {
     TRACE;
 
     public boolean isDistributionWorkload() {
-        return this == HYPEREXPONENTIAL || this == EXPONENTIAL;
+        return this == EXPONENTIAL || this == HYPEREXPONENTIAL;
     }
-
 }

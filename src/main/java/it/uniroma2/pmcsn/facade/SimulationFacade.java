@@ -4,15 +4,19 @@ import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.controller.SimulationController;
 import it.uniroma2.pmcsn.controller.Simulator;
+import it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator;
 import it.uniroma2.pmcsn.controller.decorator.storage.CsvStorageDecorator;
 import it.uniroma2.pmcsn.controller.decorator.storage.JsonStorageDecorator;
 import it.uniroma2.pmcsn.lib.statistics.IntervalEstimator;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
 import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.utils.LogFactory;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static it.uniroma2.pmcsn.utils.SimulationConsoleUtils.printBatchProgressBar;
 
 /**
  * Facade for the simulation system. 
@@ -23,7 +27,6 @@ public class SimulationFacade {
     private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(SimulationFacade.class, "SIM");
     
     private final ApplicationConfig config;
-    private AggregatedResults lastResults;
 
     private final Welford rt = new Welford();
     private final Welford jis = new Welford();
@@ -31,12 +34,46 @@ public class SimulationFacade {
     private final Welford thr = new Welford();
     
     private final Welford diverted = new Welford();
+    private final Welford avgServers = new Welford();
     private final Welford scaleOuts = new Welford();
     private final Welford scaleIns = new Welford();
     private final Welford scaleUps = new Welford();
     private final Welford scaleDowns = new Welford();
     private final Welford spikeSpeedMult = new Welford();
+    private final Welford spikeUtilization = new Welford();
     private final Map<Integer, Welford> serverCompletions = new HashMap<>();
+
+    private Class<? extends SimulatorDecorator> customDecoratorClass = null;
+    private final java.util.List<SimulatorDecorator> customDecorators = new java.util.ArrayList<>();
+
+    /**
+     * Sets a custom decorator class to be instantiated and wrapped around the controller 
+     * during simulations.
+     */
+    public void setCustomDecorator(Class<? extends SimulatorDecorator> decoratorClass) {
+        this.customDecoratorClass = decoratorClass;
+    }
+
+    /**
+     * Retrieves the list of custom decorators instantiated during the runs 
+     * (e.g., one per replication).
+     */
+    public java.util.List<SimulatorDecorator> getCustomDecorators() {
+        return customDecorators;
+    }
+
+    private Simulator applyCustomDecorator(Simulator baseController) {
+        if (customDecoratorClass != null) {
+            try {
+                SimulatorDecorator decorator = customDecoratorClass.getConstructor(Simulator.class).newInstance(baseController);
+                customDecorators.add(decorator);
+                return decorator;
+            } catch (Exception e) {
+                logger.error("Failed to instantiate custom decorator: {}", customDecoratorClass.getSimpleName(), e);
+            }
+        }
+        return baseController;
+    }
 
     /**
      * Creates a facade with default configuration.
@@ -62,7 +99,6 @@ public class SimulationFacade {
             case BATCH_MEANS -> runBatchMeansSimulation();
             case INDEPENDENT_REPLICATIONS -> runIndependentReplicationsSimulation();
         };
-        this.lastResults = results;
         return results;
     }
 
@@ -98,10 +134,8 @@ public class SimulationFacade {
             
             int currentBatch = i + 1;
             int totalBatches = config.execution().numBatches();
-            
-            if (currentBatch % 10 == 0 || currentBatch == totalBatches) {
-                logger.info("Batch {}/{} completed", currentBatch, totalBatches);
-            }
+
+            printBatchProgressBar(currentBatch, totalBatches);
             
             logger.debug("Batch {}/{} results: " +
                     "Response Time {} | " +
@@ -113,9 +147,12 @@ public class SimulationFacade {
                     controller.getSystemUtilization(), controller.getThroughput());
             controller.resetStatistics();
         }
+        System.out.println(); // New line after progress bar
 
         return createResults("BATCH MEANS (STEADY STATE)", config.execution().numBatches());
     }
+
+    private final java.util.List<Double> runningMeans = new java.util.ArrayList<>();
 
     /**
      * Runs a terminating simulation using the Independent Replications method with a custom builder.
@@ -127,6 +164,8 @@ public class SimulationFacade {
 
         // Setting starting seed
         long currentSeed = config.execution().seed();
+        runningMeans.clear();
+        customDecorators.clear(); // Ensure clean state for new runs
 
         for (int i = 0; i < config.execution().numReplications(); i++) {
 
@@ -135,16 +174,19 @@ public class SimulationFacade {
                 .config(config.withSeed(currentSeed))
                 .build();
 
+            controller = applyCustomDecorator(controller);
+
             logger.info("Running replication {}/{} with seed {}...", i + 1, config.execution().numReplications(), currentSeed);
 
             if (config.execution().maxJobs() > 0) {
                 controller.run(SimulationController.StopCondition.untilJobsCompleted(config.execution().maxJobs()));
             } else {
-                controller.run(SimulationController.StopCondition.untilTimeElapsed(config.execution().maxTime()));
+                controller.run(SimulationController.StopCondition.untilTimeElapsed(config.execution().maxTime()), true);
             }
 
             logger.debug("Running replication {}/{} completed", i + 1, config.execution().numReplications());
             updateAggregators(controller);
+            runningMeans.add(rt.getMean());
 
             // Get seed from old run
             currentSeed = controller.getSeed();
@@ -170,9 +212,8 @@ public class SimulationFacade {
         }
         updateAggregators(controller);
         AggregatedResults results = createResults("SINGLE RUN", 1);
-        this.lastResults = results;
-        
-        // Finalize decorators (close files)
+
+        // Finalize decorators
         // Since decorators are wrapping the controller, we should find them
         findAndCloseStorage(controller);
         
@@ -182,16 +223,7 @@ public class SimulationFacade {
     private void findAndCloseStorage(Simulator s) {
         if (s instanceof CsvStorageDecorator d) d.finalizeSimulation();
         else if (s instanceof JsonStorageDecorator d) d.finalizeSimulation();
-        else if (s instanceof it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator sd) findAndCloseStorage(sd.getDecorated());
-    }
-
-
-    /**
-     * Returns the results of the last simulation run.
-     * @return Aggregated results, or null if no simulation has been run.
-     */
-    public AggregatedResults getLastResults() {
-        return lastResults;
+        else if (s instanceof SimulatorDecorator sd) findAndCloseStorage(sd.getDecorated());
     }
 
     /**
@@ -204,6 +236,7 @@ public class SimulationFacade {
         thr.update(c.getThroughput());
         
         diverted.update(c.getTotalJobsDiverted());
+        avgServers.update(c.getWebServerCluster().getAverageActiveServers(c.getClock()));
         
         // Horizontal Scaling
         scaleOuts.update(c.getWebServerCluster().getScaleOutCount());
@@ -214,6 +247,7 @@ public class SimulationFacade {
         scaleDowns.update(c.getLoadManager().getVerticalScaler().getScaleDownCount());
         
         spikeSpeedMult.update(c.getSpikeServer().getAverageSpeedMultiplier(c.getClock()));
+        spikeUtilization.update(c.getSpikeServer().getAverageUtilization(c.getClock()));
 
         for (WebServer ws : c.getWebServerCluster().getAllServers()) {
             serverCompletions.computeIfAbsent(ws.getId(), k -> new Welford()).update(ws.getCompletedJobsCount());
@@ -234,11 +268,13 @@ public class SimulationFacade {
             IntervalEstimator.estimate(util.getCount(), util.getMean(), util.getStandardDeviation(), 0.95),
             IntervalEstimator.estimate(thr.getCount(), thr.getMean(), thr.getStandardDeviation(), 0.95),
             IntervalEstimator.estimate(diverted.getCount(), diverted.getMean(), diverted.getStandardDeviation(), 0.95),
+            IntervalEstimator.estimate(avgServers.getCount(), avgServers.getMean(), avgServers.getStandardDeviation(), 0.95),
             IntervalEstimator.estimate(scaleOuts.getCount(), scaleOuts.getMean(), scaleOuts.getStandardDeviation(), 0.95),
             IntervalEstimator.estimate(scaleIns.getCount(), scaleIns.getMean(), scaleIns.getStandardDeviation(), 0.95),
             IntervalEstimator.estimate(scaleUps.getCount(), scaleUps.getMean(), scaleUps.getStandardDeviation(), 0.95),
             IntervalEstimator.estimate(scaleDowns.getCount(), scaleDowns.getMean(), scaleDowns.getStandardDeviation(), 0.95),
             IntervalEstimator.estimate(spikeSpeedMult.getCount(), spikeSpeedMult.getMean(), spikeSpeedMult.getStandardDeviation(), 0.95),
+            IntervalEstimator.estimate(spikeUtilization.getCount(), spikeUtilization.getMean(), spikeUtilization.getStandardDeviation(), 0.95),
             serverStats
         );
         logger.info("\n {}", results.toString());
@@ -248,7 +284,7 @@ public class SimulationFacade {
     /**
      * Encapsulates the aggregated statistical results of a simulation experiment.
      */
-    public static record AggregatedResults(
+    public record AggregatedResults(
         String methodLabel,
         int sampleCount,
         IntervalEstimator.IntervalResult responseTime,
@@ -256,39 +292,37 @@ public class SimulationFacade {
         IntervalEstimator.IntervalResult utilization,
         IntervalEstimator.IntervalResult throughput,
         IntervalEstimator.IntervalResult divertedJobs,
+        IntervalEstimator.IntervalResult avgServers,
         IntervalEstimator.IntervalResult scaleOutActions,
         IntervalEstimator.IntervalResult scaleInActions,
         IntervalEstimator.IntervalResult scaleUpActions,
         IntervalEstimator.IntervalResult scaleDownActions,
         IntervalEstimator.IntervalResult spikeAvgSpeed,
+        IntervalEstimator.IntervalResult spikeUtilization,
         Map<Integer, IntervalEstimator.IntervalResult> serverCompletions
     ) {
         @Override
+        @NotNull
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("==================================================================\n");
-            sb.append("                   AGGREGATED SIMULATION REPORT                  \n");
-            sb.append(String.format("METHOD: %s\n", methodLabel));
-            sb.append(String.format("SAMPLES (N): %d\n", sampleCount));
-            sb.append("==================================================================\n");
-            sb.append(String.format("%-25s: %s\n", "Response Time", responseTime));
-            sb.append(String.format("%-25s: %s\n", "Jobs in System", jobsInSystem));
-            sb.append(String.format("%-25s: %s\n", "System Utilization", utilization));
-            sb.append(String.format("%-25s: %s\n", "Throughput", throughput));
-            sb.append(String.format("%-25s: %s\n", "Diverted Jobs", divertedJobs));
-            sb.append("------------------------------------------------------------------\n");
-            sb.append(String.format("%-25s: %s\n", "Scale OUT Actions", scaleOutActions));
-            sb.append(String.format("%-25s: %s\n", "Scale IN  Actions", scaleInActions));
-            sb.append(String.format("%-25s: %s\n", "Scale UP  Actions", scaleUpActions));
-            sb.append(String.format("%-25s: %s\n", "Scale DOWN Actions", scaleDownActions));
-            sb.append(String.format("%-25s: %s\n", "Spike Server Avg Speed", spikeAvgSpeed));
-            sb.append("------------------------------------------------------------------\n");
-            sb.append("SERVER COMPLETIONS:\n");
-            serverCompletions.forEach((id, res) -> 
-                sb.append(String.format("  Server #%-12d: %s\n", id, res))
-            );
-            sb.append("==================================================================");
-            return sb.toString();
+            return "==================================================================\n" +
+                    "                   AGGREGATED SIMULATION REPORT                  \n" +
+                    String.format("METHOD: %s\n", methodLabel) +
+                    String.format("SAMPLES (N): %d\n", sampleCount) +
+                    "==================================================================\n" +
+                    String.format("%-25s: %s\n", "Response Time", responseTime) +
+                    String.format("%-25s: %s\n", "Jobs in System", jobsInSystem) +
+                    String.format("%-25s: %s\n", "System Utilization", utilization) +
+                    String.format("%-25s: %s\n", "Throughput", throughput) +
+                    String.format("%-25s: %s\n", "Diverted Jobs", divertedJobs) +
+                    String.format("%-25s: %s\n", "Avg Active Servers (N)", avgServers) +
+                    "------------------------------------------------------------------\n" +
+                    String.format("%-25s: %s\n", "Scale OUT Actions", scaleOutActions) +
+                    String.format("%-25s: %s\n", "Scale IN  Actions", scaleInActions) +
+                    String.format("%-25s: %s\n", "Scale UP  Actions", scaleUpActions) +
+                    String.format("%-25s: %s\n", "Scale DOWN Actions", scaleDownActions) +
+                    String.format("%-25s: %s\n", "Spike Server Avg Speed", spikeAvgSpeed) +
+                    String.format("%-25s: %s\n", "Spike Server Utilization", spikeUtilization) +
+                    "==================================================================";
         }
     }
 }

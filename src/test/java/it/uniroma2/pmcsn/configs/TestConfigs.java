@@ -65,7 +65,7 @@ public class TestConfigs {
         return new ApplicationConfig(
             ApplicationConfig.LoadConfig.traceDriven(tracePath, RoutingPolicy.DETERMINISTIC, 0),
             ApplicationConfig.ClusterConfig.fixedServer(1, true),
-            ApplicationConfig.ScalingConfig.onlyVertical(upper, lower, speed, cooldown),
+            ApplicationConfig.ScalingConfig.onlyVertical(upper, lower, speed, cooldown, ApplicationConfig.VERTICAL_INCREMENT),
             ApplicationConfig.ExecutionConfig.singleRun(V_SCALING_MAX_TIME),
             new ApplicationConfig.LoggingConfig(true, LoggingFormat.CSV, LoggingDataType.SCALING_METRICS, csvPath)
         );

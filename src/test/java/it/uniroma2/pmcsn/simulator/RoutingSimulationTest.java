@@ -93,7 +93,7 @@ public class RoutingSimulationTest extends BaseSimulationTest {
 
         ApplicationConfig baseConfig = TestConfigs.routing(tracePath, RoutingPolicy.DETERMINISTIC, 1, csvPath);
         ApplicationConfig testConfig = new ApplicationConfig(
-            new ApplicationConfig.LoadConfig(0.0, 0.0, 0.0, 0.0, SI_MAX, RoutingPolicy.DETERMINISTIC, it.uniroma2.pmcsn.configs.WorkloadType.TRACE, tracePath),
+            new ApplicationConfig.LoadConfig(0.0, 0.0, 0.0, 0.0, SI_MAX, -1, RoutingPolicy.DETERMINISTIC, it.uniroma2.pmcsn.configs.WorkloadType.TRACE, tracePath),
             ApplicationConfig.ClusterConfig.fixedServer(1, true),
             baseConfig.scaling(),
             ApplicationConfig.ExecutionConfig.singleRun(trace.size()),

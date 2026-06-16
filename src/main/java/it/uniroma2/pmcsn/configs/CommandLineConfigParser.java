@@ -97,10 +97,10 @@ public class CommandLineConfigParser {
         }
 
         return new ApplicationConfig(
-            new ApplicationConfig.LoadConfig(meanInterarrival, cvInterarrival, meanService, cvService, siMax, policy, workload, tracePath),
+            new ApplicationConfig.LoadConfig(meanInterarrival, cvInterarrival, meanService, cvService, siMax, -1, policy, workload, tracePath),
             new ApplicationConfig.ClusterConfig(webServers, minServers, maxServers, true),
             new ApplicationConfig.ScalingConfig(scaleOutLimit, scaleInLimit, scaleInterval, cooldown, 
-                                               spikeUpperThreshold, spikeLowerThreshold, spikeCpu, horizontalScalerEnabled, verticalScalerEnabled),
+                                               spikeUpperThreshold, spikeLowerThreshold, spikeCpu, ApplicationConfig.VERTICAL_INCREMENT, horizontalScalerEnabled, verticalScalerEnabled),
             new ApplicationConfig.ExecutionConfig(method, seed, replications, maxTime, 0, batches, batchSize, warmUp),
             new ApplicationConfig.LoggingConfig(logEnabled, logFormat, logType, logPath)
         );

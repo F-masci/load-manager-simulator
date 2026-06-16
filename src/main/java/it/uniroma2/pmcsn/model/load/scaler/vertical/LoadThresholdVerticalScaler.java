@@ -14,8 +14,12 @@ public class LoadThresholdVerticalScaler extends ThresholdVerticalScaler {
     }
 
     public LoadThresholdVerticalScaler(ApplicationConfig.ScalingConfig scalingConfig) {
+        this(scalingConfig, 0.5); // Default increment of 50%
+    }
+
+    public LoadThresholdVerticalScaler(ApplicationConfig.ScalingConfig scalingConfig, double increment) {
         final double baseSpeed = scalingConfig.spikeCpuPercentage();
-        this(scalingConfig.spikeUpperThreshold(), scalingConfig.spikeLowerThreshold(), baseSpeed, baseSpeed * 2.0, scalingConfig.cooldown());
+        this(scalingConfig.spikeUpperThreshold(), scalingConfig.spikeLowerThreshold(), baseSpeed, baseSpeed + increment, scalingConfig.cooldown());
     }
 
     public LoadThresholdVerticalScaler(double upperThreshold, double lowerThreshold, double baseSpeed, double scaledSpeed, double cooldown) {

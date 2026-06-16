@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>it.pmcsn</groupId>
-    <artifactId>horizontal_scaler_simulator</artifactId>
+    <artifactId>load_manager_simulator</artifactId>
     <version>1.0</version>
 
     <properties>

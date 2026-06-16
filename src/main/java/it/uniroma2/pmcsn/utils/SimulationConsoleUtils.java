@@ -1,0 +1,54 @@
+package it.uniroma2.pmcsn.utils;
+
+/**
+ * Utility class for console-based simulation reports and progress tracking.
+ */
+public class SimulationConsoleUtils {
+
+    /**
+     * Prints a dynamic progress bar on console for job completion.
+     *
+     * @param percentage      The completion percentage (0-100).
+     * @param currentJobs     The number of jobs completed so far.
+     * @param currentTime     The current simulation clock.
+     */
+    public static void printJobProgressBar(int percentage, long currentJobs, double currentTime) {
+        String info = String.format("Jobs: %d | Clock: %.2fs", currentJobs, currentTime);
+        printBar(percentage, info);
+    }
+
+    /**
+     * Prints a dynamic progress bar on console for batch execution.
+     *
+     * @param currentBatch    The current batch index.
+     * @param totalBatches    The total number of batches.
+     */
+    public static void printBatchProgressBar(int currentBatch, int totalBatches) {
+        int percentage = (int) ((double) currentBatch / totalBatches * 100);
+        String info = String.format("Batch: %d/%d", currentBatch, totalBatches);
+        printBar(percentage, info);
+    }
+
+    /**
+     * General progress bar printing logic.
+     */
+    private static void printBar(int percentage, String info) {
+        int barLength = 50;
+        int filledLength = (int) (barLength * percentage / 100.0);
+
+        StringBuilder bar = new StringBuilder("[");
+        for (int i = 0; i < barLength; i++) {
+            if (i < filledLength) {
+                bar.append("=");
+            } else if (i == filledLength) {
+                bar.append(">");
+            } else {
+                bar.append(" ");
+            }
+        }
+        bar.append("]");
+
+        String output = String.format("\r%s %3d%% | %s", bar.toString(), percentage, info);
+        System.out.print(output);
+    }
+}

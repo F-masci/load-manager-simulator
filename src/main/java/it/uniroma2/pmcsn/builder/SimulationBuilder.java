@@ -4,7 +4,10 @@ import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.controller.SimulationController;
 import it.uniroma2.pmcsn.controller.Simulator;
+import it.uniroma2.pmcsn.controller.decorator.TimeSerieCollector;
 import it.uniroma2.pmcsn.controller.decorator.data.LoadComparisonDecorator;
+import it.uniroma2.pmcsn.controller.decorator.data.RoutingBalanceDecorator;
+import it.uniroma2.pmcsn.controller.decorator.data.ScalingMetricsDecorator;
 import it.uniroma2.pmcsn.controller.decorator.data.SystemMetricsDecorator;
 import it.uniroma2.pmcsn.controller.decorator.storage.CsvStorageDecorator;
 import it.uniroma2.pmcsn.controller.decorator.storage.JsonStorageDecorator;
@@ -42,7 +45,14 @@ public class SimulationBuilder {
      * Initializes the builder with default configuration constants.
      */
     public SimulationBuilder() {
-        this.config = new ApplicationConfig();
+        this(new ApplicationConfig());
+    }
+
+    /**
+     * Initializes the builder with the provided configuration.
+     */
+    public SimulationBuilder(ApplicationConfig config) {
+        config(config);
     }
 
     /**
@@ -101,7 +111,7 @@ public class SimulationBuilder {
         // SpikeServer
         SpikeServer spikeServer = new SpikeServer(0, config.scaling().spikeCpuPercentage());
         SpikeServerRoutingStrategy spikeStrategy = config.cluster().spikeEnabled()
-                ? new ThresholdSpikeServerRoutingStrategy()
+                ? new ThresholdSpikeServerRoutingStrategy(config.load().siLow())
                 : new NoSpikeServerRoutingStrategy();
 
         // Router
@@ -113,7 +123,7 @@ public class SimulationBuilder {
             : new NoHorizontalScaler();
 
         VerticalScaler vScaler = config.scaling().verticalEnabled()
-            ? new LoadThresholdVerticalScaler(config)
+            ? new LoadThresholdVerticalScaler(config.scaling(), config.scaling().verticalIncrement())
             : new NoVerticalScaler();
 
         // LoadManager
@@ -134,8 +144,9 @@ public class SimulationBuilder {
             controller = switch (config.logging().dataType()) {
                 case LOAD_COMPARISON -> new LoadComparisonDecorator(controller);
                 case SYSTEM_METRICS -> new SystemMetricsDecorator(controller);
-                case SCALING_METRICS -> new it.uniroma2.pmcsn.controller.decorator.data.ScalingMetricsDecorator(controller);
-                case ROUTING_BALANCE -> new it.uniroma2.pmcsn.controller.decorator.data.RoutingBalanceDecorator(controller);
+                case SCALING_METRICS -> new ScalingMetricsDecorator(controller);
+                case ROUTING_BALANCE -> new RoutingBalanceDecorator(controller);
+                case TIME_SERIE -> new TimeSerieCollector(controller);
             };
 
             // Second: Storage decorator (How to save)

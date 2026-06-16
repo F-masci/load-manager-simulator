@@ -15,7 +15,7 @@ public class SpikeServer extends Server {
     }
 
     public void setSpeedMultiplier(double speedMultiplier, double clock) {
-        logger.info(this.speedMultiplier < speedMultiplier
+        logger.debug(this.speedMultiplier < speedMultiplier
                     ? "Scale Up: SpikeServer speed set to {} at clock={} (load={})"
                     : "Scale Down: SpikeServer speed restored to {} at clock={} (load={})", speedMultiplier, clock, getActiveJobs().size());
         super.setSpeedMultiplier(speedMultiplier);

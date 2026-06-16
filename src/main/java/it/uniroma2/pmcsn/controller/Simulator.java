@@ -5,6 +5,7 @@ import it.uniroma2.pmcsn.model.load.LoadManager;
 import it.uniroma2.pmcsn.model.server.SpikeServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import it.uniroma2.pmcsn.utils.LogFactory;
+import it.uniroma2.pmcsn.utils.SimulationConsoleUtils;
 
 /**
  * Interface for the simulation engine, allowing decorators.
@@ -77,12 +78,12 @@ public interface Simulator {
             int currentPercentage = (int) (currentProgress * 100);
 
             if (currentPercentage > lastPrintedPercentage) {
-                printProgressBar(currentPercentage, getTotalJobsCompleted(), getClock());
+                SimulationConsoleUtils.printJobProgressBar(currentPercentage, getTotalJobsCompleted(), getClock());
                 lastPrintedPercentage = currentPercentage;
             }
         }
         if(progress) {
-            printProgressBar(100, getTotalJobsCompleted(), getClock());
+            SimulationConsoleUtils.printJobProgressBar(100, getTotalJobsCompleted(), getClock());
             System.out.println();
         }
 
@@ -102,29 +103,4 @@ public interface Simulator {
         }
     }
 
-    /**
-     * Print a dynamic progress bar on console.
-     */
-    default void printProgressBar(int percentage, long currentJobs, double currentTime) {
-        int barLength = 50;
-        int filledLength = (int) (barLength * percentage / 100.0);
-
-        StringBuilder bar = new StringBuilder("[");
-        for (int i = 0; i < barLength; i++) {
-            if (i < filledLength) {
-                bar.append("=");
-            } else if (i == filledLength) {
-                bar.append(">");
-            } else {
-                bar.append(" ");
-            }
-        }
-        bar.append("]");
-
-        // Output format: [====>     ]  50% | Jobs: 50000 | Clock: 120.5s
-        String output = String.format("\r%s %3d%% | Jobs: %d | Clock: %.2fs",
-                bar.toString(), percentage, currentJobs, currentTime);
-
-        System.out.print(output);
-    }
 }

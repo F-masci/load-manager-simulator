@@ -22,5 +22,10 @@ public enum LoggingDataType {
     /**
      * Per-server job counts to validate routing balance.
      */
-    ROUTING_BALANCE
+    ROUTING_BALANCE,
+
+    /**
+     * Complete time-series of response times.
+     */
+    TIME_SERIE
 }
