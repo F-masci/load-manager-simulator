@@ -10,15 +10,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Decorator that collects load comparison data (WS vs SS jobs, SI, SI_max) in memory.
+ * Decorator that collects load comparison data including web server and spike server jobs.
  */
 public class LoadComparisonDecorator extends SimulatorDecorator implements DataExporter {
     private final List<Map<String, Object>> snapshots = new ArrayList<>();
 
+    /**
+     * Initializes the decorator with a simulator.
+     *
+     * @param decorated the simulator to decorate
+     */
     public LoadComparisonDecorator(Simulator decorated) {
         super(decorated);
     }
 
+    /**
+     * Processes the next event and captures the system state.
+     *
+     * @return true if an event was processed, false otherwise
+     */
     @Override
     public boolean processNextEvent() {
         boolean result = super.processNextEvent();
@@ -26,6 +36,9 @@ public class LoadComparisonDecorator extends SimulatorDecorator implements DataE
         return result;
     }
 
+    /**
+     * Captures a snapshot of the current system state.
+     */
     private void captureState() {
         Map<String, Object> snapshot = new LinkedHashMap<>();
         double clock = getClock();
@@ -47,16 +60,29 @@ public class LoadComparisonDecorator extends SimulatorDecorator implements DataE
         snapshots.add(snapshot);
     }
 
+    /**
+     * Retrieves the captured state snapshots.
+     *
+     * @return list of captured data maps
+     */
     @Override
     public List<Map<String, Object>> getCapturedData() {
         return snapshots;
     }
 
+    /**
+     * Retrieves the headers for the captured data.
+     *
+     * @return array of header names
+     */
     @Override
     public String[] getHeaders() {
         return new String[]{"clock", "event", "webServerJobs", "spikeServerJobs", "totalActiveJobs", "avgSi", "siMax"};
     }
 
+    /**
+     * Resets the collected snapshots and base statistics.
+     */
     @Override
     public void resetStatistics() {
         super.resetStatistics();

@@ -57,6 +57,9 @@ public class SimulationBuilder {
 
     /**
      * Replaces the entire configuration with a provided ApplicationConfig.
+     *
+     * @param config The new application configuration.
+     * @return The builder instance.
      */
     public SimulationBuilder config(ApplicationConfig config) {
         this.config = config;
@@ -65,6 +68,9 @@ public class SimulationBuilder {
 
     /**
      * Overrides the seed for the next build.
+     *
+     * @param seed The random seed.
+     * @return The builder instance.
      */
     public SimulationBuilder seed(long seed) {
         this.config = config.withSeed(seed);
@@ -74,8 +80,11 @@ public class SimulationBuilder {
     /**
      * Builds and returns a fresh Simulator using the current configuration.
      * All stateful components are instantiated from scratch.
+     *
+     * @return A newly constructed Simulator instance.
      */
     public Simulator build() {
+
         long seed = config.execution().seed();
 
         // Event Source

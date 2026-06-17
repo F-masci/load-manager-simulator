@@ -1,11 +1,11 @@
 package it.uniroma2.pmcsn.objective;
 
-import it.uniroma2.pmcsn.LoadManagerSimulator;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.LoadConfig;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
-import it.uniroma2.pmcsn.utils.LogFactory;
-import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
+import it.uniroma2.pmcsn.facade.SimulationFacade.AggregatedResults;
 import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
+import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -17,13 +17,29 @@ import java.util.Map;
  * Analyzes the impact of different bands (siMax - siLow) on system stability
  * (measured by state changes) and performance across varying arrival rates.
  */
-public class VerticalScalerStabilityObjective extends LoadManagerSimulator {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(VerticalScalerStabilityObjective.class, "OBJ4.1");
+public class VerticalScalerStabilityObjective extends BaseObjective {
 
+    /**
+     * Initializes the vertical scaler stability objective.
+     */
+    public VerticalScalerStabilityObjective() {
+        super(VerticalScalerStabilityObjective.class, "OBJ4.1");
+    }
+
+    /**
+     * Main entry point for Objective 4.1.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new VerticalScalerStabilityObjective().start(args);
     }
 
+    /**
+     * Executes the vertical scaler stability analysis.
+     *
+     * @param config The application configuration.
+     */
     @Override
     protected void run(ApplicationConfig config) {
         logger.info("Starting Vertical Scaler Stability Objective (4.1)...");
@@ -58,7 +74,7 @@ public class VerticalScalerStabilityObjective extends LoadManagerSimulator {
 
                 for (double lambda : lambdas) {
                     ApplicationConfig currentConfig = new ApplicationConfig(
-                            new ApplicationConfig.LoadConfig(
+                            new LoadConfig(
                                     1.0 / lambda, cv,
                                     ApplicationConfig.MEAN_SERVICE, ApplicationConfig.CV_SERVICE,
                                     siMax, siLow,
@@ -71,7 +87,7 @@ public class VerticalScalerStabilityObjective extends LoadManagerSimulator {
                     );
 
                     SimulationFacade facade = new SimulationFacade(currentConfig);
-                    SimulationFacade.AggregatedResults results = facade.runSimulation();
+                    AggregatedResults results = facade.runSimulation();
 
                     double diverted = results.divertedJobs().mean();
                     double r0 = results.responseTime().mean();
@@ -93,3 +109,4 @@ public class VerticalScalerStabilityObjective extends LoadManagerSimulator {
         ObjectiveChartUtility.generateVerticalScalerStabilityGrid(bandStateChangesData, bandRtData, "data/objective/vertical_scaler_stability.png", 5.0);
     }
 }
+

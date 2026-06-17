@@ -4,16 +4,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Interface for decorators that collect simulation data and can export it.
+ * Interface for decorators that collect and export simulation data.
  */
 public interface DataExporter {
     /**
-     * Returns the list of captured snapshots. Each snapshot is a map of key-value pairs.
+     * Gets the list of captured data snapshots.
+     *
+     * @return list of snapshots where each map links metric keys to values
      */
     List<Map<String, Object>> getCapturedData();
 
     /**
-     * Returns the ordered list of headers/keys for the data.
+     * Gets the headers representing the data keys.
+     *
+     * @return array of header names
      */
     String[] getHeaders();
 }

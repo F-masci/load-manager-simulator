@@ -16,23 +16,48 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
     private final Queue<JobCompletionRecord> window = new LinkedList<>();
     private boolean hasNewDataSinceLastEvaluation = false;
 
+    /**
+     * Record representing a single job completion.
+     * @param completionTime The time the job completed
+     * @param responseTime The response time of the job
+     */
     private record JobCompletionRecord(double completionTime, double responseTime) {}
 
+    /**
+     * Constructs a MovingWindowHorizontalScaler using the provided application configuration.
+     * @param config The application configuration
+     */
     public MovingWindowHorizontalScaler(ApplicationConfig config) {
         this(config.scaling());
     }
 
+    /**
+     * Constructs a MovingWindowHorizontalScaler using the provided scaling configuration.
+     * @param scalingConfig The scaling configuration
+     */
     public MovingWindowHorizontalScaler(ApplicationConfig.ScalingConfig scalingConfig) {
         this(scalingConfig.scaleOutLimit(), scalingConfig.scaleInLimit(),
                 scalingConfig.scaleInterval(), scalingConfig.cooldown());
     }
 
+    /**
+     * Constructs a MovingWindowHorizontalScaler with the specified thresholds, window size, and cooldown.
+     * @param scaleOutThreshold The threshold for scaling out
+     * @param scaleInThreshold The threshold for scaling in
+     * @param windowSize The size of the moving window
+     * @param cooldown The cooldown period
+     */
     public MovingWindowHorizontalScaler(double scaleOutThreshold, double scaleInThreshold, double windowSize, double cooldown) {
         super(scaleOutThreshold, scaleInThreshold, cooldown);
         this.windowSize = windowSize;
         this.lastScalingTime = Double.NEGATIVE_INFINITY;
     }
 
+    /**
+     * Records a job completion and updates the moving window.
+     * @param clock The current simulation clock
+     * @param responseTime The response time of the completed job
+     */
     @Override
     public void recordCompletion(double clock, double responseTime) {
         window.add(new JobCompletionRecord(clock, responseTime));
@@ -42,6 +67,12 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
         hasNewDataSinceLastEvaluation = true;
     }
 
+    /**
+     * Evaluates whether to scale the cluster based on the moving window average.
+     * @param clock The current simulation clock
+     * @param cluster The WebServerCluster to evaluate
+     * @return true if a scaling action occurred, false otherwise
+     */
     @Override
     public boolean evaluateScaling(double clock, WebServerCluster cluster) {
         if (!hasNewDataSinceLastEvaluation) {
@@ -76,6 +107,11 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
         return false;
     }
 
+    /**
+     * Calculates the average response time from the current window.
+     * @param clock The current simulation clock
+     * @return The average response time
+     */
     @Override
     public double getCurrentMetric(double clock) {
         if (window.isEmpty()) {
@@ -89,12 +125,19 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
         return sum / window.size();
     }
 
+    /**
+     * Clears the moving window and resets evaluation flag.
+     */
     @Override
     public void resetStatistics() {
         window.clear();
         hasNewDataSinceLastEvaluation = false;
     }
 
+    /**
+     * Gets the window size.
+     * @return The window size
+     */
     public double getWindowSize() {
         return windowSize;
     }

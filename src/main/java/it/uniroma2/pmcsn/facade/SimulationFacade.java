@@ -13,7 +13,9 @@ import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.utils.LogFactory;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static it.uniroma2.pmcsn.utils.SimulationConsoleUtils.printBatchProgressBar;
@@ -44,11 +46,14 @@ public class SimulationFacade {
     private final Map<Integer, Welford> serverCompletions = new HashMap<>();
 
     private Class<? extends SimulatorDecorator> customDecoratorClass = null;
-    private final java.util.List<SimulatorDecorator> customDecorators = new java.util.ArrayList<>();
+    private final List<SimulatorDecorator> customDecorators = new ArrayList<>();
+
 
     /**
      * Sets a custom decorator class to be instantiated and wrapped around the controller 
      * during simulations.
+     *
+     * @param decoratorClass The decorator class to use.
      */
     public void setCustomDecorator(Class<? extends SimulatorDecorator> decoratorClass) {
         this.customDecoratorClass = decoratorClass;
@@ -57,10 +62,13 @@ public class SimulationFacade {
     /**
      * Retrieves the list of custom decorators instantiated during the runs 
      * (e.g., one per replication).
+     *
+     * @return The list of instantiated custom decorators.
      */
-    public java.util.List<SimulatorDecorator> getCustomDecorators() {
+    public List<SimulatorDecorator> getCustomDecorators() {
         return customDecorators;
     }
+
 
     private Simulator applyCustomDecorator(Simulator baseController) {
         if (customDecoratorClass != null) {
@@ -152,13 +160,15 @@ public class SimulationFacade {
         return createResults("BATCH MEANS (STEADY STATE)", config.execution().numBatches());
     }
 
-    private final java.util.List<Double> runningMeans = new java.util.ArrayList<>();
+    private final List<Double> runningMeans = new ArrayList<>();
 
     /**
      * Runs a terminating simulation using the Independent Replications method with a custom builder.
+     *
      * @return Aggregated results over all replications.
      */
     public AggregatedResults runIndependentReplicationsSimulation() {
+
 
         logger.info("Starting {} independent replications...", config.execution().numReplications());
 

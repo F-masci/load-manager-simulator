@@ -18,17 +18,29 @@ public class JsonStorageDecorator extends SimulatorDecorator {
     private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(JsonStorageDecorator.class, "STORAGE");
     private final String outputPath;
 
+    /**
+     * Initializes the decorator with a simulator and an output path.
+     *
+     * @param decorated the simulator to decorate
+     * @param outputPath the path to the JSON output file
+     */
     public JsonStorageDecorator(Simulator decorated, String outputPath) {
         super(decorated);
         this.outputPath = outputPath;
     }
 
+    /**
+     * Finalizes the simulation and triggers data persistence.
+     */
     @Override
     public void finalizeSimulation() {
         super.finalizeSimulation();
         persistData();
     }
 
+    /**
+     * Persists the captured data from an available exporter to a JSON file.
+     */
     private void persistData() {
         DataExporter exporter = findExporter(decorated);
         if (exporter == null) {
@@ -61,6 +73,12 @@ public class JsonStorageDecorator extends SimulatorDecorator {
         }
     }
 
+    /**
+     * Searches for a DataExporter in the decoration chain.
+     *
+     * @param s the simulator to search from
+     * @return the found DataExporter or null if not found
+     */
     private DataExporter findExporter(Simulator s) {
         if (s instanceof DataExporter de) return de;
         if (s instanceof SimulatorDecorator sd) return findExporter(sd.getDecorated());

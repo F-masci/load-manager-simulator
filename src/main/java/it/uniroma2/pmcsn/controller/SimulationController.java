@@ -45,6 +45,16 @@ public class SimulationController implements Simulator {
     private final TimedWelford systemUtilStat = new TimedWelford();
     private final double scaleInterval;
 
+    /**
+     * Initializes the simulation controller with system components and constraints.
+     *
+     * @param maxTime maximum simulation time
+     * @param eventSource source for job arrivals
+     * @param webServerCluster cluster of web servers
+     * @param spikeServer spike server instance
+     * @param loadController load manager for routing and scaling
+     * @param scaleInterval interval for periodic scaling checks
+     */
     public SimulationController(double maxTime, EventSource eventSource,
                                 WebServerCluster webServerCluster, SpikeServer spikeServer,
                                 LoadManager loadController, double scaleInterval) {
@@ -99,6 +109,7 @@ public class SimulationController implements Simulator {
         return true;
     }
 
+    @Override
     public void resetStatistics() {
         clockSinceReset = clock;
         totalJobsArrived = totalJobsDiverted = totalJobsCompleted = 0;
@@ -114,6 +125,11 @@ public class SimulationController implements Simulator {
         updateSystemStats(clock);
     }
 
+    /**
+     * Dispatches the event to the appropriate handler based on its type.
+     *
+     * @param event event to process
+     */
     private void processEvent(Event event) {
         switch (event.getType()) {
             case ARRIVAL -> handleArrival(event.getJob());
@@ -123,6 +139,11 @@ public class SimulationController implements Simulator {
         }
     }
 
+    /**
+     * Handles a job arrival by routing it to a server and scheduling the next completion.
+     *
+     * @param job arriving job
+     */
     private void handleArrival(Job job) {
         totalJobsArrived++;
 
@@ -137,6 +158,12 @@ public class SimulationController implements Simulator {
         checkAndApplyScaling();
     }
 
+    /**
+     * Handles a job completion by releasing resources and updating statistics.
+     *
+     * @param job completed job
+     * @param server server that processed the job
+     */
     private void handleCompletion(Job job, Server server) {
         server.completeJob(job, clock);
 
@@ -150,11 +177,17 @@ public class SimulationController implements Simulator {
         checkAndApplyScaling();
     }
 
+    /**
+     * Triggers both horizontal and vertical scaling evaluation.
+     */
     private void checkAndApplyScaling() {
         checkHorizontalScaling();
         checkVerticalScaling();
     }
 
+    /**
+     * Evaluates horizontal scaling and reschedules events if a change occurs.
+     */
     private void checkHorizontalScaling() {
         HorizontalScaler hScaler = loadController.getHorizontalScaler();
         if (hScaler.evaluateScaling(clock, webServerCluster)) {
@@ -168,6 +201,9 @@ public class SimulationController implements Simulator {
         }
     }
 
+    /**
+     * Evaluates vertical scaling and reschedules events if a change occurs.
+     */
     private void checkVerticalScaling() {
         VerticalScaler vScaler = loadController.getVerticalScaler();
         if (vScaler.evaluateScaling(clock, spikeServer)) {
@@ -181,6 +217,9 @@ public class SimulationController implements Simulator {
         }
     }
 
+    /**
+     * Handles periodic horizontal scale evaluation and reschedules the next check.
+     */
     private void handleHorizontalScaleCheck() {
         checkHorizontalScaling();
         boolean hasPending = eventQueue.stream().anyMatch(e -> e.getType() == EventType.SCALE_CHECK_HORIZONTAL);
@@ -189,6 +228,9 @@ public class SimulationController implements Simulator {
         }
     }
 
+    /**
+     * Handles periodic vertical scale evaluation and reschedules the next check.
+     */
     private void handleVerticalScaleCheck() {
         checkVerticalScaling();
         boolean hasPending = eventQueue.stream().anyMatch(e -> e.getType() == EventType.SCALE_CHECK_VERTICAL);
@@ -197,6 +239,9 @@ public class SimulationController implements Simulator {
         }
     }
 
+    /**
+     * Generates and schedules the next job arrival.
+     */
     private void scheduleNextArrival() {
         Job nextJob = eventSource.getNextJob(lastArrivalTime);
         if (nextJob != null) {
@@ -205,6 +250,9 @@ public class SimulationController implements Simulator {
         }
     }
 
+    /**
+     * Clears and reschedules all completion events for all active servers.
+     */
     private void rescheduleAllCompletions() {
         eventQueue.removeIf(e -> e.getType() == EventType.COMPLETION);
         webServerCluster.getActiveServers().forEach(this::scheduleCompletionsForServer);
@@ -212,11 +260,21 @@ public class SimulationController implements Simulator {
         scheduleCompletionsForServer(spikeServer);
     }
 
+    /**
+     * Reschedules completion events for a specific server.
+     *
+     * @param server server to update
+     */
     private void rescheduleCompletions(Server server) {
         eventQueue.removeIf(e -> e.getType() == EventType.COMPLETION && server.equals(e.getServer()));
         scheduleCompletionsForServer(server);
     }
 
+    /**
+     * Calculates completion times for all active jobs on a server and adds them to the queue.
+     *
+     * @param server server to schedule completions for
+     */
     private void scheduleCompletionsForServer(Server server) {
         int n = server.getActiveJobs().size();
         if (n == 0) return;
@@ -226,12 +284,23 @@ public class SimulationController implements Simulator {
         }
     }
 
+    /**
+     * Advances job service progress for all active jobs based on elapsed time.
+     *
+     * @param elapsed time since last event
+     * @param nextTime target clock time
+     */
     private void processActiveJobs(double elapsed, double nextTime) {
         webServerCluster.processActiveJobs(elapsed, nextTime);
         spikeServer.updateStatistics(nextTime);
         spikeServer.processJobs(elapsed);
     }
 
+    /**
+     * Updates system-wide time-weighted statistics (JIS and Utilization).
+     *
+     * @param time current simulation time
+     */
     private void updateSystemStats(double time) {
         // JIS: sum of active jobs in ALL servers
         double currentJis = webServerCluster.getAllServers().stream().mapToDouble(s -> s.getActiveJobs().size()).sum() 
@@ -252,52 +321,108 @@ public class SimulationController implements Simulator {
     public EventType getLastEventType() {
         return lastEventType;
     }
+
+    /**
+     * Re-seeds the event source for independent replications.
+     *
+     * @param seed new random seed
+     */
     public void plantSeeds(long seed) { eventSource.plantSeeds(seed); }
 
+    @Override
     public double getClock() { return clock; }
+
+    /**
+     * Gets the simulation time elapsed since the last statistics reset.
+     *
+     * @return elapsed time since reset
+     */
     public double getClockSinceReset() { return clock - clockSinceReset; }
+
+    @Override
     public WebServerCluster getWebServerCluster() { return webServerCluster; }
+
+    @Override
     public SpikeServer getSpikeServer() { return spikeServer; }
+
+    @Override
     public LoadManager getLoadManager() { return loadController; }
+
+    @Override
     public int getTotalJobsArrived() { return totalJobsArrived; }
+
+    @Override
     public int getTotalJobsDiverted() { return totalJobsDiverted; }
+
+    @Override
     public int getTotalJobsCompleted() { return totalJobsCompleted; }
+
+    @Override
     public double getThroughput() {
         double d = getClockSinceReset();
         return d > 0 ? (double) totalJobsCompleted / d : 0;
     }
+
+    @Override
     public double getAverageResponseTime() {
         return totalJobsCompleted > 0 ? totalSystemResponseTime / totalJobsCompleted : 0;
     }
+
+    @Override
     public double getAverageJobsInSystem() {
         return systemJisStat.getMean();
     }
+
+    @Override
     public double getSystemUtilization() {
         return systemUtilStat.getMean();
     }
 
     /**
+     * Criteria and target values to determine when a simulation run should stop.
      *
-     *
-     * @param criteria
-     * @param targetValue
+     * @param criteria stopping logic
+     * @param targetValue value that triggers the stop
      */
     public record StopCondition(StopCriteria criteria, double targetValue) {
 
+        /**
+         * Supported criteria for stopping a simulation run.
+         */
         public enum StopCriteria {
-            QUEUE_EMPTY,        // Run until the queue event is empty
-            JOBS_COMPLETED,     // Run until a certain number of jobs have been completed
-            TIME_ELAPSED        // Run until a certain time is elapsed
+            /** Stop when the event queue becomes empty. */
+            QUEUE_EMPTY,
+            /** Stop after a specific number of jobs are completed. */
+            JOBS_COMPLETED,
+            /** Stop after a specific amount of simulation time has passed. */
+            TIME_ELAPSED
         }
 
+        /**
+         * Creates a stop condition that runs until the queue is empty.
+         *
+         * @return queue empty stop condition
+         */
         public static StopCondition untilQueueEmpty() {
             return new StopCondition(StopCriteria.QUEUE_EMPTY, 0);
         }
 
+        /**
+         * Creates a stop condition that runs until a fixed number of jobs complete.
+         *
+         * @param jobs target number of jobs
+         * @return jobs completed stop condition
+         */
         public static StopCondition untilJobsCompleted(int jobs) {
             return new StopCondition(StopCriteria.JOBS_COMPLETED, jobs);
         }
 
+        /**
+         * Creates a stop condition that runs until a specific time limit.
+         *
+         * @param deltaMultiplier time duration to run
+         * @return time elapsed stop condition
+         */
         public static StopCondition untilTimeElapsed(double deltaMultiplier) {
             return new StopCondition(StopCriteria.TIME_ELAPSED, deltaMultiplier);
         }

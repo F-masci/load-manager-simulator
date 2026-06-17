@@ -5,8 +5,11 @@ package it.uniroma2.pmcsn.lib.statistics;
  * and variance of a sequence of observations.
  */
 public class Welford {
+    /** The number of observations. */
     private long count = 0;
+    /** The running mean of the observations. */
     private double mean = 0.0;
+    /** The running sum of squares of differences from the mean. */
     private double m2 = 0.0;
 
     /**

@@ -3,9 +3,8 @@ package it.uniroma2.pmcsn.model.event.source;
 import it.uniroma2.pmcsn.model.Job;
 
 /**
- * An EventSource that generates jobs with hyperexponential distributions
- * for both interarrival and service times.
- * Parameters are automatically computed from Mean and Coefficient of Variation.
+ * Event source generating jobs with hyperexponentially distributed times.
+ * Parameters are computed from mean and coefficient of variation using balanced means.
  */
 public class HyperexponentialEventSource extends DistributionEventSource {
     // Streams for arrivals
@@ -29,26 +28,25 @@ public class HyperexponentialEventSource extends DistributionEventSource {
     private final double serviceM2;
 
     /**
-     * Constructor that accepts Mean for arrivals and services.
+     * Initializes the source with default coefficient of variation.
      *
-     * @param seed        The seed for the random number generators
-     * @param arrivalMean Mean interarrival time
-     * @param serviceMean Mean service time
+     * @param seed the seed for random generation
+     * @param arrivalMean mean interarrival time
+     * @param serviceMean mean service time
      */
     public HyperexponentialEventSource(long seed, double arrivalMean, double serviceMean) {
         this(seed, arrivalMean, 2.0, serviceMean, 2.0);
     }
 
-
-        /**
-         * Constructor that accepts Mean and CV for arrivals and services.
-         *
-         * @param seed        The seed for the random number generators
-         * @param arrivalMean Mean interarrival time
-         * @param arrivalCv   Coefficient of variation for arrivals (must be >= 1.0)
-         * @param serviceMean Mean service time
-         * @param serviceCv   Coefficient of variation for services (must be >= 1.0)
-         */
+    /**
+     * Initializes the source with specified means and coefficients of variation.
+     *
+     * @param seed the seed for random generation
+     * @param arrivalMean mean interarrival time
+     * @param arrivalCv coefficient of variation for arrivals
+     * @param serviceMean mean service time
+     * @param serviceCv coefficient of variation for services
+     */
     public HyperexponentialEventSource(long seed, double arrivalMean, double arrivalCv, double serviceMean, double serviceCv) {
         super(seed);
 
@@ -71,19 +69,11 @@ public class HyperexponentialEventSource extends DistributionEventSource {
     }
 
     /**
-     * Helper method to compute p, m1, and m2 using the Balanced Means method.
+     * Computes hyperexponential parameters using the Balanced Means method.
      *
-     * The Balanced Means method calculates the parameters such that the probability
-     * of choosing a branch is inversely proportional to its mean: p * m1 = (1 - p) * m2.
-     *
-     * Formulas used:
-     * p  = 0.5 * (1 - sqrt((CV^2 - 1) / (CV^2 + 1)))
-     * m1 = Mean / (2 * p)
-     * m2 = Mean / (2 * (1 - p))
-     *
-     * @param mean The expected value (mean)
-     * @param cv   The coefficient of variation (must be >= 1.0)
-     * @return An array containing [p, m1, m2]
+     * @param mean the target mean
+     * @param cv the target coefficient of variation
+     * @return array containing probability p and means m1, m2
      */
     private double[] computeBalancedMeans(double mean, double cv) {
         double cv2 = cv * cv;
@@ -98,6 +88,12 @@ public class HyperexponentialEventSource extends DistributionEventSource {
         return new double[]{p, m1, m2};
     }
 
+    /**
+     * Generates the next job using hyperexponential distributions.
+     *
+     * @param lastArrivalTime the arrival time of the previous job
+     * @return the generated job
+     */
     @Override
     public Job getNextJob(double lastArrivalTime) {
         jobCounter++;

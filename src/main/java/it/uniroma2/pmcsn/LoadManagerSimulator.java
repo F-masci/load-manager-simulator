@@ -14,11 +14,22 @@ import it.uniroma2.pmcsn.utils.LogFactory;
 public class LoadManagerSimulator {
     private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(LoadManagerSimulator.class, "SIM");
 
+    /**
+     * Main application entry point.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new LoadManagerSimulator().start(args);
     }
 
+    /**
+     * Starts the simulation process.
+     *
+     * @param args Command line arguments to parse.
+     */
     protected void start(String[] args) {
+
         // Parse configurations from command line arguments
         ApplicationConfig config = CommandLineConfigParser.parse(args);
 
@@ -88,7 +99,13 @@ public class LoadManagerSimulator {
         }
     }
 
+    /**
+     * Executes the simulation logic based on the configuration.
+     *
+     * @param config The application configuration to use.
+     */
     protected void run(ApplicationConfig config) {
+
         SimulationFacade simulator = new SimulationFacade(config);
         simulator.runSimulation();
     }

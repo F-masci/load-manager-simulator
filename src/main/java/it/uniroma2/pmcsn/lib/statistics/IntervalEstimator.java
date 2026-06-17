@@ -10,10 +10,19 @@ import java.util.List;
  * Calculates confidence intervals for mean values obtained from simulation experiments.
  */
 public class IntervalEstimator {
+    /** The random variable models used for statistical distributions. */
     private static final Rvms rvms = new Rvms();
 
     /**
      * Result class encapsulating the confidence interval and its parameters.
+     *
+     * @param count the number of observations
+     * @param mean the sample mean
+     * @param stdDev the sample standard deviation
+     * @param confidenceLevel the desired confidence level
+     * @param halfWidth the calculated half-width of the interval
+     * @param lowerBound the lower bound of the confidence interval
+     * @param upperBound the upper bound of the confidence interval
      */
     public record IntervalResult(
         long count,
@@ -24,6 +33,11 @@ public class IntervalEstimator {
         double lowerBound,
         double upperBound
     ) {
+        /**
+         * Returns a string representation of the interval result.
+         *
+         * @return a formatted string containing mean, standard deviation, half-width, and confidence interval
+         */
         @Override
         @NotNull
         public String toString() {
@@ -45,15 +59,10 @@ public class IntervalEstimator {
             return 0.0;
         }
 
-        // alpha = 1 - confidenceLevel
-        // We need t_{n-1, 1 - alpha/2}
         double alpha = 1.0 - confidenceLevel;
         double quantile = 1.0 - alpha / 2.0;
 
-        // Get the Student's T distribution critical value
         double t = rvms.idfStudent(count - 1, quantile);
-
-        // Standard error
         double standardError = stdDev / Math.sqrt(count);
 
         return t * standardError;
@@ -106,5 +115,4 @@ public class IntervalEstimator {
             mean + halfWidth
         );
     }
-
 }

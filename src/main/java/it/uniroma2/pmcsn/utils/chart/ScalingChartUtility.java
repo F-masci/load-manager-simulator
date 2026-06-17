@@ -12,6 +12,8 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility for generating scaling dynamics charts (Horizontal and Vertical).
@@ -20,11 +22,10 @@ import java.io.IOException;
 public class ScalingChartUtility extends BaseChartUtility {
 
     /**
-     * Generates a horizontal scaling chart showing active servers, metrics, and cooldowns.
-     * Marks scale-out/in events and discrete logic evaluations.
+     * Generates a horizontal scaling dynamics chart.
      *
-     * @param csvPath Path to the CSV source file.
-     * @param outputPath Path for the generated PNG.
+     * @param csvPath path to the source csv file
+     * @param outputPath path for the output png image
      */
     public static void generateHorizontalScalingChart(String csvPath, String outputPath) {
         XYSeries activeServersSeries = new XYSeries("Active Web Servers");
@@ -36,7 +37,7 @@ public class ScalingChartUtility extends BaseChartUtility {
         
         double scaleOutLimit = 0;
         double scaleInLimit = 0;
-        java.util.List<Double> scalingActionTimes = new java.util.ArrayList<>();
+        List<Double> scalingActionTimes = new ArrayList<>();
         int lastActiveServers = -1;
 
         // Parse CSV data for horizontal scaling
@@ -116,7 +117,10 @@ public class ScalingChartUtility extends BaseChartUtility {
     }
 
     /**
-     * Generates a vertical scaling chart for the Spike Server speed dynamics.
+     * Generates a vertical scaling dynamics chart.
+     *
+     * @param csvPath path to the source csv file
+     * @param outputPath path for the output png image
      */
     public static void generateVerticalScalingChart(String csvPath, String outputPath) {
         XYSeries spikeSpeedSeries = new XYSeries("Spike Server Speed Multiplier");
@@ -128,7 +132,7 @@ public class ScalingChartUtility extends BaseChartUtility {
         
         double vUpperLimit = 0;
         double vLowerLimit = 0;
-        java.util.List<Double> speedActionTimes = new java.util.ArrayList<>();
+        List<Double> speedActionTimes = new ArrayList<>();
         double lastSpeed = -1;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(csvPath))) {

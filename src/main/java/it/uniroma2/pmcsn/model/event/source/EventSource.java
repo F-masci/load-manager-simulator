@@ -3,34 +3,34 @@ package it.uniroma2.pmcsn.model.event.source;
 import it.uniroma2.pmcsn.model.Job;
 
 /**
- * Source of job arrivals and their service times for the simulation.
+ * Interface defining a source for job arrivals and service demands.
  */
 public interface EventSource {
     
     /**
-     * Generates or reads the next job.
+     * Generates or retrieves the next job in the sequence.
      *
-     * @param lastArrivalTime The arrival time of the previous job
-     * @return The next job, or null if no more jobs are available
+     * @param lastArrivalTime the arrival time of the previous job
+     * @return the next job or null if the sequence has ended
      */
     Job getNextJob(double lastArrivalTime);
 
     /**
-     * Resets the event source state.
+     * Resets the source to its initial state.
      */
     void reset();
 
     /**
-     * Gets the seed used for random number generation, if applicable.
+     * Gets the seed used for generation if applicable.
      *
-     * @return The seed value
+     * @return the current seed value
      */
     long getSeed();
 
     /**
-     * Set the seed used for random number generation, if applicable.
+     * Seeds the generator for reproducible sequences.
      *
-     * @param seed The seed value
+     * @param seed the seed value to set
      */
     void plantSeeds(long seed);
 }

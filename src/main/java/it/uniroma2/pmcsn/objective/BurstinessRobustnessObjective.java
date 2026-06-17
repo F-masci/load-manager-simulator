@@ -1,13 +1,13 @@
 package it.uniroma2.pmcsn.objective;
 
-import it.uniroma2.pmcsn.LoadManagerSimulator;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
-import it.uniroma2.pmcsn.configs.ApplicationConfig.*;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ClusterConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.LoadConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ScalingConfig;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
-import it.uniroma2.pmcsn.utils.LogFactory;
-
-import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
+import it.uniroma2.pmcsn.facade.SimulationFacade.AggregatedResults;
 import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
+import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -17,13 +17,29 @@ import org.jfree.data.xy.XYSeriesCollection;
  * Verify if the system maintains SLA under varying levels of traffic burstiness
  * and increasing load using default full-scaling config.
  */
-public class BurstinessRobustnessObjective extends LoadManagerSimulator {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(BurstinessRobustnessObjective.class, "OBJ4.3");
+public class BurstinessRobustnessObjective extends BaseObjective {
 
+    /**
+     * Initializes the burstiness robustness objective.
+     */
+    public BurstinessRobustnessObjective() {
+        super(BurstinessRobustnessObjective.class, "OBJ4.3");
+    }
+
+    /**
+     * Main entry point for Objective 4.3.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new BurstinessRobustnessObjective().start(args);
     }
 
+    /**
+     * Executes the burstiness robustness analysis.
+     *
+     * @param config The application configuration.
+     */
     @Override
     protected void run(ApplicationConfig config) {
         logger.info("Starting Burstiness Robustness Objective (4.3)");
@@ -60,14 +76,14 @@ public class BurstinessRobustnessObjective extends LoadManagerSimulator {
                 // Use default full-system scaling configurations
                 ApplicationConfig objectiveConfig = new ApplicationConfig(
                     loadConfig, 
-                    new ApplicationConfig.ClusterConfig(), 
-                    new ApplicationConfig.ScalingConfig(), 
+                    new ClusterConfig(), 
+                    new ScalingConfig(), 
                     config.execution(),
                     config.logging()
                 );
 
                 SimulationFacade facade = new SimulationFacade(objectiveConfig);
-                SimulationFacade.AggregatedResults results = facade.runSimulation();
+                AggregatedResults results = facade.runSimulation();
                 
                 double r0 = results.responseTime().mean();
                 boolean converging = r0 < 1000.0;
@@ -87,3 +103,4 @@ public class BurstinessRobustnessObjective extends LoadManagerSimulator {
         ObjectiveChartUtility.generateBurstinessLineChart(dataset, "data/objective/burstiness_robustness.png", slaThreshold);
     }
 }
+

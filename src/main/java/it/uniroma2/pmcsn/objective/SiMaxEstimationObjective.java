@@ -1,14 +1,16 @@
 package it.uniroma2.pmcsn.objective;
 
-import it.uniroma2.pmcsn.LoadManagerSimulator;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ClusterConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.LoadConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ScalingConfig;
 import it.uniroma2.pmcsn.configs.SimulationMethod;
 import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
+import it.uniroma2.pmcsn.facade.SimulationFacade.AggregatedResults;
 import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
-import it.uniroma2.pmcsn.utils.LogFactory;
-import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
+import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import org.jfree.data.xy.XYSeries;
 
 /**
@@ -17,13 +19,29 @@ import org.jfree.data.xy.XYSeries;
  * Config: 1 Web Server, Spike Server enabled, Scaling DISABLED.
  * Workload: Hyperexponential, lambda = 6.66 (mean = 0.15015), cv = 4.
  */
-public class SiMaxEstimationObjective extends LoadManagerSimulator {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(SiMaxEstimationObjective.class, "OBJ1.1");
+public class SiMaxEstimationObjective extends BaseObjective {
 
+    /**
+     * Initializes the SI_max estimation objective.
+     */
+    public SiMaxEstimationObjective() {
+        super(SiMaxEstimationObjective.class, "OBJ1.1");
+    }
+
+    /**
+     * Main entry point for Objective 1.1.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new SiMaxEstimationObjective().start(args);
     }
 
+    /**
+     * Executes the SI_max estimation analysis.
+     *
+     * @param config The application configuration.
+     */
     @Override
     protected void run(ApplicationConfig config) {
         logger.info("Starting SI_max Estimation Objective (1.1)...");
@@ -31,7 +49,7 @@ public class SiMaxEstimationObjective extends LoadManagerSimulator {
         double meanInterarrival = 0.15015; // lambda = 6.66
         double cvInterarrival = 4.0;
         
-        ApplicationConfig.LoadConfig baseLoad = new ApplicationConfig.LoadConfig(
+        LoadConfig baseLoad = new LoadConfig(
                 meanInterarrival, cvInterarrival,
                 ApplicationConfig.MEAN_SERVICE, ApplicationConfig.CV_SERVICE,
                 10, -1, // initial siMax, siLow
@@ -40,8 +58,8 @@ public class SiMaxEstimationObjective extends LoadManagerSimulator {
 
         ApplicationConfig baseConfig = new ApplicationConfig(
                 baseLoad,
-                ApplicationConfig.ClusterConfig.fixedServer(1, true),
-                ApplicationConfig.ScalingConfig.disabled(),
+                ClusterConfig.fixedServer(1, true),
+                ScalingConfig.disabled(),
                 config.execution(),
                 config.logging()
         );
@@ -63,7 +81,7 @@ public class SiMaxEstimationObjective extends LoadManagerSimulator {
 
         for (int siMax = 10; siMax <= 200; siMax += 10) {
             ApplicationConfig currentConfig = new ApplicationConfig(
-                    new ApplicationConfig.LoadConfig(
+                    new LoadConfig(
                             meanInterarrival, cvInterarrival,
                             baseConfig.load().meanService(), baseConfig.load().cvService(),
                             siMax, -1,
@@ -76,7 +94,7 @@ public class SiMaxEstimationObjective extends LoadManagerSimulator {
             );
 
             SimulationFacade facade = new SimulationFacade(currentConfig);
-            SimulationFacade.AggregatedResults results = facade.runSimulation();
+            AggregatedResults results = facade.runSimulation();
 
             double r0 = results.responseTime().mean();
             double r0L = results.responseTime().lowerBound();
@@ -112,3 +130,4 @@ public class SiMaxEstimationObjective extends LoadManagerSimulator {
                 "data/objective/simax_estimation.png", 5.0);
     }
 }
+

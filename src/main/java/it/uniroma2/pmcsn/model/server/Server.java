@@ -4,7 +4,11 @@ import it.uniroma2.pmcsn.lib.statistics.TimedWelford;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
 import it.uniroma2.pmcsn.model.Job;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Queue;
 
 /**
  * Base abstract class representing a Server node.
@@ -25,33 +29,66 @@ public abstract class Server {
 
     protected double totalServiceTime = 0.0; // Kept as simple sum for now
 
+    /**
+     * Constructs a Server with a given ID and speed multiplier.
+     *
+     * @param id the unique identifier of the server
+     * @param speedMultiplier the processing rate multiplier
+     */
     protected Server(int id, double speedMultiplier) {
         this.id = id;
         this.speedMultiplier = speedMultiplier;
     }
 
+    /**
+     * Returns the server ID.
+     *
+     * @return the server identifier
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Sets the speed multiplier for the server.
+     *
+     * @param speedMultiplier the new speed multiplier value
+     */
     public void setSpeedMultiplier(double speedMultiplier) {
         this.speedMultiplier = speedMultiplier;
     }
 
+    /**
+     * Returns the current speed multiplier.
+     *
+     * @return the speed multiplier value
+     */
     public double getSpeedMultiplier() {
         return speedMultiplier;
     }
 
+    /**
+     * Returns the list of currently active jobs in execution.
+     *
+     * @return the list of active jobs
+     */
     public List<Job> getActiveJobs() {
         return activeJobs;
     }
 
+    /**
+     * Returns the job queue (empty in PS mode).
+     *
+     * @return the job queue
+     */
     public Queue<Job> getQueue() {
         return queue;
     }
 
     /**
      * Updates time-integrated statistics based on the current clock.
+     *
+     * @param currentClock current simulation time
      */
     public void updateStatistics(double currentClock) {
         activeJobsStat.updateToTime(currentClock, activeJobs.size());
@@ -63,7 +100,7 @@ public abstract class Server {
      * Simulates the execution of jobs in Processor Sharing for a given time interval.
      * Consumes the remaining service demand of all active jobs.
      *
-     * @param elapsed Time interval elapsed
+     * @param elapsed time interval elapsed
      */
     public void processJobs(double elapsed) {
         if (elapsed <= 0.0 || activeJobs.isEmpty()) {
@@ -79,9 +116,9 @@ public abstract class Server {
     /**
      * Accepts a job. Under Processor Sharing with infinite queue, it enters execution immediately.
      *
-     * @param job The job to accept
-     * @param currentClock The current simulation clock
-     * @return The job.
+     * @param job the job to accept
+     * @param currentClock current simulation clock
+     * @return the accepted job
      */
     public Job acceptJob(Job job, double currentClock) {
         updateStatistics(currentClock);
@@ -94,8 +131,8 @@ public abstract class Server {
     /**
      * Completes a specific job under Processor Sharing.
      *
-     * @param job The job to complete
-     * @param currentClock The current simulation clock
+     * @param job the job to complete
+     * @param currentClock current simulation clock
      * @return null (no queue to advance under standard PS)
      */
     public Job completeJob(Job job, double currentClock) {
@@ -113,10 +150,10 @@ public abstract class Server {
         return null;
     }
 
-    // Getters for statistics
     /**
      * Resets all performance statistics.
-     * @param currentClock The current simulation clock.
+     *
+     * @param currentClock current simulation clock
      */
     public void resetStatistics(double currentClock) {
         activeJobsStat.reset();
@@ -132,55 +169,124 @@ public abstract class Server {
         totalServiceTime = 0.0;
     }
 
+    /**
+     * Returns the time-integrated average of active jobs.
+     *
+     * @return the area under the active jobs curve
+     */
     public double getTimeIntegratedActiveJobs() {
         return activeJobsStat.getMean() * activeJobsStat.getTotalDuration();
     }
 
+    /**
+     * Returns the time-integrated average of the queue length.
+     *
+     * @return the area under the queue length curve
+     */
     public double getTimeIntegratedQueueLength() {
         return (systemLengthStat.getMean() - activeJobsStat.getMean()) * systemLengthStat.getTotalDuration();
     }
 
+    /**
+     * Returns the time-integrated average of the system length.
+     *
+     * @return the area under the system length curve
+     */
     public double getTimeIntegratedSystemLength() {
         return systemLengthStat.getMean() * systemLengthStat.getTotalDuration();
     }
 
+    /**
+     * Returns the number of completed jobs.
+     *
+     * @return the completed jobs count
+     */
     public int getCompletedJobsCount() {
         return (int) responseTimeStat.getCount();
     }
 
+    /**
+     * Returns the total waiting time (always zero in PS).
+     *
+     * @return the total waiting time
+     */
     public double getTotalWaitingTime() {
         return 0.0; // Under PS, waiting time is 0 (accepted jobs start immediately)
     }
 
+    /**
+     * Returns the sum of all job response times.
+     *
+     * @return the total response time
+     */
     public double getTotalResponseTime() {
         return responseTimeStat.getMean() * responseTimeStat.getCount();
     }
 
+    /**
+     * Returns the sum of all job service times.
+     *
+     * @return the total service time
+     */
     public double getTotalServiceTime() {
         return totalServiceTime;
     }
 
+    /**
+     * Returns the average server utilization.
+     *
+     * @param totalTime total simulation time (unused, kept for consistency)
+     * @return the average utilization
+     */
     public double getAverageUtilization(double totalTime) {
         // Utilization is the fraction of time the server was busy (activeJobs > 0)
         return busyStat.getMean();
     }
 
+    /**
+     * Returns the average queue length over time.
+     *
+     * @param totalTime total simulation time (unused, kept for consistency)
+     * @return the average queue length
+     */
     public double getAverageQueueLength(double totalTime) {
         return systemLengthStat.getMean() - activeJobsStat.getMean();
     }
 
+    /**
+     * Returns the average system length over time.
+     *
+     * @param totalTime total simulation time (unused, kept for consistency)
+     * @return the average system length
+     */
     public double getAverageSystemLength(double totalTime) {
         return systemLengthStat.getMean();
     }
 
+    /**
+     * Returns the average waiting time per job.
+     *
+     * @return the average waiting time
+     */
     public double getAverageWaitingTime() {
         return 0.0;
     }
 
+    /**
+     * Returns the average response time per job.
+     *
+     * @return the average response time
+     */
     public double getAverageResponseTime() {
         return responseTimeStat.getMean();
     }
 
+    /**
+     * Checks if this server is equal to another object based on ID.
+     *
+     * @param o the object to compare
+     * @return true if IDs match, false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -189,11 +295,21 @@ public abstract class Server {
         return id == server.id;
     }
 
+    /**
+     * Generates a hash code based on server ID.
+     *
+     * @return the hash code
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id);
     }
 
+    /**
+     * Returns a string representation of the server.
+     *
+     * @return server details as string
+     */
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{" +

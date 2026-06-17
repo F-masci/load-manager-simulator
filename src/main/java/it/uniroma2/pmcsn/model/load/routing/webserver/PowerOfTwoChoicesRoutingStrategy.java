@@ -10,7 +10,7 @@ import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import java.util.List;
 
 /**
- * Power of Two Choices (JSQ-2): selects 2 random servers and routes to the one with the least jobs.
+ * Routing strategy that selects the best of two randomly chosen servers.
  */
 public class PowerOfTwoChoicesRoutingStrategy implements WebServerRoutingStrategy {
     private static final int STREAM = 255;
@@ -19,10 +19,18 @@ public class PowerOfTwoChoicesRoutingStrategy implements WebServerRoutingStrateg
     protected final Rvgs rvgs;
     protected final long seed;
 
+    /**
+     * Constructs a strategy using the default application seed.
+     */
     public PowerOfTwoChoicesRoutingStrategy() {
         this(ApplicationConfig.SEED);
     }
 
+    /**
+     * Constructs a strategy using a specific seed.
+     *
+     * @param seed the seed for random number generation
+     */
     public PowerOfTwoChoicesRoutingStrategy(long seed) {
         this.rngs = new Rngs();
         this.rvgs = new Rvgs(rngs);
@@ -31,6 +39,13 @@ public class PowerOfTwoChoicesRoutingStrategy implements WebServerRoutingStrateg
         rngs.plantSeeds(seed);
     }
 
+    /**
+     * Selects two random servers and returns the one with the fewest active jobs.
+     *
+     * @param job the job to route
+     * @param cluster the web server cluster
+     * @return the selected web server
+     */
     @Override
     public WebServer selectWebServer(Job job, WebServerCluster cluster) {
         List<WebServer> active = cluster.getActiveServers();
@@ -52,3 +67,4 @@ public class PowerOfTwoChoicesRoutingStrategy implements WebServerRoutingStrateg
         return (s1.getActiveJobs().size() <= s2.getActiveJobs().size()) ? s1 : s2;
     }
 }
+

@@ -1,15 +1,19 @@
 package it.uniroma2.pmcsn.objective;
 
-import it.uniroma2.pmcsn.LoadManagerSimulator;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ClusterConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.LoadConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ScalingConfig;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
+import it.uniroma2.pmcsn.facade.SimulationFacade.AggregatedResults;
 import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
-import it.uniroma2.pmcsn.utils.LogFactory;
-import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
+import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import org.jfree.data.xy.XYSeries;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Objective 1.3: Horizontal Scaler Parameter Estimation
@@ -17,13 +21,29 @@ import java.util.*;
  * Compares 1, 2, 3, 4, 5 Web Servers across different arrival rates.
  * Scalers are DISABLED to identify physical limits.
  */
-public class HorizontalScalingParameterEstimationObjective extends LoadManagerSimulator {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(HorizontalScalingParameterEstimationObjective.class, "OBJ1.3");
+public class HorizontalScalingParameterEstimationObjective extends BaseObjective {
 
+    /**
+     * Initializes the horizontal scaling parameter estimation objective.
+     */
+    public HorizontalScalingParameterEstimationObjective() {
+        super(HorizontalScalingParameterEstimationObjective.class, "OBJ1.3");
+    }
+
+    /**
+     * Main entry point for Objective 1.3.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new HorizontalScalingParameterEstimationObjective().start(args);
     }
 
+    /**
+     * Executes the horizontal scaling parameter estimation analysis.
+     *
+     * @param config The application configuration.
+     */
     @Override
     protected void run(ApplicationConfig config) {
         logger.info("Starting Horizontal Scaling Parameter Estimation Objective (1.3)...");
@@ -48,20 +68,20 @@ public class HorizontalScalingParameterEstimationObjective extends LoadManagerSi
 
             for (double lambda : lambdas) {
                 ApplicationConfig currentConfig = new ApplicationConfig(
-                        new ApplicationConfig.LoadConfig(
+                        new LoadConfig(
                                 1.0 / lambda, arrivalCv,
                                 ApplicationConfig.MEAN_SERVICE, ApplicationConfig.CV_SERVICE,
                                 ApplicationConfig.SI_MAX, -1,
                                 RoutingPolicy.ROUND_ROBIN, ApplicationConfig.WORKLOAD_TYPE, null
                         ),
-                        ApplicationConfig.ClusterConfig.fixedServer(n, true),
-                        ApplicationConfig.ScalingConfig.disabled(),
+                        ClusterConfig.fixedServer(n, true),
+                        ScalingConfig.disabled(),
                         config.execution(),
                         config.logging()
                 );
 
                 SimulationFacade facade = new SimulationFacade(currentConfig);
-                SimulationFacade.AggregatedResults results = facade.runSimulation();
+                AggregatedResults results = facade.runSimulation();
 
                 double r0 = results.responseTime().mean();
                 // Simple check for non-convergence
@@ -83,3 +103,4 @@ public class HorizontalScalingParameterEstimationObjective extends LoadManagerSi
                 cvResults, "data/objective/horizontal_parameter_estimation.png", 5.0);
     }
 }
+

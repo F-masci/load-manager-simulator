@@ -2,6 +2,7 @@ package it.uniroma2.pmcsn.model.server;
 
 import it.uniroma2.pmcsn.lib.statistics.TimedWelford;
 import it.uniroma2.pmcsn.utils.LogFactory;
+import it.uniroma2.pmcsn.utils.LogFactory.ModuleLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
  * Handles dynamic capacity scaling (scaleOut and scaleIn) and deallocation draining.
  */
 public class WebServerCluster {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(WebServerCluster.class, "SERVER");
+    private static final ModuleLogger logger = LogFactory.getLogger(WebServerCluster.class, "SERVER");
 
     private final List<WebServer> activeServers;
     private final List<WebServer> drainingServers;
@@ -25,6 +26,12 @@ public class WebServerCluster {
     
     private final TimedWelford activeServersStat = new TimedWelford();
 
+    /**
+     * Constructs a WebServerCluster with a specified minimum and maximum number of servers.
+     *
+     * @param minServers the minimum number of active servers
+     * @param maxServers the maximum number of active servers
+     */
     public WebServerCluster(int minServers, int maxServers) {
         this.minServers = minServers;
         this.maxServers = maxServers;
@@ -40,6 +47,13 @@ public class WebServerCluster {
         activeServersStat.updateToTime(0.0, activeServers.size());
     }
 
+    /**
+     * Constructs a WebServerCluster with specified limits and an initial list of servers.
+     *
+     * @param minServers the minimum number of active servers
+     * @param maxServers the maximum number of active servers
+     * @param initialServers the list of initially active servers
+     */
     public WebServerCluster(int minServers, int maxServers, List<WebServer> initialServers) {
         this.minServers = minServers;
         this.maxServers = maxServers;
@@ -49,36 +63,74 @@ public class WebServerCluster {
         activeServersStat.updateToTime(0.0, activeServers.size());
     }
 
+    /**
+     * Returns the current number of active servers.
+     *
+     * @return the active servers count
+     */
     public int getActiveServersCount() {
         return activeServers.size();
     }
 
+    /**
+     * Returns the current number of draining servers.
+     *
+     * @return the draining servers count
+     */
     public int getDrainingServersCount() {
         return drainingServers.size();
     }
 
+    /**
+     * Returns the list of currently active servers.
+     *
+     * @return the list of active servers
+     */
     public List<WebServer> getActiveServers() {
         return activeServers;
     }
 
+    /**
+     * Returns the list of servers currently in the draining state.
+     *
+     * @return the list of draining servers
+     */
     public List<WebServer> getDrainingServers() {
         return drainingServers;
     }
 
+    /**
+     * Returns the list of all servers created during the simulation.
+     *
+     * @return the list of all servers
+     */
     public List<WebServer> getAllServers() {
         return allServers;
     }
 
+    /**
+     * Returns the minimum number of servers.
+     *
+     * @return the minimum servers limit
+     */
     public int getMinServers() {
         return minServers;
     }
 
+    /**
+     * Returns the maximum number of servers.
+     *
+     * @return the maximum servers limit
+     */
     public int getMaxServers() {
         return maxServers;
     }
 
     /**
      * Increases the number of active Web Servers by 1, if below maxServers.
+     *
+     * @param clock current simulation time
+     * @return true if a server was added, false otherwise
      */
     public boolean scaleOut(double clock) {
         if (activeServers.size() < maxServers) {
@@ -98,6 +150,9 @@ public class WebServerCluster {
     /**
      * Decreases the number of active Web Servers by 1, if above minServers.
      * The removed server enters a draining state if it has active jobs.
+     *
+     * @param clock current simulation time
+     * @return true if a server was removed from active pool, false otherwise
      */
     public boolean scaleIn(double clock) {
         if (activeServers.size() > minServers) {
@@ -119,6 +174,8 @@ public class WebServerCluster {
 
     /**
      * Updates statistics for all active and draining servers.
+     *
+     * @param clock current simulation time
      */
     public void updateStatistics(double clock) {
         activeServersStat.updateToTime(clock, activeServers.size());
@@ -129,6 +186,9 @@ public class WebServerCluster {
 
     /**
      * Updates statistics and processes jobs for all active and draining servers.
+     *
+     * @param elapsed time interval elapsed
+     * @param nextTime simulation time at the end of the interval
      */
     public void processActiveJobs(double elapsed, double nextTime) {
         for (WebServer ws : activeServers) {
@@ -145,6 +205,8 @@ public class WebServerCluster {
 
     /**
      * Updates statistics for all servers at the end of the simulation.
+     *
+     * @param clock current simulation time
      */
     public void finalizeStatistics(double clock) {
         for (WebServer ws : allServers) {
@@ -154,6 +216,8 @@ public class WebServerCluster {
 
     /**
      * Resets statistics for all servers in the cluster and scaling counts.
+     *
+     * @param clock current simulation clock
      */
     public void resetStatistics(double clock) {
         for (WebServer ws : allServers) {
@@ -165,16 +229,29 @@ public class WebServerCluster {
         activeServersStat.updateToTime(clock, activeServers.size());
     }
 
+    /**
+     * Returns the total number of scale-out actions performed.
+     *
+     * @return the scale out count
+     */
     public int getScaleOutCount() {
         return scaleOutCount;
     }
 
+    /**
+     * Returns the total number of scale-in actions performed.
+     *
+     * @return the scale in count
+     */
     public int getScaleInCount() {
         return scaleInCount;
     }
 
     /**
      * Returns the average number of active servers weighted by time.
+     *
+     * @param currentClock current simulation clock
+     * @return the average active servers
      */
     public double getAverageActiveServers(double currentClock) {
         activeServersStat.updateToTime(currentClock, activeServers.size());

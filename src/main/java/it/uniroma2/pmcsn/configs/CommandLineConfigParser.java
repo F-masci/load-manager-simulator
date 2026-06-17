@@ -10,6 +10,9 @@ public class CommandLineConfigParser {
 
     /**
      * Parses command-line arguments and returns an ApplicationConfig instance.
+     *
+     * @param args command-line arguments
+     * @return populated application configuration
      */
     public static ApplicationConfig parse(String[] args) {
         // Initialize with default values from constants
@@ -106,6 +109,9 @@ public class CommandLineConfigParser {
         );
     }
 
+    /**
+     * Prints the usage information to the standard output.
+     */
     public static void printUsage() {
         System.out.println("Usage: java it.pmcsn.LoadManagerSimulator [options]");
         System.out.println("Options:");

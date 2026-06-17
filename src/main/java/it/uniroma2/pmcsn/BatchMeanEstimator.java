@@ -32,8 +32,15 @@ public class BatchMeanEstimator {
 
     /**
      * Standardized data structure encapsulating output statistics.
+     *
+     * @param intervalResult   The calculated confidence interval.
+     * @param totalObservations Total number of samples collected.
+     * @param batchSize        The size of each batch (b).
+     * @param numBatches       The number of batches (k).
+     * @param finalLag1ACF     The Lag-1 autocorrelation of batch means.
      */
     public record EstimationReport(
+
             IntervalEstimator.IntervalResult intervalResult,
             int totalObservations,
             int batchSize,

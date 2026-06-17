@@ -5,13 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * SimulatorDecorator to collect the time series of individual response times in-memory.
+ * Decorator that collects a time series of individual job response times in memory.
  */
 public class TimeSerieCollector extends SimulatorDecorator {
     private final List<Double> series = new ArrayList<>();
     private int lastJobsCompleted = 0;
     private double lastSumOfResponseTimes = 0.0;
 
+    /**
+     * Initializes the collector with a simulator.
+     *
+     * @param decorated simulator to decorate
+     */
     public TimeSerieCollector(Simulator decorated) {
         super(decorated);
     }
@@ -42,8 +47,9 @@ public class TimeSerieCollector extends SimulatorDecorator {
     }
 
     /**
-     * Retrieves the collected time series data.
-     * @return List of response times.
+     * Gets the collected time series data.
+     *
+     * @return list of response times
      */
     public List<Double> getSeries() {
         return series;

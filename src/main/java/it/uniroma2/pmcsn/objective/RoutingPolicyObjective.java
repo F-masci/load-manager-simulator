@@ -1,20 +1,26 @@
 package it.uniroma2.pmcsn.objective;
 
-import it.uniroma2.pmcsn.LoadManagerSimulator;
 import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ClusterConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ExecutionConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.LoadConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.LoggingConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ScalingConfig;
 import it.uniroma2.pmcsn.configs.LoggingDataType;
-import it.uniroma2.pmcsn.controller.SimulationController;
+import it.uniroma2.pmcsn.controller.SimulationController.StopCondition;
 import it.uniroma2.pmcsn.controller.Simulator;
 import it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator;
 import it.uniroma2.pmcsn.controller.decorator.TimeSerieCollector;
 import it.uniroma2.pmcsn.lib.statistics.AutoCorrelation;
 import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
-import it.uniroma2.pmcsn.utils.LogFactory;
-import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
+import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Objective 2.1: Routing Policy Comparison
@@ -22,13 +28,29 @@ import java.util.*;
  * Config: 3 Web Servers STATIC (min=3, max=3), Spike Server ENABLED.
  * Scaling: DISABLED.
  */
-public class RoutingPolicyObjective extends LoadManagerSimulator {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(RoutingPolicyObjective.class, "OBJ2.1");
+public class RoutingPolicyObjective extends BaseObjective {
 
+    /**
+     * Initializes the routing policy objective.
+     */
+    public RoutingPolicyObjective() {
+        super(RoutingPolicyObjective.class, "OBJ2.1");
+    }
+
+    /**
+     * Main entry point for Objective 2.1.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new RoutingPolicyObjective().start(args);
     }
 
+    /**
+     * Executes the routing policy analysis.
+     *
+     * @param config The application configuration.
+     */
     @Override
     protected void run(ApplicationConfig config) {
         logger.info("Starting Routing Policy Objective (2.1)...");
@@ -49,17 +71,17 @@ public class RoutingPolicyObjective extends LoadManagerSimulator {
 
         for (RoutingPolicy policy : policies) {
             ApplicationConfig currentConfig = new ApplicationConfig(
-                    new ApplicationConfig.LoadConfig(
+                    new LoadConfig(
                             config.load().workloadType(),
                             config.load().meanInterarrival(),
                             config.load().meanService(),
                             policy,
                             config.load().siMax()
                     ),
-                    ApplicationConfig.ClusterConfig.fixedServer(4, true),
-                    ApplicationConfig.ScalingConfig.disabled(),
-                    ApplicationConfig.ExecutionConfig.singleRun(1_000_000),
-                    new ApplicationConfig.LoggingConfig(true, config.logging().format(), LoggingDataType.TIME_SERIE, config.logging().outputPath())
+                    ClusterConfig.fixedServer(4, true),
+                    ScalingConfig.disabled(),
+                    ExecutionConfig.singleRun(1_000_000),
+                    new LoggingConfig(true, config.logging().format(), LoggingDataType.TIME_SERIE, config.logging().outputPath())
             );
 
             SimulationBuilder builder = new SimulationBuilder().config(currentConfig);
@@ -71,7 +93,7 @@ public class RoutingPolicyObjective extends LoadManagerSimulator {
                 continue;
             }
 
-            controller.run(SimulationController.StopCondition.untilJobsCompleted(currentConfig.execution().maxJobs()));
+            controller.run(StopCondition.untilJobsCompleted(currentConfig.execution().maxJobs()));
 
             List<Double> series = collector.getSeries();
             double r0 = controller.getAverageResponseTime();
@@ -91,9 +113,16 @@ public class RoutingPolicyObjective extends LoadManagerSimulator {
         ObjectiveChartUtility.generateRoutingStatisticalChart(r0Map, stdDevMap, p99Map, "data/objective/routing_policy_comparison.png", 5.0);
     }
 
+    /**
+     * Helper to find the TimeSerieCollector in the decorator chain.
+     *
+     * @param s The simulator instance.
+     * @return The TimeSerieCollector if found, null otherwise.
+     */
     private TimeSerieCollector findCollector(Simulator s) {
         if (s instanceof TimeSerieCollector c) return c;
         if (s instanceof SimulatorDecorator sd) return findCollector(sd.getDecorated());
         return null;
     }
 }
+

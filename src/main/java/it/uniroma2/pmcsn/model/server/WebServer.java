@@ -5,12 +5,19 @@ package it.uniroma2.pmcsn.model.server;
  */
 public class WebServer extends Server {
 
+    /**
+     * Constructs a WebServer with a given ID and unit speed multiplier.
+     *
+     * @param id the unique identifier of the server
+     */
     public WebServer(int id) {
         super(id, 1.0);
     }
 
     /**
-     * Spike Indicator (SI): number of requests currently in execution on this server.
+     * Returns the Spike Indicator (SI), defined as the number of requests currently in execution.
+     *
+     * @return the number of active jobs
      */
     public int getSpikeIndicator() {
         return activeJobs.size();

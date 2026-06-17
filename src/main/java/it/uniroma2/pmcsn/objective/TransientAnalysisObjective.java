@@ -1,14 +1,16 @@
 package it.uniroma2.pmcsn.objective;
 
-import it.uniroma2.pmcsn.LoadManagerSimulator;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
-import it.uniroma2.pmcsn.configs.ApplicationConfig.*;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ClusterConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ExecutionConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.LoadConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ScalingConfig;
 import it.uniroma2.pmcsn.configs.WorkloadType;
+import it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator;
 import it.uniroma2.pmcsn.controller.decorator.data.TransientTimeSeriesCollector;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
-import it.uniroma2.pmcsn.utils.LogFactory;
-import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
+import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -25,13 +28,29 @@ import java.util.Map;
  * Uses standard Hyperexponential workload to observe the system starting from empty
  * and reaching a finite horizon across multiple independent replications.
  */
-public class TransientAnalysisObjective extends LoadManagerSimulator {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(TransientAnalysisObjective.class, "OBJ4.2");
+public class TransientAnalysisObjective extends BaseObjective {
 
+    /**
+     * Initializes the transient analysis objective.
+     */
+    public TransientAnalysisObjective() {
+        super(TransientAnalysisObjective.class, "OBJ4.2");
+    }
+
+    /**
+     * Main entry point for Objective 4.2.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new TransientAnalysisObjective().start(args);
     }
 
+    /**
+     * Executes the transient analysis.
+     *
+     * @param config The application configuration.
+     */
     @Override
     protected void run(ApplicationConfig config) {
         logger.info("Starting Finite Horizon Objective (4.2)...");
@@ -81,6 +100,20 @@ public class TransientAnalysisObjective extends LoadManagerSimulator {
         }
     }
 
+    /**
+     * Runs a specific architecture scenario for transient analysis.
+     *
+     * @param label           The architecture label.
+     * @param baseConfig      The base application configuration.
+     * @param min             Minimum number of servers.
+     * @param max             Maximum number of servers.
+     * @param hEnabled        Whether horizontal scaling is enabled.
+     * @param vEnabled        Whether vertical scaling is enabled.
+     * @param cv              Coefficient of variation for interarrival.
+     * @param lambda          Arrival rate.
+     * @param scenarioDataset The dataset to populate.
+     * @param csv             The CSV string builder to populate.
+     */
     private void runArchScenario(String label, ApplicationConfig baseConfig, 
                                  int min, int max, boolean hEnabled, boolean vEnabled,
                                  double cv, double lambda,
@@ -97,15 +130,15 @@ public class TransientAnalysisObjective extends LoadManagerSimulator {
         );
 
         ApplicationConfig fullConfig = new ApplicationConfig(
-            new ApplicationConfig.LoadConfig(
+            new LoadConfig(
                     1.0 / lambda, cv,
                     ApplicationConfig.MEAN_SERVICE, ApplicationConfig.CV_SERVICE,
                     ApplicationConfig.SI_MAX, -1,
                     ApplicationConfig.ROUTING_POLICY, WorkloadType.HYPEREXPONENTIAL, null
             ),
-            new ApplicationConfig.ClusterConfig(min, min, max, vEnabled), 
+            new ClusterConfig(min, min, max, vEnabled), 
             sConf, 
-            ApplicationConfig.ExecutionConfig.replications(5, 500_800.0), // 10 Replications, 50.0s each (transient)
+            ExecutionConfig.replications(5, 500_800.0), // 10 Replications, 50.0s each (transient)
             baseConfig.logging()
         );
 
@@ -114,7 +147,7 @@ public class TransientAnalysisObjective extends LoadManagerSimulator {
         
         facade.runSimulation();
         
-        java.util.List<it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator> decorators = facade.getCustomDecorators();
+        List<SimulatorDecorator> decorators = facade.getCustomDecorators();
         
         for (int i = 0; i < decorators.size(); i++) {
             TransientTimeSeriesCollector collector = (TransientTimeSeriesCollector) decorators.get(i);
@@ -131,4 +164,5 @@ public class TransientAnalysisObjective extends LoadManagerSimulator {
         }
     }
 }
+
 

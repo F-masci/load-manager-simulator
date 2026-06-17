@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * SimulatorDecorator to collect the time series of Response Time against Clock Time.
- * Also stores the seed used for the specific simulation run.
+ * Decorator that collects a time series of response time against clock time.
  */
 public class TransientTimeSeriesCollector extends SimulatorDecorator {
     // Stores pairs of [ClockTime, R0]
@@ -16,11 +15,21 @@ public class TransientTimeSeriesCollector extends SimulatorDecorator {
     private int lastJobsCompleted = 0;
     private final long startingSeed;
 
+    /**
+     * Initializes the collector with a simulator and records its starting seed.
+     *
+     * @param decorated the simulator to decorate
+     */
     public TransientTimeSeriesCollector(Simulator decorated) {
         super(decorated);
         this.startingSeed = decorated.getSeed();
     }
 
+    /**
+     * Processes the next event and records response time if a job was completed.
+     *
+     * @return true if an event was processed, false otherwise
+     */
     @Override
     public boolean processNextEvent() {
         boolean hasNext = super.processNextEvent();
@@ -35,17 +44,27 @@ public class TransientTimeSeriesCollector extends SimulatorDecorator {
         return hasNext;
     }
 
+    /**
+     * Gets the starting seed of the simulation.
+     *
+     * @return the starting seed
+     */
     public long getStartingSeed() {
         return startingSeed;
     }
 
     /**
-     * Retrieves the collected time series data (Clock vs R0).
+     * Retrieves the collected time series data as clock and response time pairs.
+     *
+     * @return list of double arrays containing clock and response time
      */
     public List<double[]> getTimeSeries() {
         return timeSeries;
     }
 
+    /**
+     * Resets the collected time series and completed jobs counter.
+     */
     @Override
     public void resetStatistics() {
         super.resetStatistics();

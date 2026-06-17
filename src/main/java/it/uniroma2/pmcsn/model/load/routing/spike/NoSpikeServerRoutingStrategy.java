@@ -3,11 +3,17 @@ package it.uniroma2.pmcsn.model.load.routing.spike;
 import it.uniroma2.pmcsn.model.server.WebServer;
 
 /**
- * Implementation of SpikeServerRoutingStrategy that never routes to the Spike Server (always returns false).
- * Used for testing or running simulations in a simplified context without a Spike Server.
+ * Strategy that never routes to the spike server.
  */
 public class NoSpikeServerRoutingStrategy implements SpikeServerRoutingStrategy {
 
+    /**
+     * Always returns false as this strategy disables spike server routing.
+     *
+     * @param targetServer the initially selected web server
+     * @param siMax the maximum spike indicator threshold
+     * @return always false
+     */
     @Override
     public boolean shouldRouteToSpike(WebServer targetServer, int siMax) {
         return false;

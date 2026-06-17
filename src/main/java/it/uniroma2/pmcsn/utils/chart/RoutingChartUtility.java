@@ -24,11 +24,11 @@ import java.util.Map;
 public class RoutingChartUtility extends BaseChartUtility {
 
     /**
-     * Generates a chart showing individual load for each active Web Server.
-     * Useful for validating that the load balancer is properly distributing jobs.
+     * Generates a chart showing load distribution for web servers.
      *
-     * @param csvPath Path to the CSV source file.
-     * @param outputPath Path for the generated PNG.
+     * @param policy the routing policy used
+     * @param csvPath path to the source csv file
+     * @param outputPath path for the output png image
      */
     public static void generateRoutingBalanceChart(RoutingPolicy policy, String csvPath, String outputPath) {
         Map<Integer, XYSeries> serverSeriesMap = new HashMap<>();
@@ -84,7 +84,11 @@ public class RoutingChartUtility extends BaseChartUtility {
     }
 
     /**
-     * Helper to create sub-plots for routing balance.
+     * Creates a subplot for routing balance.
+     *
+     * @param series the data series
+     * @param color the area color
+     * @return the created xy plot
      */
     private static XYPlot createRoutingSubplot(XYSeries series, Color color) {
         XYSeriesCollection dataset = new XYSeriesCollection(series);

@@ -7,8 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Implementation of SpikeServerRoutingStrategy based on a threshold value (siMax) compared
- * to the target Web Server's Spike Indicator load.
+ * Strategy based on threshold values for activating and deactivating spike server routing.
  */
 public class ThresholdSpikeServerRoutingStrategy implements SpikeServerRoutingStrategy {
     private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(ThresholdSpikeServerRoutingStrategy.class, "ROUTER");
@@ -18,20 +17,28 @@ public class ThresholdSpikeServerRoutingStrategy implements SpikeServerRoutingSt
     private int stateChanges = 0;
 
     /**
-     * Standard constructor. siLow will be equal to siMax.
+     * Constructs a strategy where the deactivation threshold equals the activation threshold.
      */
     public ThresholdSpikeServerRoutingStrategy() {
         this(-1);
     }
 
     /**
-     * Constructor with explicit siLow.
-     * @param siLow the lower threshold for deactivating spike routing.
+     * Constructs a strategy with an explicit deactivation threshold.
+     *
+     * @param siLow the lower threshold for deactivating spike routing
      */
     public ThresholdSpikeServerRoutingStrategy(int siLow) {
         this.siLow = siLow;
     }
 
+    /**
+     * Determines if a request should be routed to the spike server based on hysteresis.
+     *
+     * @param targetServer the initially selected web server
+     * @param siMax the maximum spike indicator threshold
+     * @return true if the job should be routed to the spike server
+     */
     @Override
     public boolean shouldRouteToSpike(WebServer targetServer, int siMax) {
         int currentSiLow = (siLow == -1) ? siMax : siLow;
@@ -57,14 +64,16 @@ public class ThresholdSpikeServerRoutingStrategy implements SpikeServerRoutingSt
     }
 
     /**
-     * Returns the total number of state changes (activations/deactivations) occurred.
+     * Gets the total number of state changes occurred.
+     *
+     * @return the state changes count
      */
     public int getStateChanges() {
         return stateChanges;
     }
 
     /**
-     * Resets the state and counter for all servers.
+     * Resets the state and counters for all servers.
      */
     public void reset() {
         spikeModeMap.clear();

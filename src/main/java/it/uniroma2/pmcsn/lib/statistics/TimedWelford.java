@@ -6,14 +6,20 @@ package it.uniroma2.pmcsn.lib.statistics;
  * where each value is weighted by the duration it persists.
  */
 public class TimedWelford {
+    /** The total duration of all observations. */
     private double totalDuration = 0.0;
+    /** The running time-weighted mean. */
     private double mean = 0.0;
+    /** The running sum of squares for variance calculation. */
     private double sumOfSquares = 0.0;
+    /** The number of updates received. */
     private long count = 0;
 
-    // For tracking state over time
+    /** The simulation time of the last update. */
     private double lastTime = 0.0;
+    /** The current value of the variable being tracked. */
     private double currentValue = 0.0;
+    /** Flag indicating if the tracker has been initialized. */
     private boolean initialized = false;
 
     /**

@@ -2,16 +2,19 @@ package it.uniroma2.pmcsn.utils.chart;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYStepAreaRenderer;
 import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.util.ShapeUtils;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,11 +26,10 @@ import java.io.IOException;
 public class SystemChartUtility extends BaseChartUtility {
 
     /**
-     * Generates a comparison chart of Web Server vs Spike Server load.
-     * Highlights job diversions and individual workload events.
+     * Generates a comparison chart of web server vs spike server load.
      *
-     * @param csvPath Path to the CSV source file.
-     * @param outputPath Path for the generated PNG.
+     * @param csvPath path to the source csv file
+     * @param outputPath path for the output png image
      */
     public static void generateLoadComparisonChart(String csvPath, String outputPath) {
         XYSeries wsSeries = new XYSeries("Web Server (Active Jobs)");
@@ -107,15 +109,15 @@ public class SystemChartUtility extends BaseChartUtility {
         
         // Arrivals: Red X
         markerRenderer.setSeriesPaint(0, new Color(191, 97, 106, 180)); 
-        markerRenderer.setSeriesShape(0, org.jfree.chart.util.ShapeUtils.createDiagonalCross(5.0f, 1.5f));
+        markerRenderer.setSeriesShape(0, ShapeUtils.createDiagonalCross(5.0f, 1.5f));
         
         // Completions: Green Circle
         markerRenderer.setSeriesPaint(1, new Color(34, 139, 34, 180)); 
-        markerRenderer.setSeriesShape(1, new java.awt.geom.Ellipse2D.Double(-4, -4, 8, 8));
+        markerRenderer.setSeriesShape(1, new Ellipse2D.Double(-4, -4, 8, 8));
         plot.setRenderer(2, markerRenderer);
 
         // Final Plot and Chart Polish
-        plot.setDatasetRenderingOrder(org.jfree.chart.plot.DatasetRenderingOrder.FORWARD);
+        plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
         plot.setBackgroundPaint(Color.WHITE);
         plot.setDomainGridlinePaint(new Color(230, 230, 230));
         plot.setRangeGridlinePaint(new Color(230, 230, 230));

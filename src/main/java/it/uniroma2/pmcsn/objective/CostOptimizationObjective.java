@@ -1,15 +1,16 @@
 package it.uniroma2.pmcsn.objective;
 
-import it.uniroma2.pmcsn.LoadManagerSimulator;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ClusterConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.LoadConfig;
+import it.uniroma2.pmcsn.configs.ApplicationConfig.ScalingConfig;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
-import it.uniroma2.pmcsn.utils.LogFactory;
-import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
+import it.uniroma2.pmcsn.facade.SimulationFacade.AggregatedResults;
 import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
+import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,13 +20,29 @@ import java.util.Map;
  * for multiple candidate horizontal scaling thresholds, across 4 different cooldown values.
  * C_tot = (N_avg * 100) + (S_avg * 100)
  */
-public class CostOptimizationObjective extends LoadManagerSimulator {
-    private static final LogFactory.ModuleLogger logger = LogFactory.getLogger(CostOptimizationObjective.class, "OBJ3.1");
+public class CostOptimizationObjective extends BaseObjective {
 
+    /**
+     * Initializes the cost optimization objective.
+     */
+    public CostOptimizationObjective() {
+        super(CostOptimizationObjective.class, "OBJ3.1");
+    }
+
+    /**
+     * Main entry point for Objective 3.1.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new CostOptimizationObjective().start(args);
     }
 
+    /**
+     * Executes the economic analysis.
+     *
+     * @param config The application configuration.
+     */
     @Override
     protected void run(ApplicationConfig config) {
         logger.info("Starting Economic Analysis: Total Cost vs Load Objective (3.1)...");
@@ -69,14 +86,14 @@ public class CostOptimizationObjective extends LoadManagerSimulator {
 
                 for (double lambda : lambdas) {
                     ApplicationConfig objectiveConfig = new ApplicationConfig(
-                            new ApplicationConfig.LoadConfig(
+                            new LoadConfig(
                                     1.0 / lambda, ApplicationConfig.CV_INTERARRIVAL,
                                     ApplicationConfig.MEAN_SERVICE, ApplicationConfig.CV_SERVICE,
                                     ApplicationConfig.SI_MAX, -1,
                                     ApplicationConfig.ROUTING_POLICY, ApplicationConfig.WORKLOAD_TYPE, null
                             ),
-                            new ApplicationConfig.ClusterConfig(1, 1, 25, true),
-                            new ApplicationConfig.ScalingConfig(
+                            new ClusterConfig(1, 1, 25, true),
+                            new ScalingConfig(
                                     fixedUpper, scaleInLimit,
                                     ApplicationConfig.SCALE_INTERVAL, cooldown,
                                     ApplicationConfig.SPIKE_UPPER_THRESHOLD,
@@ -90,7 +107,7 @@ public class CostOptimizationObjective extends LoadManagerSimulator {
                     );
 
                     SimulationFacade facade = new SimulationFacade(objectiveConfig);
-                    SimulationFacade.AggregatedResults results = facade.runSimulation();
+                    AggregatedResults results = facade.runSimulation();
 
                     double nAvg = results.avgServers().mean();
                     double sAvg = results.spikeAvgSpeed().mean();
@@ -115,3 +132,4 @@ public class CostOptimizationObjective extends LoadManagerSimulator {
         ObjectiveChartUtility.generateCostCooldownGrid(costCooldownData, rtCooldownData, "data/objective/cost_analysis.png", 5.0);
     }
 }
+

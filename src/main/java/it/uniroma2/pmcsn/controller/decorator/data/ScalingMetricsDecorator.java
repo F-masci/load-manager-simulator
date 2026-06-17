@@ -2,6 +2,7 @@ package it.uniroma2.pmcsn.controller.decorator.data;
 
 import it.uniroma2.pmcsn.controller.Simulator;
 import it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator;
+import it.uniroma2.pmcsn.model.event.EventType;
 import it.uniroma2.pmcsn.model.load.scaler.horizontal.HorizontalScaler;
 import it.uniroma2.pmcsn.model.load.scaler.vertical.VerticalScaler;
 
@@ -11,15 +12,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Decorator that collects scaling metrics (Horizontal and Vertical scaler states) in memory.
+ * Decorator that collects horizontal and vertical scaling metrics in memory.
  */
 public class ScalingMetricsDecorator extends SimulatorDecorator implements DataExporter {
     private final List<Map<String, Object>> snapshots = new ArrayList<>();
 
+    /**
+     * Initializes the scaling metrics decorator with a simulator.
+     *
+     * @param decorated the simulator to decorate
+     */
     public ScalingMetricsDecorator(Simulator decorated) {
         super(decorated);
     }
 
+    /**
+     * Processes the next event and captures scaling states if changes occur.
+     *
+     * @return true if an event was processed, false otherwise
+     */
     @Override
     public boolean processNextEvent() {
         HorizontalScaler hScaler = getLoadManager().getHorizontalScaler();
@@ -37,7 +48,7 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
         boolean vScaled = currentVScaling != lastVScaling;
 
         // Determine which scaler was checked based on event type
-        it.uniroma2.pmcsn.model.event.EventType lastEvent = getDecorated().getLastEventType();
+        EventType lastEvent = getDecorated().getLastEventType();
         String checkType = "NONE";
         if (lastEvent != null) {
             switch (lastEvent) {
@@ -58,6 +69,13 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
         return result;
     }
 
+    /**
+     * Captures the current state of scalers and system metrics.
+     *
+     * @param forceHZero true to force horizontal cooldown to zero
+     * @param forceVZero true to force vertical cooldown to zero
+     * @param checkType the type of scaling check performed
+     */
     private void captureState(boolean forceHZero, boolean forceVZero, String checkType) {
         Map<String, Object> snapshot = new LinkedHashMap<>();
         double clock = getClock();
@@ -86,11 +104,21 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
         snapshots.add(snapshot);
     }
 
+    /**
+     * Retrieves the captured scaling snapshots.
+     *
+     * @return list of state snapshots
+     */
     @Override
     public List<Map<String, Object>> getCapturedData() {
         return snapshots;
     }
 
+    /**
+     * Retrieves the headers for scaling metrics.
+     *
+     * @return array of header strings
+     */
     @Override
     public String[] getHeaders() {
         return new String[]{
@@ -100,9 +128,13 @@ public class ScalingMetricsDecorator extends SimulatorDecorator implements DataE
         };
     }
 
+    /**
+     * Resets the captured scaling data and base statistics.
+     */
     @Override
     public void resetStatistics() {
         super.resetStatistics();
         snapshots.clear();
     }
 }
+

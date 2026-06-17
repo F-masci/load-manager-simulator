@@ -6,10 +6,18 @@ import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import java.util.List;
 
 /**
- * Implementation of WebServerRoutingStrategy selecting the Web Server with the lowest load (Spike Indicator).
+ * Routing strategy that selects the web server with the lowest spike indicator load.
  */
 public class LeastLoadedRoutingStrategy implements WebServerRoutingStrategy {
 
+    /**
+     * Selects the active web server with the minimum load.
+     *
+     * @param job the job to route
+     * @param cluster the web server cluster
+     * @return the least loaded web server
+     * @throws IllegalStateException if no active servers are found
+     */
     @Override
     public WebServer selectWebServer(Job job, WebServerCluster cluster) {
         List<WebServer> active = cluster.getActiveServers();
