@@ -15,22 +15,6 @@ public class TestConfigs {
     final static private double V_SCALING_MAX_TIME = 25.0;
 
     /**
-     * Generates an M/M/1 configuration for simple system validation.
-     *
-     * @param arrivalMean Mean time between arrivals (1/lambda).
-     * @param serviceMean Mean service time (1/mu).
-     * @return A configuration for steady-state M/M/1 analysis.
-     */
-    public static ApplicationConfig mm1(double arrivalMean, double serviceMean) {
-        return new ApplicationConfig(
-            ApplicationConfig.LoadConfig.singleExponentialServer(arrivalMean, serviceMean),
-            ApplicationConfig.ClusterConfig.singleServer(),
-            ApplicationConfig.ScalingConfig.disabled(),
-            ApplicationConfig.ExecutionConfig.batchRun(NUM_BATCHES, BATCH_SIZE)
-        );
-    }
-
-    /**
      * Generates a configuration for testing Horizontal Scaling (Scale-out/Scale-in).
      *
      * @param tracePath    Path to the trace file driving the workload.

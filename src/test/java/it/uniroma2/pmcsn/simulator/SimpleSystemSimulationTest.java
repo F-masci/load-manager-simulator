@@ -32,7 +32,12 @@ public class SimpleSystemSimulationTest extends BaseSimulationTest {
         final double expectedUtil = lam / mu;
         final double expectedThr = lam;
 
-        ApplicationConfig testConfig = TestConfigs.mm1(ARRIVAL_MEAN, SERVICE_MEAN);
+        ApplicationConfig testConfig = new ApplicationConfig(
+            ApplicationConfig.LoadConfig.singleExponentialServer(ARRIVAL_MEAN, SERVICE_MEAN),
+            ApplicationConfig.ClusterConfig.singleServer(),
+            ApplicationConfig.ScalingConfig.disabled(),
+            ApplicationConfig.ExecutionConfig.batchRun(8192, 2048, 0)
+        );
 
         SimulationFacade facade = new SimulationFacade(testConfig);
         SimulationFacade.AggregatedResults results = facade.runSimulation();
@@ -59,7 +64,7 @@ public class SimpleSystemSimulationTest extends BaseSimulationTest {
             ApplicationConfig.ClusterConfig.singleServer(),
             ApplicationConfig.ScalingConfig.disabled(),
             // Simulator run for 25_000_000 sample, so we use this to build batch means params
-            ApplicationConfig.ExecutionConfig.batchRun(256, 100_000)
+            ApplicationConfig.ExecutionConfig.batchRun(512, 16_384, 0)
         );
 
         SimulationFacade facade = new SimulationFacade(testConfig);
@@ -68,12 +73,12 @@ public class SimpleSystemSimulationTest extends BaseSimulationTest {
         double littleJis = results.throughput().mean() * results.responseTime().mean();
         double realJis = results.jobsInSystem().mean();
 
-        logDebug("Little's Law Check - Real JIS: {}, Expected JIS (X * R): {}", realJis, littleJis);
+        logDebug("Little's Law Check - Real JIS: {}, Expected JIS: {}", realJis, littleJis);
         assertEquals(realJis, littleJis, results.jobsInSystem().halfWidth(), "Little's Law does not hold");
 
         // Expected results taken from book simulator
         // We use a scaling factor becuse this isn't a theoretical model and the confidence intervals
-        //  are quite large, so we want to be more lenient in the assertions
+        // are quite large, so we want to be more lenient in the assertions
         final int scalingFactor = 3;
         assertEquals(1.2113, results.responseTime().mean(), results.responseTime().halfWidth() * scalingFactor, "Mean Response Time mismatch");
         assertEquals(3.0118, results.jobsInSystem().mean(), results.jobsInSystem().halfWidth() * scalingFactor, "Mean Jobs in System mismatch");

@@ -1,0 +1,22 @@
+INFO  BatchMeanEstimator [SIM] - Starting Batch Means Estimation Analysis...
+INFO  BatchMeanEstimator [SIM] - 
+--- Phase 1: Analytical Method - ACF ---
+INFO  BatchMeanEstimator [SIM] - Running static pilot trace for 5000000 jobs...
+[==================================================] 100% | Jobs: 5000000 | Clock: 1999758,74s
+INFO  AutoCorrelation [STATS] - Evaluating ACF cutoff for 17 consecutive lags below threshold
+Calculating ACF cutoff: lag=124, consecutiveBelow=16, candidateLag=108
+INFO  BatchMeanEstimator [SIM] - Cutoff lag detected: 108 - Critical limit threshold = 8.944271909999158E-4
+INFO  BatchMeanEstimator [SIM] - Forming fixed structure: batch size (b) = 1080, number of batches (k) = 4629
+INFO  BatchMeanEstimator [SIM] - 
+--- Phase 2: Dynamic Method - Automated Stopping Rule ---
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,2723 (>= 0.05). Independence failed. Doubling batch size to 64...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,0996 (>= 0.05). Independence failed. Doubling batch size to 128...
+INFO  BatchMeanEstimator [SIM] - -> Convergence successfully reached!
+INFO  BatchMeanEstimator [SIM] -    Final dynamic state parameters: N = 30000, Batch Size (b) = 128, Batches (k) = 234
+INFO  BatchMeanEstimator [SIM] -    Criteria validation: Lag-1 ACF = 0,0274 (< 0.05) | Rel. Precision = 0,0444 (< 0.05)
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] -                                               FINAL COMPARATIVE ANALYSIS REPORT                                         
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] - Analytical : Mean = 0,6657, StdDev = 0,0884, HW=0,0025, CI = [0,6631, 0,6682] | N = 5000000, b = 1080, k = 4629 | Lag-1 ACF = 0,0063
+INFO  BatchMeanEstimator [SIM] - Dynamic    : Mean = 0,6584, StdDev = 0,2267, HW=0,0292, CI = [0,6292, 0,6876] | N = 30000, b = 128, k = 234 | Lag-1 ACF = 0,0274
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================

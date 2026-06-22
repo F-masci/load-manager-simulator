@@ -1,0 +1,48 @@
+INFO  SimpleSystemSimulationTest [TEST] - Validating M/M/1 metrics: lambda=2.5, mu=4.0
+INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation (Infinite Horizon)... Warm-up: 0 jobs
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 2048 jobs...
+[==================================================] 100% | Batch: 8192/8192
+INFO  SimulationFacade [SIM] -
+ ==================================================================
+                   AGGREGATED SIMULATION REPORT
+METHOD: BATCH MEANS (STEADY STATE)
+SAMPLES (N): 8192
+==================================================================
+Response Time            : Mean = 0,6656, StdDev = 0,0652, HW=0,0014, CI = [0,6642, 0,6670]
+Jobs in System           : Mean = 1,6662, StdDev = 0,1814, HW=0,0039, CI = [1,6622, 1,6701]
+System Utilization       : Mean = 0,6251, StdDev = 0,0198, HW=0,0004, CI = [0,6247, 0,6256]
+Throughput               : Mean = 2,5010, StdDev = 0,0551, HW=0,0012, CI = [2,4998, 2,5022]
+Diverted Jobs            : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
+------------------------------------------------------------------
+Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
+Spike Server Utilization : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+==================================================================
+INFO  SimpleSystemSimulationTest [TEST] - Validating H2/H2/1 metrics: lambda=2.5, mu=4.0
+INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation (Infinite Horizon)... Warm-up: 0 jobs
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 512 batches of 16384 jobs...
+[==================================================] 100% | Batch: 512/512
+INFO  SimulationFacade [SIM] -
+ ==================================================================
+                   AGGREGATED SIMULATION REPORT
+METHOD: BATCH MEANS (STEADY STATE)
+SAMPLES (N): 512
+==================================================================
+Response Time            : Mean = 1,1975, StdDev = 0,1712, HW=0,0149, CI = [1,1826, 1,2123]
+Jobs in System           : Mean = 2,9979, StdDev = 0,4821, HW=0,0419, CI = [2,9561, 3,0398]
+System Utilization       : Mean = 0,6240, StdDev = 0,0290, HW=0,0025, CI = [0,6215, 0,6265]
+Throughput               : Mean = 2,4991, StdDev = 0,0816, HW=0,0071, CI = [2,4921, 2,5062]
+Diverted Jobs            : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
+------------------------------------------------------------------
+Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
+Spike Server Utilization : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+==================================================================

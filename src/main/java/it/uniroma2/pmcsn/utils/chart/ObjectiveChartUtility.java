@@ -291,7 +291,7 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             XYLineAndShapeRenderer stateRenderer = new XYLineAndShapeRenderer(true, true);
             configureRenderer(stateRenderer, bandStateData.get(band).getSeriesCount(), NORD_RED, shapes);
 
-            XYPlot statePlot = createXYSubplot(bandStateData.get(band), "State Changes", stateRenderer);
+            XYPlot statePlot = createXYSubplot(bandStateData.get(band), "Spike Utilization (%)", stateRenderer);
 
             XYLineAndShapeRenderer rtRenderer = new XYLineAndShapeRenderer(true, true);
             configureRenderer(rtRenderer, bandRtData.get(band).getSeriesCount(), NORD_BLUE, shapes);
@@ -460,7 +460,7 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             legend.setSources(new LegendItemSource[] {
                 () -> {
                     LegendItemCollection result = new LegendItemCollection();
-                    result.add(new LegendItem("State Changes", null, null, null, new Line2D.Double(0, 0, 10, 0), new BasicStroke(2.0f), NORD_RED));
+                    result.add(new LegendItem("Spike Utilization (%)", null, null, null, new Line2D.Double(0, 0, 10, 0), new BasicStroke(2.0f), NORD_RED));
                     result.add(new LegendItem("Avg Response Time R0", null, null, null, new Line2D.Double(0, 0, 10, 0), new BasicStroke(2.0f), NORD_BLUE));
                     for (int i = 0; i < series.getSeriesCount(); i++) {
                         result.add(new LegendItem(series.getSeriesKey(i).toString(), null, null, null, shapes[i % shapes.length], Color.DARK_GRAY));
