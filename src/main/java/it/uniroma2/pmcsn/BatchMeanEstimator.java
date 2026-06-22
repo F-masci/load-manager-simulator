@@ -26,9 +26,9 @@ public class BatchMeanEstimator {
     private static final double TARGET_PRECISION = 0.05;    // Relative precision epsilon
     private static final double CONFIDENCE_LEVEL = 1 - TARGET_PRECISION;
     private static final int SIZE_MULTIPLEIR = 10;          // Multiplier for batch size scaling from cutoff lag
-    private static final int INITIAL_BATCH_SIZE = 64;       // Starting batch size for the dynamic method
-    private static final int RE_EVALUATION_BLOCK = 250_000; // Step size for extending the dynamic simulation
-    private static final int MIN_BATCHES_THRESHOLD = 64;    // Recommended minimum k to avoid small-sample variation
+    private static final int INITIAL_BATCH_SIZE = 32;       // Starting batch size for the dynamic method
+    private static final int RE_EVALUATION_BLOCK = 10_000;  // Step size for extending the dynamic simulation
+    private static final int MIN_BATCHES_THRESHOLD = 32;    // Recommended minimum k to avoid small-sample variation
 
     /**
      * Standardized data structure encapsulating output statistics.
