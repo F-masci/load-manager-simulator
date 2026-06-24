@@ -4,10 +4,11 @@ import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.controller.SimulationController;
 import it.uniroma2.pmcsn.controller.Simulator;
-import it.uniroma2.pmcsn.controller.decorator.TimeSerieCollector;
+import it.uniroma2.pmcsn.controller.decorator.data.TimeSerieCollector;
 import it.uniroma2.pmcsn.lib.statistics.AutoCorrelation;
 import it.uniroma2.pmcsn.lib.statistics.IntervalEstimator;
 import it.uniroma2.pmcsn.lib.statistics.Welford;
+import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
 import it.uniroma2.pmcsn.utils.LogFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,17 +60,94 @@ public class BatchMeanEstimator {
         }
     }
 
-    static void main(String[] args) {
-        logger.info("Starting Batch Means Estimation Analysis...");
+    public final static ApplicationConfig[] APPLICATION_CONFIGS = new ApplicationConfig[]{
+            // 0: Default
+            new ApplicationConfig(),
+            // 1: Routing policy
+            new ApplicationConfig(
+                    new ApplicationConfig.LoadConfig(
+                            ApplicationConfig.WORKLOAD_TYPE,
+                            ApplicationConfig.MEAN_INTERARRIVAL, ApplicationConfig.CV_SERVICE,
+                            ApplicationConfig.MEAN_SERVICE, ApplicationConfig.CV_SERVICE,
+                            RoutingPolicy.ROUND_ROBIN
+                    ),
+                ApplicationConfig.ClusterConfig.fixedServer(4, false),
+                ApplicationConfig.ScalingConfig.disabled(),
+                new ApplicationConfig.ExecutionConfig()
+            ),
+            // 2: SI_max estimator
+            new ApplicationConfig(
+                    new ApplicationConfig.LoadConfig(
+                            ApplicationConfig.MEAN_INTERARRIVAL, ApplicationConfig.CV_SERVICE,
+                            ApplicationConfig.MEAN_SERVICE, ApplicationConfig.CV_SERVICE,
+                            75, ApplicationConfig.SI_LOW,
+                            ApplicationConfig.ROUTING_POLICY, ApplicationConfig.WORKLOAD_TYPE, null
+                    ),
+                    ApplicationConfig.ClusterConfig.fixedServer(1, true),
+                    ApplicationConfig.ScalingConfig.disabled(),
+                    new ApplicationConfig.ExecutionConfig()
+            ),
+            // 3: Vertical Step Sizing
+            new ApplicationConfig(
+                    new ApplicationConfig.LoadConfig(),
+                    ApplicationConfig.ClusterConfig.fixedServer(1, true),
+                    ApplicationConfig.ScalingConfig.onlyVertical(
+                            ApplicationConfig.SPIKE_UPPER_THRESHOLD,
+                            ApplicationConfig.SPIKE_LOWER_THRESHOLD,
+                            ApplicationConfig.SPIKE_CPU_PERCENTAGE,
+                            1.0,
+                            ApplicationConfig.COOLDOWN
+                    ),
+                    new ApplicationConfig.ExecutionConfig()
+            ),
+            // 4: Horizontal Scaling
+            new ApplicationConfig(
+                    new ApplicationConfig.LoadConfig(),
+                    ApplicationConfig.ClusterConfig.fixedServer(5, true),
+                    ApplicationConfig.ScalingConfig.disabled(),
+                    new ApplicationConfig.ExecutionConfig()
+            ),
+            // 5: Cost analysis
+            new ApplicationConfig(
+                    new ApplicationConfig.LoadConfig(),
+                    new ApplicationConfig.ClusterConfig(1, 1, 25, true),
+                    new ApplicationConfig.ScalingConfig(
+                            ApplicationConfig.SCALE_OUT_LIMIT, 3.5,
+                            ApplicationConfig.WINDOW_SIZE, 50.0,
+                            ApplicationConfig.SPIKE_UPPER_THRESHOLD,
+                            ApplicationConfig.SPIKE_LOWER_THRESHOLD,
+                            ApplicationConfig.SPIKE_CPU_PERCENTAGE,
+                            ApplicationConfig.VERTICAL_INCREMENT,
+                            true, true
+                    ),
+                    new ApplicationConfig.ExecutionConfig()
+            )
+    };
+
+    public static void main(String[] args) {
 
         // Target system setup under steady-state conditions
-        ApplicationConfig config = new ApplicationConfig();
+        ApplicationConfig config = APPLICATION_CONFIGS[0];
+        run(config);
+    }
+
+    public static void run(ApplicationConfig config) {
+
+        ApplicationConfig currentConfig = new ApplicationConfig(
+            config.load(),
+            config.cluster(),
+            config.scaling(),
+            config.execution()
+            // Remove logging config
+        );
+
+        logger.info("Starting Batch Means Estimation Analysis...");
 
         logger.info("\n--- Phase 1: Analytical Method - ACF ---");
-        EstimationReport analyticalReport = performAnalyticalEstimation(config);
+        EstimationReport analyticalReport = performAnalyticalEstimation(currentConfig);
 
         logger.info("\n--- Phase 2: Dynamic Method - Automated Stopping Rule ---");
-        EstimationReport dynamicReport = performDynamicEstimation(config);
+        EstimationReport dynamicReport = performDynamicEstimation(currentConfig);
 
         // Print the completely standardized comparative final report
         printComparativeReport(analyticalReport, dynamicReport);
@@ -85,7 +163,7 @@ public class BatchMeanEstimator {
      * @return Standardized report containing static batch statistical results.
      */
     private static EstimationReport performAnalyticalEstimation(ApplicationConfig config) {
-        int totalJobs = 15_000_000;
+        int totalJobs = 5_000_000;
 
         // Instantiate simulator wrapped with an in-memory time-series decorator
         SimulationBuilder builder = new SimulationBuilder().config(config);

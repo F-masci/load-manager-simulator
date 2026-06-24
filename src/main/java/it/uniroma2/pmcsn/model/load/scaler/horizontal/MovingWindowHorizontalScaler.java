@@ -37,7 +37,7 @@ public class MovingWindowHorizontalScaler extends HorizontalScaler {
      */
     public MovingWindowHorizontalScaler(ApplicationConfig.ScalingConfig scalingConfig) {
         this(scalingConfig.scaleOutLimit(), scalingConfig.scaleInLimit(),
-                scalingConfig.scaleInterval(), scalingConfig.cooldown());
+                scalingConfig.windowSize(), scalingConfig.cooldown());
     }
 
     /**

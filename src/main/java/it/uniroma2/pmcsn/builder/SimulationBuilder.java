@@ -1,14 +1,9 @@
 package it.uniroma2.pmcsn.builder;
 
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
-import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.controller.SimulationController;
 import it.uniroma2.pmcsn.controller.Simulator;
-import it.uniroma2.pmcsn.controller.decorator.TimeSerieCollector;
-import it.uniroma2.pmcsn.controller.decorator.data.LoadComparisonDecorator;
-import it.uniroma2.pmcsn.controller.decorator.data.RoutingBalanceDecorator;
-import it.uniroma2.pmcsn.controller.decorator.data.ScalingMetricsDecorator;
-import it.uniroma2.pmcsn.controller.decorator.data.SystemMetricsDecorator;
+import it.uniroma2.pmcsn.controller.decorator.data.*;
 import it.uniroma2.pmcsn.controller.decorator.storage.CsvStorageDecorator;
 import it.uniroma2.pmcsn.controller.decorator.storage.JsonStorageDecorator;
 import it.uniroma2.pmcsn.model.event.source.EventSource;
@@ -142,9 +137,10 @@ public class SimulationBuilder {
             config.execution().maxTime(), 
             eventSource, 
             cluster, 
-            spikeServer, 
+            spikeServer,
+            config.cluster().spikeEnabled(),
             loadManager,
-            config.scaling().scaleInterval()
+            config.scaling().cooldown()
         );
 
         // Dynamic decoration

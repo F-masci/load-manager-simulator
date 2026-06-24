@@ -30,7 +30,7 @@ public class CommandLineConfigParser {
         WorkloadType workload = ApplicationConfig.WORKLOAD_TYPE;
         double scaleOutLimit = ApplicationConfig.SCALE_OUT_LIMIT;
         double scaleInLimit = ApplicationConfig.SCALE_IN_LIMIT;
-        double scaleInterval = ApplicationConfig.SCALE_INTERVAL;
+        double windowSize = ApplicationConfig.WINDOW_SIZE;
         double cooldown = ApplicationConfig.COOLDOWN;
         int minServers = ApplicationConfig.MIN_SERVERS;
         int maxServers = ApplicationConfig.MAX_SERVERS;
@@ -67,7 +67,7 @@ public class CommandLineConfigParser {
                     case "-workload" -> workload = WorkloadType.valueOf(args[++i].toUpperCase());
                     case "-scaleOutLimit" -> scaleOutLimit = Double.parseDouble(args[++i]);
                     case "-scaleInLimit" -> scaleInLimit = Double.parseDouble(args[++i]);
-                    case "-scaleInterval" -> scaleInterval = Double.parseDouble(args[++i]);
+                    case "-windowSize", "-scaleInterval" -> windowSize = Double.parseDouble(args[++i]);
                     case "-cooldown" -> cooldown = Double.parseDouble(args[++i]);
                     case "-minServers" -> minServers = Integer.parseInt(args[++i]);
                     case "-maxServers" -> maxServers = Integer.parseInt(args[++i]);
@@ -102,7 +102,7 @@ public class CommandLineConfigParser {
         return new ApplicationConfig(
             new ApplicationConfig.LoadConfig(meanInterarrival, cvInterarrival, meanService, cvService, siMax, -1, policy, workload, tracePath),
             new ApplicationConfig.ClusterConfig(webServers, minServers, maxServers, true),
-            new ApplicationConfig.ScalingConfig(scaleOutLimit, scaleInLimit, scaleInterval, cooldown, 
+            new ApplicationConfig.ScalingConfig(scaleOutLimit, scaleInLimit, windowSize, cooldown,
                                                spikeUpperThreshold, spikeLowerThreshold, spikeCpu, ApplicationConfig.VERTICAL_INCREMENT, horizontalScalerEnabled, verticalScalerEnabled),
             new ApplicationConfig.ExecutionConfig(method, seed, replications, maxTime, 0, batches, batchSize, warmUp),
             new ApplicationConfig.LoggingConfig(logEnabled, logFormat, logType, logPath)
@@ -127,7 +127,7 @@ public class CommandLineConfigParser {
         System.out.println("  -workload <DISTRIBUTION|HYPEREXPONENTIAL|TRACE> Workload type");
         System.out.println("  -scaleOutLimit <double>           System response time threshold to scale out");
         System.out.println("  -scaleInLimit <double>            System response time threshold to scale in");
-        System.out.println("  -scaleInterval <double>           Moving window size for horizontal scaling");
+        System.out.println("  -windowSize <double>              Moving window size for horizontal scaling");
         System.out.println("  -cooldown <double>                Minimum time between scaling actions");
         System.out.println("  -minServers <int>                 Minimum number of Web Servers");
         System.out.println("  -maxServers <int>                 Maximum number of Web Servers");

@@ -34,12 +34,12 @@ public class ScalingSimulationTest extends BaseSimulationTest {
         trace.add("35.0 2.0"); trace.add("35.0 2.0"); trace.add("35.0 2.0");
 
         String tracePath = createTraceFile(trace);
-        String csvPath = "data/res/scaling/horizontal_scaling.csv";
-        String chartPath = "data/chart/scaling/horizontal_scaling_chart.png";
+        String csvPath = "data/vv/res/scaling/horizontal_scaling.csv";
+        String chartPath = "data/vv/chart/scaling/horizontal_scaling_chart.png";
         
-        ensureDirectories("data/res/scaling", "data/chart/scaling");
+        ensureDirectories("data/vv/res/scaling", "data/vv/chart/scaling");
 
-        ApplicationConfig testConfig = TestConfigs.horizontalScaling(tracePath, 2.0, 0.5, 4.0, csvPath);
+        ApplicationConfig testConfig = TestConfigs.horizontalScaling(tracePath, 2.0, 0.5, 4.0, 4.0, csvPath);
         SimulationFacade facade = new SimulationFacade(testConfig);
         SimulationFacade.AggregatedResults results = facade.runSingleSimulation();
         
@@ -64,10 +64,10 @@ public class ScalingSimulationTest extends BaseSimulationTest {
         for (double t = 12.0; t < 25.0; t += 3.0) trace.add(t + " 0.5");
         
         String tracePath = createTraceFile(trace);
-        String csvPath = "data/res/scaling/vertical_scaling.csv";
-        String chartPath = "data/chart/scaling/vertical_scaling_chart.png";
+        String csvPath = "data/vv/res/scaling/vertical_scaling.csv";
+        String chartPath = "data/vv/chart/scaling/vertical_scaling_chart.png";
 
-        ensureDirectories("data/res/scaling", "data/chart/scaling");
+        ensureDirectories("data/vv/res/scaling", "data/vv/chart/scaling");
 
         ApplicationConfig testConfig = TestConfigs.verticalScaling(tracePath, 3.0, 1.0, 4.0, 4.0, csvPath);
         SimulationFacade facade = new SimulationFacade(testConfig);

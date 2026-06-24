@@ -1,0 +1,158 @@
+
+/* ---------- */
+/* -- 1 WB -- */
+/* ---------- */
+
+INFO  BatchMeanEstimator [SIM] - Starting Batch Means Estimation Analysis...
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 1: Analytical Method - ACF ---
+INFO  BatchMeanEstimator [SIM] - Running static pilot trace for 5000000 jobs...
+[==================================================] 100% | Jobs: 5000000 | Clock: 1001325,78s
+INFO  AutoCorrelation [STATS] - Evaluating ACF cutoff for 17 consecutive lags below threshold
+Calculating ACF cutoff: lag=536, consecutiveBelow=16, candidateLag=520
+INFO  BatchMeanEstimator [SIM] - Cutoff lag detected: 520 - Critical limit threshold = 8.944271909999158E-4
+INFO  BatchMeanEstimator [SIM] - Forming fixed structure: batch size (b) = 5200, number of batches (k) = 961
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 2: Dynamic Method - Automated Stopping Rule ---
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,0986 (>= 0.05). Independence failed. Doubling batch size to 64...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,0540 (>= 0.05). Independence failed. Doubling batch size to 128...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0574 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - -> Convergence successfully reached!
+INFO  BatchMeanEstimator [SIM] -    Final dynamic state parameters: N = 40001, Batch Size (b) = 128, Batches (k) = 312
+INFO  BatchMeanEstimator [SIM] -    Criteria validation: Lag-1 ACF = 0,0069 (< 0.05) | Rel. Precision = 0,0480 (< 0.05)
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] -                                               FINAL COMPARATIVE ANALYSIS REPORT
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] - Analytical : Mean = 5,5422, StdDev = 0,5450, HW=0,0345, CI = [5,5077, 5,5767] | N = 5000000, b = 5200, k = 961 | Lag-1 ACF = 0,0537
+INFO  BatchMeanEstimator [SIM] - Dynamic    : Mean = 5,5837, StdDev = 2,4084, HW=0,2683, CI = [5,3154, 5,8520] | N = 40001, b = 128, k = 312 | Lag-1 ACF = 0,0069
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+
+/* ---------- */
+/* -- 2 WB -- */
+/* ---------- */
+
+INFO  BatchMeanEstimator [SIM] - Starting Batch Means Estimation Analysis...
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 1: Analytical Method - ACF ---
+INFO  BatchMeanEstimator [SIM] - Running static pilot trace for 5000000 jobs...
+[==================================================] 100% | Jobs: 5000000 | Clock: 1001321,96s
+INFO  AutoCorrelation [STATS] - Evaluating ACF cutoff for 17 consecutive lags below threshold
+Calculating ACF cutoff: lag=1157, consecutiveBelow=16, candidateLag=1141
+INFO  BatchMeanEstimator [SIM] - Cutoff lag detected: 1141 - Critical limit threshold = 8.944271909999158E-4
+INFO  BatchMeanEstimator [SIM] - Forming fixed structure: batch size (b) = 11410, number of batches (k) = 438
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 2: Dynamic Method - Automated Stopping Rule ---
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,4843 (>= 0.05). Independence failed. Doubling batch size to 64...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,4301 (>= 0.05). Independence failed. Doubling batch size to 128...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,3312 (>= 0.05). Independence failed. Doubling batch size to 256...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,2746 (>= 0.05). Independence failed. Doubling batch size to 512...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,1754 (>= 0.05). Independence failed. Doubling batch size to 1024...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,2491 (>= 0.05). Independence failed. Doubling batch size to 2048...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0977 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0941 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0892 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0824 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0758 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0728 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,0679 (>= 0.05). Independence failed. Doubling batch size to 4096...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = -0,1361 (>= 0.05). Independence failed. Doubling batch size to 8192...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,2126 (>= 0.05). Independence failed. Doubling batch size to 16384...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,2126 (>= 0.05). Independence failed. Doubling batch size to 32768...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,1166 (>= 0.05). Independence failed. Doubling batch size to 65536...
+INFO  BatchMeanEstimator [SIM] - -> Convergence successfully reached!
+INFO  BatchMeanEstimator [SIM] -    Final dynamic state parameters: N = 2100106, Batch Size (b) = 65536, Batches (k) = 32
+INFO  BatchMeanEstimator [SIM] -    Criteria validation: Lag-1 ACF = -0,0057 (< 0.05) | Rel. Precision = 0,0297 (< 0.05)
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] -                                               FINAL COMPARATIVE ANALYSIS REPORT
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] - Analytical : Mean = 0,7299, StdDev = 0,1065, HW=0,0100, CI = [0,7199, 0,7399] | N = 5000000, b = 11410, k = 438 | Lag-1 ACF = 0,0535
+INFO  BatchMeanEstimator [SIM] - Dynamic    : Mean = 0,7285, StdDev = 0,0600, HW=0,0216, CI = [0,7068, 0,7501] | N = 2100106, b = 65536, k = 32 | Lag-1 ACF = -0,0057
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+
+/* ---------- */
+/* -- 3 WB -- */
+/* ---------- */
+
+INFO  BatchMeanEstimator [SIM] - Starting Batch Means Estimation Analysis...
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 1: Analytical Method - ACF ---
+INFO  BatchMeanEstimator [SIM] - Running static pilot trace for 5000000 jobs...
+[==================================================] 100% | Jobs: 5000000 | Clock: 1001321,86s
+INFO  AutoCorrelation [STATS] - Evaluating ACF cutoff for 17 consecutive lags below threshold
+Calculating ACF cutoff: lag=225, consecutiveBelow=16, candidateLag=209
+INFO  BatchMeanEstimator [SIM] - Cutoff lag detected: 209 - Critical limit threshold = 8.944271909999158E-4
+INFO  BatchMeanEstimator [SIM] - Forming fixed structure: batch size (b) = 2090, number of batches (k) = 2392
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 2: Dynamic Method - Automated Stopping Rule ---
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,1150 (>= 0.05). Independence failed. Doubling batch size to 64...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,2681 (>= 0.05). Independence failed. Doubling batch size to 128...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,1888 (>= 0.05). Independence failed. Doubling batch size to 256...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0731 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0643 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0577 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0527 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - -> Convergence successfully reached!
+INFO  BatchMeanEstimator [SIM] -    Final dynamic state parameters: N = 80005, Batch Size (b) = 256, Batches (k) = 312
+INFO  BatchMeanEstimator [SIM] -    Criteria validation: Lag-1 ACF = 0,0349 (< 0.05) | Rel. Precision = 0,0486 (< 0.05)
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] -                                               FINAL COMPARATIVE ANALYSIS REPORT
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] - Analytical : Mean = 0,3562, StdDev = 0,0556, HW=0,0022, CI = [0,3539, 0,3584] | N = 5000000, b = 2090, k = 2392 | Lag-1 ACF = 0,0376
+INFO  BatchMeanEstimator [SIM] - Dynamic    : Mean = 0,3661, StdDev = 0,1597, HW=0,0178, CI = [0,3483, 0,3839] | N = 80005, b = 256, k = 312 | Lag-1 ACF = 0,0349
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+
+/* ---------- */
+/* -- 4 WB -- */
+/* ---------- */
+
+INFO  BatchMeanEstimator [SIM] - Starting Batch Means Estimation Analysis...
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 1: Analytical Method - ACF ---
+INFO  BatchMeanEstimator [SIM] - Running static pilot trace for 5000000 jobs...
+[==================================================] 100% | Jobs: 5000000 | Clock: 1001321,86s
+INFO  AutoCorrelation [STATS] - Evaluating ACF cutoff for 17 consecutive lags below threshold
+Calculating ACF cutoff: lag=124, consecutiveBelow=16, candidateLag=108
+INFO  BatchMeanEstimator [SIM] - Cutoff lag detected: 108 - Critical limit threshold = 8.944271909999158E-4
+INFO  BatchMeanEstimator [SIM] - Forming fixed structure: batch size (b) = 1080, number of batches (k) = 4629
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 2: Dynamic Method - Automated Stopping Rule ---
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,1091 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0717 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0580 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - -> Convergence successfully reached!
+INFO  BatchMeanEstimator [SIM] -    Final dynamic state parameters: N = 40001, Batch Size (b) = 32, Batches (k) = 1250
+INFO  BatchMeanEstimator [SIM] -    Criteria validation: Lag-1 ACF = 0,0449 (< 0.05) | Rel. Precision = 0,0494 (< 0.05)
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] -                                               FINAL COMPARATIVE ANALYSIS REPORT
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] - Analytical : Mean = 0,2846, StdDev = 0,0453, HW=0,0013, CI = [0,2833, 0,2859] | N = 5000000, b = 1080, k = 4629 | Lag-1 ACF = 0,0082
+INFO  BatchMeanEstimator [SIM] - Dynamic    : Mean = 0,2947, StdDev = 0,2622, HW=0,0146, CI = [0,2801, 0,3092] | N = 40001, b = 32, k = 1250 | Lag-1 ACF = 0,0449
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+
+/* ---------- */
+/* -- 5 WB -- */
+/* ---------- */
+
+INFO  BatchMeanEstimator [SIM] - Starting Batch Means Estimation Analysis...
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 1: Analytical Method - ACF ---
+INFO  BatchMeanEstimator [SIM] - Running static pilot trace for 5000000 jobs...
+[==================================================] 100% | Jobs: 5000000 | Clock: 1001321,74s
+INFO  AutoCorrelation [STATS] - Evaluating ACF cutoff for 17 consecutive lags below threshold
+Calculating ACF cutoff: lag=52, consecutiveBelow=16, candidateLag=36
+INFO  BatchMeanEstimator [SIM] - Cutoff lag detected: 36 - Critical limit threshold = 8.944271909999158E-4
+INFO  BatchMeanEstimator [SIM] - Forming fixed structure: batch size (b) = 360, number of batches (k) = 13888
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 2: Dynamic Method - Automated Stopping Rule ---
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0927 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0648 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,0517 (>= 0.05). Independence failed. Doubling batch size to 64...
+INFO  BatchMeanEstimator [SIM] - -> Convergence successfully reached!
+INFO  BatchMeanEstimator [SIM] -    Final dynamic state parameters: N = 40001, Batch Size (b) = 64, Batches (k) = 625
+INFO  BatchMeanEstimator [SIM] -    Criteria validation: Lag-1 ACF = 0,0415 (< 0.05) | Rel. Precision = 0,0460 (< 0.05)
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] -                                               FINAL COMPARATIVE ANALYSIS REPORT
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] - Analytical : Mean = 0,2616, StdDev = 0,0624, HW=0,0010, CI = [0,2606, 0,2627] | N = 5000000, b = 360, k = 13888 | Lag-1 ACF = -0,0057
+INFO  BatchMeanEstimator [SIM] - Dynamic    : Mean = 0,2697, StdDev = 0,1579, HW=0,0124, CI = [0,2573, 0,2821] | N = 40001, b = 64, k = 625 | Lag-1 ACF = 0,0415
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================

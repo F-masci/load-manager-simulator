@@ -6,10 +6,11 @@ import it.uniroma2.pmcsn.configs.ApplicationConfig.LoadConfig;
 import it.uniroma2.pmcsn.configs.ApplicationConfig.ScalingConfig;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
 import it.uniroma2.pmcsn.facade.SimulationFacade.AggregatedResults;
+import it.uniroma2.pmcsn.lib.statistics.IntervalEstimator.IntervalResult;
 import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
 import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+
+import java.util.Locale;
 
 /**
  * Objective 4.3: Robustness to Burstiness
@@ -23,7 +24,7 @@ public class BurstinessRobustnessObjective extends BaseObjective {
      * Initializes the burstiness robustness objective.
      */
     public BurstinessRobustnessObjective() {
-        super(BurstinessRobustnessObjective.class, "OBJ4.3");
+        super(BurstinessRobustnessObjective.class, "OBJ3.3");
     }
 
     /**
@@ -32,7 +33,24 @@ public class BurstinessRobustnessObjective extends BaseObjective {
      * @param args Command line arguments.
      */
     public static void main(String[] args) {
-        new BurstinessRobustnessObjective().start(args);
+
+        final int tunedBatchSize  = 4_096;
+        final int tunedBatchNums  = 1_024;
+        final int tunedWarmupJobs = 5 * 100000;
+
+        ApplicationConfig config = new ApplicationConfig(
+                new LoadConfig(
+                        0.0, 0.0,
+                        ApplicationConfig.MEAN_SERVICE, ApplicationConfig.CV_SERVICE,
+                        ApplicationConfig.SI_MAX, ApplicationConfig.SI_LOW,
+                        ApplicationConfig.ROUTING_POLICY, ApplicationConfig.WORKLOAD_TYPE, ApplicationConfig.TRACE_PATH
+                ),
+                new ClusterConfig(),
+                new ScalingConfig(),
+                ApplicationConfig.ExecutionConfig.batchRun(tunedBatchNums, tunedBatchSize, tunedWarmupJobs)
+        );
+
+        new BurstinessRobustnessObjective().start(config);
     }
 
     /**
@@ -42,27 +60,22 @@ public class BurstinessRobustnessObjective extends BaseObjective {
      */
     @Override
     protected void run(ApplicationConfig config) {
-        logger.info("Starting Burstiness Robustness Objective (4.3)");
+        logger.info("Starting Burstiness Robustness Objective");
         
-        double[] burstinessLevels = {1.0, 4.0, 8.0, 10.0, 12.0};
-        double[] arrivalRates = {1.0, 2.5, 5.0, 8.0, 10.0, 12.0, 15.0};
-        double slaThreshold = 5.0;
+        double[] burstinessLevels = {1.0, 4.0, 8.0, 12.0};
 
         StringBuilder report = new StringBuilder();
-        StringBuilder csv = new StringBuilder("CV_Interarrival,Arrival_Rate,Average_Response_Time(R0),Status\n");
-        XYSeriesCollection dataset = new XYSeriesCollection();
+        StringBuilder csv = new StringBuilder(buildCsvHeader());
 
-        report.append("\nBurstiness Robustness (Objective 4.3) Report\n");
-        report.append(String.format("%-10s | %-10s | %-30s | %-10s\n", "CV", "Lambda", "R0", "Status"));
+        report.append("\nBurstiness Robustness Report\n");
+        report.append(String.format("%-10s | %-10s | %-12s | %-12s | %-12s\n", "CV", "Lambda", "R0", "StdDev", "HW"));
         report.append("----------------------------------------------------------------------------\n");
 
         for (double cv : burstinessLevels) {
-            XYSeries series = new XYSeries("CV=" + cv);
-            for (double lambda : arrivalRates) {
-                double meanInterarrival = 1.0 / lambda;
-                
+            for (double lambda = 2.0; lambda <= 15.0; lambda += 1.5) {
+
                 LoadConfig loadConfig = new LoadConfig(
-                    meanInterarrival,
+                    1.0 / lambda,
                     cv, 
                     config.load().meanService(),
                     config.load().cvService(),
@@ -85,22 +98,82 @@ public class BurstinessRobustnessObjective extends BaseObjective {
                 SimulationFacade facade = new SimulationFacade(objectiveConfig);
                 AggregatedResults results = facade.runSimulation();
                 
-                double r0 = results.responseTime().mean();
-                boolean converging = r0 < 1000.0;
-                boolean feasible = r0 <= slaThreshold;
-                
-                double plotR0 = converging ? r0 : 50.0;
-                
-                report.append(String.format("%-10.1f | %-10.1f | %-30.4f | %-10s\n", cv, lambda, r0, converging ? (feasible ? "FEASIBLE" : "VIOLATED") : "NON_CONVERGING"));
-                csv.append(String.format("%.1f,%.1f,%.4f,%s\n", cv, lambda, r0, converging ? (feasible ? "FEASIBLE" : "VIOLATED") : "NON_CONVERGING"));
-                series.add(lambda, plotR0);
+                IntervalResult r0 = results.responseTime();
+
+                report.append(String.format(Locale.US, "%-10.1f | %-10.1f | %-12.4f | %-12.4f | %-12.4f\n",
+                        cv, lambda, r0.mean(), r0.stdDev(), r0.halfWidth()));
+                csv.append(buildCsvRow(cv, lambda, results));
             }
-            dataset.addSeries(series);
         }
 
         logger.info(report.toString());
-        ObjectiveUtils.saveToCsv("burstiness_robustness.csv", csv.toString());
-        ObjectiveChartUtility.generateBurstinessLineChart(dataset, "data/objective/burstiness_robustness.png", slaThreshold);
+        ObjectiveUtils.saveToCsv("burstiness/burstiness_robustness.csv", csv.toString());
+        try {
+            ObjectiveChartUtility.regenerateBurstinessCharts(
+                    "data/objective/burstiness/burstiness_robustness.csv",
+                    "data/objective/burstiness/burstiness_robustness.png"
+            );
+        } catch (java.io.IOException e) {
+            logger.error("Failed to generate burstiness charts", e);
+        }
+    }
+
+    private static String buildCsvHeader() {
+        StringBuilder header = new StringBuilder("CV_Interarrival,Arrival_Rate");
+        appendMetricHeader(header, "response_time");
+        appendMetricHeader(header, "jobs_in_system");
+        appendMetricHeader(header, "system_utilization");
+        appendMetricHeader(header, "throughput");
+        appendMetricHeader(header, "diverted_jobs");
+        appendMetricHeader(header, "avg_servers");
+        appendMetricHeader(header, "scale_out_actions");
+        appendMetricHeader(header, "scale_in_actions");
+        appendMetricHeader(header, "scale_up_actions");
+        appendMetricHeader(header, "scale_down_actions");
+        appendMetricHeader(header, "spike_avg_speed");
+        appendMetricHeader(header, "spike_utilization");
+        header.append('\n');
+        return header.toString();
+    }
+
+    private static void appendMetricHeader(StringBuilder header, String metricName) {
+        header.append(',')
+                .append(metricName).append("_mean,")
+                .append(metricName).append("_std_dev,")
+                .append(metricName).append("_hw,")
+                .append(metricName).append("_ci_low,")
+                .append(metricName).append("_ci_high");
+    }
+
+    private static String buildCsvRow(double cv, double lambda, AggregatedResults results) {
+        StringBuilder row = new StringBuilder();
+        row.append(String.format(Locale.US, "%.1f,%.1f", cv, lambda));
+        appendMetric(row, results.responseTime());
+        appendMetric(row, results.jobsInSystem());
+        appendMetric(row, results.utilization());
+        appendMetric(row, results.throughput());
+        appendMetric(row, results.divertedJobs());
+        appendMetric(row, results.avgServers());
+        appendMetric(row, results.scaleOutActions());
+        appendMetric(row, results.scaleInActions());
+        appendMetric(row, results.scaleUpActions());
+        appendMetric(row, results.scaleDownActions());
+        appendMetric(row, results.spikeAvgSpeed());
+        appendMetric(row, results.spikeUtilization());
+        row.append('\n');
+        return row.toString();
+    }
+
+    private static void appendMetric(StringBuilder row, IntervalResult result) {
+        if (result == null) {
+            row.append(",NaN,NaN,NaN,NaN,NaN");
+            return;
+        }
+        row.append(String.format(Locale.US, ",%.6f,%.6f,%.6f,%.6f,%.6f",
+                result.mean(),
+                result.stdDev(),
+                result.halfWidth(),
+                result.lowerBound(),
+                result.upperBound()));
     }
 }
-

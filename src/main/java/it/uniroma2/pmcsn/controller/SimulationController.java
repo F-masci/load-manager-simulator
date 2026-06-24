@@ -14,6 +14,7 @@ import it.uniroma2.pmcsn.model.server.WebServer;
 import it.uniroma2.pmcsn.model.server.WebServerCluster;
 import it.uniroma2.pmcsn.utils.LogFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -30,6 +31,7 @@ public class SimulationController implements Simulator {
     private final EventSource eventSource;
     private final WebServerCluster webServerCluster;
     private final SpikeServer spikeServer;
+    private final boolean isSpikeEnabled;
     private final LoadManager loadController;
 
     private double lastArrivalTime = 0.0;
@@ -43,7 +45,7 @@ public class SimulationController implements Simulator {
     // System-wide time-weighted statistics
     private final TimedWelford systemJisStat = new TimedWelford();
     private final TimedWelford systemUtilStat = new TimedWelford();
-    private final double scaleInterval;
+    private final double scalingCheckDelay;
 
     /**
      * Initializes the simulation controller with system components and constraints.
@@ -53,17 +55,18 @@ public class SimulationController implements Simulator {
      * @param webServerCluster cluster of web servers
      * @param spikeServer spike server instance
      * @param loadController load manager for routing and scaling
-     * @param scaleInterval interval for periodic scaling checks
+     * @param scalingCheckDelay delay between periodic scaling checks
      */
     public SimulationController(double maxTime, EventSource eventSource,
-                                WebServerCluster webServerCluster, SpikeServer spikeServer,
-                                LoadManager loadController, double scaleInterval) {
+                                WebServerCluster webServerCluster, SpikeServer spikeServer, boolean isSpikeEnabled,
+                                LoadManager loadController, double scalingCheckDelay) {
         this.maxTime = maxTime;
         this.eventSource = eventSource;
         this.webServerCluster = webServerCluster;
         this.spikeServer = spikeServer;
+        this.isSpikeEnabled = isSpikeEnabled;
         this.loadController = loadController;
-        this.scaleInterval = scaleInterval;
+        this.scalingCheckDelay = scalingCheckDelay;
     }
 
     @Override
@@ -74,9 +77,9 @@ public class SimulationController implements Simulator {
             updateSystemStats(0.0);
             scheduleNextArrival();
             
-            if (scaleInterval > 0.0) {
-                eventQueue.add(new Event(scaleInterval, EventType.SCALE_CHECK_HORIZONTAL, null, null));
-                eventQueue.add(new Event(scaleInterval, EventType.SCALE_CHECK_VERTICAL, null, null));
+            if (scalingCheckDelay > 0.0) {
+                eventQueue.add(new Event(scalingCheckDelay, EventType.SCALE_CHECK_HORIZONTAL, null, null));
+                eventQueue.add(new Event(scalingCheckDelay, EventType.SCALE_CHECK_VERTICAL, null, null));
             }
         }
     }
@@ -223,8 +226,8 @@ public class SimulationController implements Simulator {
     private void handleHorizontalScaleCheck() {
         checkHorizontalScaling();
         boolean hasPending = eventQueue.stream().anyMatch(e -> e.getType() == EventType.SCALE_CHECK_HORIZONTAL);
-        if (!hasPending && scaleInterval > 0.0) {
-            eventQueue.add(new Event(clock + scaleInterval, EventType.SCALE_CHECK_HORIZONTAL, null, null));
+        if (!hasPending && scalingCheckDelay > 0.0) {
+            eventQueue.add(new Event(clock + scalingCheckDelay, EventType.SCALE_CHECK_HORIZONTAL, null, null));
         }
     }
 
@@ -234,8 +237,8 @@ public class SimulationController implements Simulator {
     private void handleVerticalScaleCheck() {
         checkVerticalScaling();
         boolean hasPending = eventQueue.stream().anyMatch(e -> e.getType() == EventType.SCALE_CHECK_VERTICAL);
-        if (!hasPending && scaleInterval > 0.0) {
-            eventQueue.add(new Event(clock + scaleInterval, EventType.SCALE_CHECK_VERTICAL, null, null));
+        if (!hasPending && scalingCheckDelay > 0.0) {
+            eventQueue.add(new Event(clock + scalingCheckDelay, EventType.SCALE_CHECK_VERTICAL, null, null));
         }
     }
 
@@ -302,15 +305,36 @@ public class SimulationController implements Simulator {
      * @param time current simulation time
      */
     private void updateSystemStats(double time) {
-        // JIS: sum of active jobs in ALL servers
-        double currentJis = webServerCluster.getAllServers().stream().mapToDouble(s -> s.getActiveJobs().size()).sum() 
-                          + spikeServer.getActiveJobs().size();
+        // JIS: sum of active jobs in all allocated service nodes.
+        // For Web Servers, this includes both active servers and draining servers.
+        List<WebServer> webServers = new ArrayList<>();
+        webServers.addAll(webServerCluster.getActiveServers());
+        webServers.addAll(webServerCluster.getDrainingServers());
+
+        double currentJis = webServers.stream()
+                .mapToDouble(s -> s.getActiveJobs().size())
+                .sum();
+
+        if (isSpikeEnabled) {
+            currentJis += spikeServer.getActiveJobs().size();
+        }
+
         systemJisStat.updateToTime(time, currentJis);
 
-        // System Utilization: Average busy fraction across WEB servers only
-        List<WebServer> webServers = webServerCluster.getAllServers();
-        double currentUtil = webServers.isEmpty() ? 0 : 
-            webServers.stream().mapToDouble(s -> s.getActiveJobs().isEmpty() ? 0.0 : 1.0).average().orElse(0);
+        // Total System utilization: average busy fraction across currently allocated nodes.
+        // The Spike Server is counted only when enabled in the cluster configuration.
+        long busyWebServers = webServers.stream()
+                .filter(s -> !s.getActiveJobs().isEmpty())
+                .count();
+
+        long busySpikeServer = isSpikeEnabled && !spikeServer.getActiveJobs().isEmpty() ? 1 : 0;
+
+        int totalNodes = webServers.size() + (isSpikeEnabled ? 1 : 0);
+
+        double currentUtil = totalNodes == 0
+                ? 0.0
+                : (double) (busyWebServers + busySpikeServer) / totalNodes;
+
         systemUtilStat.updateToTime(time, currentUtil);
     }
 

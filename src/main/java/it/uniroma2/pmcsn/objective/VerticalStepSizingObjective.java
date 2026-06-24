@@ -21,7 +21,7 @@ public class VerticalStepSizingObjective extends BaseObjective {
      * Initializes the vertical step sizing objective.
      */
     public VerticalStepSizingObjective() {
-        super(VerticalStepSizingObjective.class, "OBJ1.2");
+        super(VerticalStepSizingObjective.class, "OBJ1.3");
     }
 
     /**
@@ -30,7 +30,25 @@ public class VerticalStepSizingObjective extends BaseObjective {
      * @param args Command line arguments.
      */
     public static void main(String[] args) {
-        new VerticalStepSizingObjective().start(args);
+
+        final int tunedBatchSize  = 8_192;
+        final int tunedBatchNums  = 2_048;
+        final int tunedWarmupJobs = 5 * tunedBatchSize;
+
+        ApplicationConfig config = new ApplicationConfig(
+                new ApplicationConfig.LoadConfig(),
+                ClusterConfig.fixedServer(1, true),
+                ScalingConfig.onlyVertical(
+                        ApplicationConfig.SPIKE_UPPER_THRESHOLD,
+                        ApplicationConfig.SPIKE_LOWER_THRESHOLD,
+                        ApplicationConfig.SPIKE_CPU_PERCENTAGE,
+                        0.0, // Dummy
+                        ApplicationConfig.COOLDOWN
+                ),
+                ApplicationConfig.ExecutionConfig.batchRun(tunedBatchNums, tunedBatchSize, tunedWarmupJobs)
+        );
+
+        new VerticalStepSizingObjective().start(config);
     }
 
     /**
@@ -40,29 +58,29 @@ public class VerticalStepSizingObjective extends BaseObjective {
      */
     @Override
     protected void run(ApplicationConfig config) {
-        logger.info("Starting Vertical Step Sizing Objective (1.2)...");
+        logger.info("Starting Vertical Step Sizing Objective...");
 
         StringBuilder report = new StringBuilder();
-        StringBuilder csv = new StringBuilder("Increment,R0,Spike_Avg_Speed,Spike_Utilization\n");
+        StringBuilder csv = new StringBuilder("Increment,R0_mean,R0_hw,Spike_Avg_Speed_mean,Spike_Avg_Speed_hw,Spike_Utilization_mean,Spike_Utilization_hw\n");
 
         XYSeries rtSeries = new XYSeries("Response Time R0");
         XYSeries speedSeries = new XYSeries("Avg Speed Multiplier");
         XYSeries utilSeries = new XYSeries("Utilization (%)");
 
-        report.append("\nVertical Step Sizing (Objective 1.2) Report\n");
+        report.append("\nVertical Step Sizing Report\n");
         report.append(String.format("%-10s | %-10s | %-20s | %-15s\n", "Increment", "R0", "Avg Speed", "Utilization"));
         report.append("------------------------------------------------------------------------------------\n");
 
-        for (double inc = 0.1; inc <= 1.0; inc += 0.1) {
+        for (double inc = 0.5; inc <= 5.0; inc += 0.5) {
             ApplicationConfig currentConfig = new ApplicationConfig(
                     config.load(),
-                    ClusterConfig.fixedServer(1, true),
+                    config.cluster(),
                     ScalingConfig.onlyVertical(
                             ApplicationConfig.SPIKE_UPPER_THRESHOLD,
                             ApplicationConfig.SPIKE_LOWER_THRESHOLD,
                             ApplicationConfig.SPIKE_CPU_PERCENTAGE,
                             inc, // Vertical Increment
-                            ApplicationConfig.COOLDOWN
+                           0.0 // No Cooldown
                     ),
                     config.execution(),
                     config.logging()
@@ -76,7 +94,11 @@ public class VerticalStepSizingObjective extends BaseObjective {
             double spikeUtil = results.spikeUtilization().mean() * 100.0;
 
             report.append(String.format("%-10.2f | %-10.4f | %-20.4f | %-15.2f%%\n", inc, r0, spikeSpeed, spikeUtil));
-            csv.append(String.format("%.2f,%.4f,%.4f,%.2f\n", inc, r0, spikeSpeed, spikeUtil));
+            csv.append(String.format("%.2f,%.4f,%.4f,%.4f,%.2f\n", inc,
+                    r0, results.responseTime().halfWidth(),
+                    spikeSpeed, results.spikeAvgSpeed().halfWidth(),
+                    spikeUtil, results.spikeUtilization().halfWidth()
+            ));
 
             rtSeries.add(inc, r0);
             speedSeries.add(inc, spikeSpeed);
@@ -87,6 +109,6 @@ public class VerticalStepSizingObjective extends BaseObjective {
         ObjectiveUtils.saveToCsv("vertical_step_sizing.csv", csv.toString());
         ObjectiveChartUtility.generateVerticalSizingStackedChart(
                 rtSeries, speedSeries, utilSeries, 
-                "data/objective/vertical_step_sizing.png", 5.0);
+                "data/objective/vertical_step_sizing.png", ApplicationConfig.SLA_THRESHOLD);
     }
 }

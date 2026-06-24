@@ -1,6 +1,8 @@
-package it.uniroma2.pmcsn.controller.decorator;
+package it.uniroma2.pmcsn.controller.decorator.data;
 
 import it.uniroma2.pmcsn.controller.Simulator;
+import it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,31 +1,23 @@
 package it.uniroma2.pmcsn.objective;
 
-import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
 import it.uniroma2.pmcsn.configs.ApplicationConfig.ClusterConfig;
-import it.uniroma2.pmcsn.configs.ApplicationConfig.ExecutionConfig;
-import it.uniroma2.pmcsn.configs.ApplicationConfig.LoadConfig;
-import it.uniroma2.pmcsn.configs.ApplicationConfig.LoggingConfig;
 import it.uniroma2.pmcsn.configs.ApplicationConfig.ScalingConfig;
-import it.uniroma2.pmcsn.configs.LoggingDataType;
-import it.uniroma2.pmcsn.controller.SimulationController.StopCondition;
-import it.uniroma2.pmcsn.controller.Simulator;
-import it.uniroma2.pmcsn.controller.decorator.SimulatorDecorator;
-import it.uniroma2.pmcsn.controller.decorator.TimeSerieCollector;
-import it.uniroma2.pmcsn.lib.statistics.AutoCorrelation;
+import it.uniroma2.pmcsn.facade.SimulationFacade;
+import it.uniroma2.pmcsn.facade.SimulationFacade.AggregatedResults;
 import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
 import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
 import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
- * Objective 2.1: Routing Policy Comparison
- * Compare outing policy on R0, StdDev, and 99th percentile.
- * Config: 3 Web Servers STATIC (min=3, max=3), Spike Server ENABLED.
+ * Objective 1.1: Routing Policy Comparison
+ * Compare routing policies on R0 and StdDev using infinite horizon.
+ * Config: 4 Web Servers STATIC (min=4, max=4), Spike Server ENABLED.
  * Scaling: DISABLED.
  */
 public class RoutingPolicyObjective extends BaseObjective {
@@ -34,7 +26,7 @@ public class RoutingPolicyObjective extends BaseObjective {
      * Initializes the routing policy objective.
      */
     public RoutingPolicyObjective() {
-        super(RoutingPolicyObjective.class, "OBJ2.1");
+        super(RoutingPolicyObjective.class, "OBJ1.1");
     }
 
     /**
@@ -43,86 +35,74 @@ public class RoutingPolicyObjective extends BaseObjective {
      * @param args Command line arguments.
      */
     public static void main(String[] args) {
-        new RoutingPolicyObjective().start(args);
+
+        final int tunedBatchSize  = 4096;
+        final int tunedBatchNums  = 2048;
+        final int tunedWarmupJobs = 5 * tunedBatchSize;
+
+        ApplicationConfig config = new ApplicationConfig(
+            new ApplicationConfig.LoadConfig(),
+            ClusterConfig.fixedServer(4, false),
+            ScalingConfig.disabled(),
+            ApplicationConfig.ExecutionConfig.batchRun(tunedBatchNums, tunedBatchSize, tunedWarmupJobs)
+        );
+
+        new RoutingPolicyObjective().start(config);
     }
 
     /**
-     * Executes the routing policy analysis.
+     * Executes the routing policy analysis using infinite horizon.
      *
      * @param config The application configuration.
      */
     @Override
     protected void run(ApplicationConfig config) {
-        logger.info("Starting Routing Policy Objective (2.1)...");
+        logger.info("Starting Routing Policy Objective...");
 
         StringBuilder report = new StringBuilder();
-        StringBuilder csv = new StringBuilder("Policy,R0,StdDev,P99\n");
+        StringBuilder csv = new StringBuilder("Policy,R0_mean,R0_hw,StdDev\n");
         Map<String, Double> r0Map = new HashMap<>();
         Map<String, Double> stdDevMap = new HashMap<>();
-        Map<String, Double> p99Map = new HashMap<>();
 
-        report.append("\nRouting Policy Comparison (Objective 2.1) Report\n");
-        report.append(String.format("%-15s | %-10s | %-10s | %-10s\n", "Policy", "R0", "StdDev", "P99"));
-        report.append("-------------------------------------------------------------\n");
+        report.append("\nRouting Policy Comparison Report\n");
+        report.append(String.format("Batch Size: %d | Num Batches: %d | Warm-up: %d jobs\n", config.execution().batchSize(), config.execution().batchSize(), config.execution().warmUpJobs()));
+        report.append(String.format("%-15s | %-10s | %-10s\n", "Policy", "R0", "StdDev"));
+        report.append("-------------------------------------------\n");
 
         RoutingPolicy[] policies = Arrays.stream(RoutingPolicy.values())
                 .filter(p -> p != RoutingPolicy.DETERMINISTIC)
                 .toArray(RoutingPolicy[]::new);
 
         for (RoutingPolicy policy : policies) {
+            ApplicationConfig.LoadConfig loadConfig = config.load();
             ApplicationConfig currentConfig = new ApplicationConfig(
-                    new LoadConfig(
-                            config.load().workloadType(),
-                            config.load().meanInterarrival(),
-                            config.load().meanService(),
-                            policy,
-                            config.load().siMax()
+                    new ApplicationConfig.LoadConfig(
+                            loadConfig.workloadType(),
+                            loadConfig.meanInterarrival(), loadConfig.cvInterarrival(),
+                            loadConfig.meanService(), loadConfig.cvService(),
+                            policy
                     ),
-                    ClusterConfig.fixedServer(4, true),
-                    ScalingConfig.disabled(),
-                    ExecutionConfig.singleRun(1_000_000),
-                    new LoggingConfig(true, config.logging().format(), LoggingDataType.TIME_SERIE, config.logging().outputPath())
+                    config.cluster(),
+                    config.scaling(),
+                    config.execution()
             );
 
-            SimulationBuilder builder = new SimulationBuilder().config(currentConfig);
-            Simulator controller = builder.build();
+            SimulationFacade facade = new SimulationFacade(currentConfig);
+            AggregatedResults results = facade.runSimulation();
 
-            TimeSerieCollector collector = findCollector(controller);
-            if (collector == null) {
-                logger.error("TimeSerieCollector not found in controller!");
-                continue;
-            }
+            double r0_mean = results.responseTime().mean();
+            double r0_hw = results.responseTime().halfWidth();
+            double stdDev = results.responseTime().stdDev();
 
-            controller.run(StopCondition.untilJobsCompleted(currentConfig.execution().maxJobs()));
+            report.append(String.format("%-15s | %-10.4f | %-10.4f\n", policy, r0_mean, stdDev));
+            csv.append(String.format(Locale.US, "%s,%.4f,%.4f,%.4f\n", policy, r0_mean, r0_hw, stdDev));
 
-            List<Double> series = collector.getSeries();
-            double r0 = controller.getAverageResponseTime();
-            double stdDev = AutoCorrelation.calculateStdDev(series, r0);
-            double p99 = AutoCorrelation.calculatePercentile(series, 99);
-
-            report.append(String.format("%-15s | %-10.4f | %-10.4f | %-10.4f\n", policy, r0, stdDev, p99));
-            csv.append(String.format("%s,%.4f,%.4f,%.4f\n", policy, r0, stdDev, p99));
-
-            r0Map.put(policy.name(), r0);
+            r0Map.put(policy.name(), r0_mean);
             stdDevMap.put(policy.name(), stdDev);
-            p99Map.put(policy.name(), p99);
         }
 
         logger.info(report.toString());
         ObjectiveUtils.saveToCsv("routing_policy_comparison.csv", csv.toString());
-        ObjectiveChartUtility.generateRoutingStatisticalChart(r0Map, stdDevMap, p99Map, "data/objective/routing_policy_comparison.png", 5.0);
-    }
-
-    /**
-     * Helper to find the TimeSerieCollector in the decorator chain.
-     *
-     * @param s The simulator instance.
-     * @return The TimeSerieCollector if found, null otherwise.
-     */
-    private TimeSerieCollector findCollector(Simulator s) {
-        if (s instanceof TimeSerieCollector c) return c;
-        if (s instanceof SimulatorDecorator sd) return findCollector(sd.getDecorated());
-        return null;
+        ObjectiveChartUtility.generateRoutingStatisticalChart(r0Map, stdDevMap, "data/objective/routing_policy_comparison.png");
     }
 }
-

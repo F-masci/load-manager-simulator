@@ -128,7 +128,7 @@ public class SimulationFacade {
         // Infinite horizon simulation
         Simulator controller = builder.build();
 
-        logger.info("Starting BATCH MEANS simulation (Infinite Horizon)... Warm-up: {} jobs", config.execution().warmUpJobs());
+        logger.info("Starting BATCH MEANS simulation... Warm-up: {} jobs", config.execution().warmUpJobs());
         if (config.execution().warmUpJobs() > 0) {
             controller.run(SimulationController.StopCondition.untilJobsCompleted(config.execution().warmUpJobs()));
         }
@@ -202,7 +202,7 @@ public class SimulationFacade {
             currentSeed = controller.getSeed();
         }
 
-        return createResults("INDEPENDENT REPLICATIONS (FINITE HORIZON)", config.execution().numReplications());
+        return createResults("INDEPENDENT REPLICATIONS", config.execution().numReplications());
     }
 
     /**

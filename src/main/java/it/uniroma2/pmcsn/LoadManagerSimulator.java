@@ -32,8 +32,17 @@ public class LoadManagerSimulator {
 
         // Parse configurations from command line arguments
         ApplicationConfig config = CommandLineConfigParser.parse(args);
+        start(config);
+    }
 
+    /**
+     * Starts the simulation process.
+     *
+     * @param config Application configuration.
+     */
+    protected void start(ApplicationConfig config) {
         try {
+
             logger.info("==================================================================");
             logger.info("                SIMULATION CONFIGURATION OVERVIEW                ");
             logger.info("==================================================================");
@@ -73,7 +82,7 @@ public class LoadManagerSimulator {
                 logger.info("    Spike CPU % (Base):  {}", config.scaling().spikeCpuPercentage() * 100);
                 logger.info("    Vertical Increment:  {}", config.scaling().verticalIncrement());
             }
-            logger.info("  Scaling Interval:      {}", config.scaling().scaleInterval());
+            logger.info("  Window Size:           {}", config.scaling().windowSize());
             logger.info("  Cooldown Period:       {}", config.scaling().cooldown());
 
             // Execution Parameters
@@ -92,7 +101,6 @@ public class LoadManagerSimulator {
             logger.info("==================================================================\n");
 
             run(config);
-
         } catch (Exception e) {
             logger.error("Error during simulation execution: ", e);
             System.exit(1);
@@ -105,7 +113,6 @@ public class LoadManagerSimulator {
      * @param config The application configuration to use.
      */
     protected void run(ApplicationConfig config) {
-
         SimulationFacade simulator = new SimulationFacade(config);
         simulator.runSimulation();
     }

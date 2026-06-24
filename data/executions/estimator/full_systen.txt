@@ -1,0 +1,84 @@
+INFO  ConvergenceEstimator [SIM] - Starting long-run convergence estimation analysis...
+INFO  ConvergenceEstimator [SIM] - Independent replications = 10, initial jobs = 10000, initial job increment = 10000, max jobs = 1000000
+INFO  ConvergenceEstimator [SIM] - Increment schedule: grow by factor 2 every 10 evaluated horizons
+INFO  ConvergenceEstimator [SIM] - Criteria: relative change <= 0.01 for 5 consecutive windows and relative HW <= 0.05
+INFO  ConvergenceEstimator [SIM] - Divergence rule: relative growth >= 0.02 with non-overlapping worsening CI for 5 consecutive windows
+INFO  SimulationFacade [SIM] - Starting 10 independent replications...
+INFO  SimulationFacade [SIM] - Running replication 1/10 with seed 123456789...
+INFO  SimulationFacade [SIM] - Running replication 2/10 with seed 405801031...
+INFO  SimulationFacade [SIM] - Running replication 3/10 with seed 1872812340...
+INFO  SimulationFacade [SIM] - Running replication 4/10 with seed 1485115875...
+INFO  SimulationFacade [SIM] - Running replication 5/10 with seed 63830220...
+INFO  SimulationFacade [SIM] - Running replication 6/10 with seed 1204656853...
+INFO  SimulationFacade [SIM] - Running replication 7/10 with seed 869751385...
+INFO  SimulationFacade [SIM] - Running replication 8/10 with seed 896796824...
+INFO  SimulationFacade [SIM] - Running replication 9/10 with seed 1037518862...
+INFO  SimulationFacade [SIM] - Running replication 10/10 with seed 498561825...
+INFO  SimulationFacade [SIM] -
+ ==================================================================
+                   AGGREGATED SIMULATION REPORT
+METHOD: INDEPENDENT REPLICATIONS
+SAMPLES (N): 10
+==================================================================
+Response Time            : Mean = 3,4225, StdDev = 0,0149, HW=0,0107, CI = [3,4118, 3,4332]
+Jobs in System           : Mean = 17,0877, StdDev = 0,1419, HW=0,1015, CI = [16,9862, 17,1892]
+System Utilization       : Mean = 0,5114, StdDev = 0,0022, HW=0,0016, CI = [0,5099, 0,5130]
+Throughput               : Mean = 4,9919, StdDev = 0,0240, HW=0,0171, CI = [4,9748, 5,0091]
+Diverted Jobs            : Mean = 78531,9000, StdDev = 2235,9035, HW=1599,4690, CI = [76932,4310, 80131,3690]
+Avg Active Servers (N)   : Mean = 1,5647, StdDev = 0,0162, HW=0,0116, CI = [1,5531, 1,5762]
+------------------------------------------------------------------
+Scale OUT Actions        : Mean = 2785,1000, StdDev = 39,8593, HW=28,5137, CI = [2756,5863, 2813,6137]
+Scale IN  Actions        : Mean = 2785,0000, StdDev = 39,7995, HW=28,4708, CI = [2756,5292, 2813,4708]
+Scale UP  Actions        : Mean = 81,6000, StdDev = 11,4329, HW=8,1786, CI = [73,4214, 89,7786]
+Scale DOWN Actions       : Mean = 81,6000, StdDev = 11,4329, HW=8,1786, CI = [73,4214, 89,7786]
+Spike Server Avg Speed   : Mean = 1,0041, StdDev = 0,0006, HW=0,0004, CI = [1,0037, 1,0046]
+Spike Server Utilization : Mean = 0,0956, StdDev = 0,0028, HW=0,0020, CI = [0,0936, 0,0977]
+==================================================================
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 10000, time ~= 2067,9968, R0 = 3,3465, HW = 0,1083, rel.change = NaN, rel.HW = 0,03236, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 20000, time ~= 4091,8046, R0 = 3,4035, HW = 0,0836, rel.change = 0,01703, rel.HW = 0,02455, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 30000, time ~= 6127,2511, R0 = 3,3988, HW = 0,0485, rel.change = 0,00138, rel.HW = 0,01428, stable windows = 1, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 40000, time ~= 8123,3186, R0 = 3,4257, HW = 0,0420, rel.change = 0,00791, rel.HW = 0,01225, stable windows = 2, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 50000, time ~= 10135,5567, R0 = 3,4107, HW = 0,0332, rel.change = 0,00436, rel.HW = 0,00974, stable windows = 3, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 60000, time ~= 12117,4258, R0 = 3,4221, HW = 0,0352, rel.change = 0,00334, rel.HW = 0,01030, stable windows = 4, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 70000, time ~= 14107,6193, R0 = 3,4229, HW = 0,0364, rel.change = 0,00022, rel.HW = 0,01062, stable windows = 5, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - =======================================================================================================================
+INFO  ConvergenceEstimator [SIM] -                                                 CONVERGENCE ANALYSIS REPORT
+INFO  ConvergenceEstimator [SIM] - =======================================================================================================================
+INFO  ConvergenceEstimator [SIM] - CONVERGED | replications = 10, jobs = 70000, time ~= 14107,6193, R0 = 3,4229, HW = 0,0364, rel.change = 0,00022, rel.HW = 0,01062, stable windows = 5, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - Convergence jobs: 70000
+INFO  ConvergenceEstimator [SIM] - Convergence time: 14107.619320383928
+INFO  ConvergenceEstimator [SIM] - =======================================================================================================================
+
+
+
+
+
+
+
+
+INFO  BatchMeanEstimator [SIM] - Starting Batch Means Estimation Analysis...
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 1: Analytical Method - ACF ---
+INFO  BatchMeanEstimator [SIM] - Running static pilot trace for 5000000 jobs...
+[==================================================] 100% | Jobs: 5000000 | Clock: 1001325,29s
+INFO  AutoCorrelation [STATS] - Evaluating ACF cutoff for 17 consecutive lags below threshold
+Calculating ACF cutoff: lag=248, consecutiveBelow=16, candidateLag=232
+INFO  BatchMeanEstimator [SIM] - Cutoff lag detected: 232 - Critical limit threshold = 8.944271909999158E-4
+INFO  BatchMeanEstimator [SIM] - Forming fixed structure: batch size (b) = 2320, number of batches (k) = 2155
+INFO  BatchMeanEstimator [SIM] -
+--- Phase 2: Dynamic Method - Automated Stopping Rule ---
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,2465 (>= 0.05). Independence failed. Doubling batch size to 64...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,2383 (>= 0.05). Independence failed. Doubling batch size to 128...
+INFO  BatchMeanEstimator [SIM] - Lag-1 ACF = 0,1414 (>= 0.05). Independence failed. Doubling batch size to 256...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0606 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0543 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - Relative Precision = 0,0512 (>= 0.05). Precision failed. Appending data chunks...
+INFO  BatchMeanEstimator [SIM] - -> Convergence successfully reached!
+INFO  BatchMeanEstimator [SIM] -    Final dynamic state parameters: N = 70004, Batch Size (b) = 256, Batches (k) = 273
+INFO  BatchMeanEstimator [SIM] -    Criteria validation: Lag-1 ACF = 0,0460 (< 0.05) | Rel. Precision = 0,0480 (< 0.05)
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] -                                               FINAL COMPARATIVE ANALYSIS REPORT
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================
+INFO  BatchMeanEstimator [SIM] - Analytical : Mean = 3,4224, StdDev = 0,3718, HW=0,0157, CI = [3,4067, 3,4381] | N = 5000000, b = 2320, k = 2155 | Lag-1 ACF = -0,0697
+INFO  BatchMeanEstimator [SIM] - Dynamic    : Mean = 3,3915, StdDev = 1,3673, HW=0,1629, CI = [3,2286, 3,5545] | N = 70004, b = 256, k = 273 | Lag-1 ACF = 0,0460
+INFO  BatchMeanEstimator [SIM] - =======================================================================================================================

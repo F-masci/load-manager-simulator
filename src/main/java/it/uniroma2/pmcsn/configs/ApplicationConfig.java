@@ -25,44 +25,47 @@ public record ApplicationConfig(
     public static final double CV_INTERARRIVAL = 4.0;
     public static final double MEAN_SERVICE = 0.25;
     public static final double CV_SERVICE = 4.0;
-    public static final int SI_MAX = 30;
+    public static final int SI_MAX = 40;
+    public static final int SI_LOW = -1;
 
     // Server and routing configuration constants
     public static final int WEB_SERVER_COUNT = 1;
-    public static final RoutingPolicy ROUTING_POLICY = RoutingPolicy.ROUND_ROBIN;
+    public static final RoutingPolicy ROUTING_POLICY = RoutingPolicy.LEAST_LOADED;
     public static final String TRACE_PATH = null;
     public static final double SPIKE_CPU_PERCENTAGE = 1.0;
     public static final WorkloadType WORKLOAD_TYPE = WorkloadType.HYPEREXPONENTIAL;
     public static final boolean SPIKE_ENABLED = true;
 
     // Autoscaling configuration constants
-    public static final double SCALE_OUT_LIMIT = 5.0;
-    public static final double SCALE_IN_LIMIT = 2.0;
-    public static final double COOLDOWN = 1_000.0;
-    public static final double SCALE_INTERVAL = COOLDOWN;
+    public static final double SCALE_OUT_LIMIT = 6.0;
+    public static final double SCALE_IN_LIMIT = 3.5;
+    public static final double COOLDOWN = 10.0;
+    public static final double WINDOW_SIZE = (double) SI_MAX * 2.5;
     public static final int MIN_SERVERS = 1;
     public static final int MAX_SERVERS = 25;
     public static final boolean HORIZONTAL_SCALER_ENABLED = true;
-    public static final double SPIKE_UPPER_THRESHOLD = (double) SI_MAX / 1.5;
-    public static final double SPIKE_LOWER_THRESHOLD = SPIKE_UPPER_THRESHOLD * 0.8;
-    public static final double VERTICAL_INCREMENT = 0.1;
+    public static final double SPIKE_UPPER_THRESHOLD = (double) SI_MAX / 2.5;
+    public static final double SPIKE_LOWER_THRESHOLD = SPIKE_UPPER_THRESHOLD * 0.7;
+    public static final double VERTICAL_INCREMENT = 1.0;
     public static final boolean VERTICAL_SCALER_ENABLED = true;
 
     // Simulation configuration constants
     public static final SimulationMethod SIMULATION_METHOD = SimulationMethod.BATCH_MEANS;
     public static final int NUM_REPLICATIONS = 10;
     public static final double MAX_TIME = Integer.MAX_VALUE;
-    public static final int NUM_BATCHES = 32;
-    public static final int BATCH_SIZE = 512;
+    public static final int NUM_BATCHES = 64;
+    public static final int BATCH_SIZE = 8_192;
 
-    // First batch is to warm up
-    public static final int WARM_UP_JOBS = BATCH_SIZE;
+    // First 5 batches are to warm up
+    public static final int WARM_UP_JOBS = 5 * BATCH_SIZE;
 
     // Logging configuration constants
     public static final boolean LOGGING_ENABLED = false;
     public static final LoggingFormat LOGGING_FORMAT = LoggingFormat.CSV;
     public static final LoggingDataType LOGGING_DATA_TYPE = LoggingDataType.LOAD_COMPARISON;
     public static final String LOGGING_OUTPUT_PATH = "simulation_state.csv";
+
+    public static final double SLA_THRESHOLD = SCALE_OUT_LIMIT;
 
     /**
      * Configuration parameters for workload and load routing.
@@ -139,7 +142,7 @@ public record ApplicationConfig(
          * @param siMax maximum service intensity
          */
         public LoadConfig(WorkloadType workloadType, double meanInterarrival, double meanService, RoutingPolicy routingPolicy, int siMax) {
-            this(meanInterarrival, CV_INTERARRIVAL, meanService, CV_SERVICE, siMax, -1, routingPolicy, workloadType, TRACE_PATH);
+            this(meanInterarrival, CV_INTERARRIVAL, meanService, CV_SERVICE, siMax, SI_LOW, routingPolicy, workloadType, TRACE_PATH);
         }
 
         /**
@@ -166,7 +169,22 @@ public record ApplicationConfig(
          * @param routingPolicy job routing policy
          */
         public LoadConfig(WorkloadType workloadType, double meanInterarrival, double cvInterarrival, double meanService, double cvService, RoutingPolicy routingPolicy) {
-            this(meanInterarrival, cvInterarrival, meanService, cvService, SI_MAX, -1, routingPolicy, workloadType, TRACE_PATH);
+            this(workloadType, meanInterarrival, cvInterarrival, meanService, cvService, routingPolicy, SI_MAX);
+        }
+
+        /**
+         * Initializes load configuration with workload type, mean times, coefficients of variation, routing policy, and maximum intensity.
+         *
+         * @param workloadType type of workload
+         * @param meanInterarrival average time between arrivals
+         * @param cvInterarrival coefficient of variation for inter-arrivals
+         * @param meanService average service time
+         * @param cvService coefficient of variation for service times
+         * @param routingPolicy job routing policy
+         * @param siMax maximum service intensity
+         */
+        public LoadConfig(WorkloadType workloadType, double meanInterarrival, double cvInterarrival, double meanService, double cvService, RoutingPolicy routingPolicy, int siMax) {
+            this(meanInterarrival, cvInterarrival, meanService, cvService, siMax, SI_LOW, routingPolicy, workloadType, TRACE_PATH);
         }
 
         /**
@@ -213,7 +231,7 @@ public record ApplicationConfig(
          * @return trace-driven load configuration
          */
         public static LoadConfig traceDriven(String tracePath, RoutingPolicy policy, int siMax) {
-            return new LoadConfig(0.0, 0.0, 0.0, 0.0, siMax, -1, policy, WorkloadType.TRACE, tracePath);
+            return new LoadConfig(0.0, 0.0, 0.0, 0.0, siMax, SI_LOW, policy, WorkloadType.TRACE, tracePath);
         }
 
         /**
@@ -285,7 +303,7 @@ public record ApplicationConfig(
      *
      * @param scaleOutLimit CPU threshold to trigger horizontal scale-out
      * @param scaleInLimit CPU threshold to trigger horizontal scale-in
-     * @param scaleInterval time interval between scaling evaluations
+     * @param windowSize number of completions used by the horizontal moving window
      * @param cooldown time to wait after a scaling action
      * @param spikeUpperThreshold upper threshold for spike server activation
      * @param spikeLowerThreshold lower threshold for spike server deactivation
@@ -297,7 +315,7 @@ public record ApplicationConfig(
     public record ScalingConfig(
         double scaleOutLimit,
         double scaleInLimit,
-        double scaleInterval,
+        double windowSize,
         double cooldown,
         double spikeUpperThreshold,
         double spikeLowerThreshold,
@@ -310,7 +328,7 @@ public record ApplicationConfig(
          * Initializes scaling configuration with default values.
          */
         public ScalingConfig() {
-            this(SCALE_OUT_LIMIT, SCALE_IN_LIMIT, SCALE_INTERVAL, COOLDOWN, 
+            this(SCALE_OUT_LIMIT, SCALE_IN_LIMIT, WINDOW_SIZE, COOLDOWN,
                  SPIKE_UPPER_THRESHOLD, SPIKE_LOWER_THRESHOLD, SPIKE_CPU_PERCENTAGE, VERTICAL_INCREMENT, true, true);
         }
 
@@ -322,8 +340,8 @@ public record ApplicationConfig(
          * @param cooldown scaling cooldown period
          * @return horizontal-only scaling configuration
          */
-        public static ScalingConfig onlyHorizontal(double scaleOutLimit, double scaleInLimit, double cooldown) {
-            return new ScalingConfig(scaleOutLimit, scaleInLimit, cooldown, cooldown, 0, 0, 0, 0, true, false);
+        public static ScalingConfig onlyHorizontal(double scaleOutLimit, double scaleInLimit, double windowSize, double cooldown) {
+            return new ScalingConfig(scaleOutLimit, scaleInLimit, windowSize, cooldown, 0, 0, 0, 0, true, false);
         }
 
         /**
@@ -337,7 +355,7 @@ public record ApplicationConfig(
          * @return vertical-only scaling configuration
          */
         public static ScalingConfig onlyVertical(double spikeUpperThreshold, double spikeLowerThreshold, double spikeCpuPercentage, double increment, double cooldown) {
-            return new ScalingConfig(0, 0, cooldown, cooldown, spikeUpperThreshold, spikeLowerThreshold, spikeCpuPercentage, increment, false, true);
+            return new ScalingConfig(0, 0, 0, cooldown, spikeUpperThreshold, spikeLowerThreshold, spikeCpuPercentage, increment, false, true);
         }
 
         /**

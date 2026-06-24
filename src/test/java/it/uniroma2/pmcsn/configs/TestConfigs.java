@@ -7,9 +7,6 @@ import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
  */
 public class TestConfigs {
 
-    final static private int NUM_BATCHES = ApplicationConfig.NUM_BATCHES;
-    final static private int BATCH_SIZE = ApplicationConfig.BATCH_SIZE;
-
     final static private double ROUTING_MAX_TIME = 50.0;
     final static private double H_SCALING_MAX_TIME = 45.0;
     final static private double V_SCALING_MAX_TIME = 25.0;
@@ -24,11 +21,11 @@ public class TestConfigs {
      * @param csvPath      Output path for persistence.
      * @return A configuration for horizontal scaling lifecycle validation.
      */
-    public static ApplicationConfig horizontalScaling(String tracePath, double outThreshold, double inThreshold, double cooldown, String csvPath) {
+    public static ApplicationConfig horizontalScaling(String tracePath, double outThreshold, double inThreshold, double windowSize, double cooldown, String csvPath) {
         return new ApplicationConfig(
             ApplicationConfig.LoadConfig.traceDriven(tracePath, RoutingPolicy.ROUND_ROBIN),
             new ApplicationConfig.ClusterConfig(1, 1, 5, false),
-            ApplicationConfig.ScalingConfig.onlyHorizontal(outThreshold, inThreshold, cooldown),
+            ApplicationConfig.ScalingConfig.onlyHorizontal(outThreshold, inThreshold, windowSize, cooldown),
             ApplicationConfig.ExecutionConfig.singleRun(H_SCALING_MAX_TIME),
             new ApplicationConfig.LoggingConfig(true, LoggingFormat.CSV, LoggingDataType.SCALING_METRICS, csvPath)
         );
@@ -49,7 +46,7 @@ public class TestConfigs {
         return new ApplicationConfig(
             ApplicationConfig.LoadConfig.traceDriven(tracePath, RoutingPolicy.DETERMINISTIC, 0),
             ApplicationConfig.ClusterConfig.fixedServer(1, true),
-            ApplicationConfig.ScalingConfig.onlyVertical(upper, lower, speed, cooldown, ApplicationConfig.VERTICAL_INCREMENT),
+            ApplicationConfig.ScalingConfig.onlyVertical(upper, lower, speed, 4.0, cooldown),
             ApplicationConfig.ExecutionConfig.singleRun(V_SCALING_MAX_TIME),
             new ApplicationConfig.LoggingConfig(true, LoggingFormat.CSV, LoggingDataType.SCALING_METRICS, csvPath)
         );

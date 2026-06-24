@@ -41,3 +41,7 @@ build/
 
 ### Docs ###
 .docs/
+report/auxil
+report/report.*
+!report/report.pdf
+!report/report.tex

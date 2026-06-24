@@ -21,8 +21,8 @@ import java.util.Locale;
  * Generates visual charts for performance analysis.
  */
 public class RoutingSimulationTest extends BaseSimulationTest {
-    private static final String BASE_RES_DIR = "data/res/routing/";
-    private static final String BASE_CHART_DIR = "data/chart/routing/";
+    private static final String BASE_RES_DIR = "data/vv/res/routing/";
+    private static final String BASE_CHART_DIR = "data/vv/chart/routing/";
     private static String commonTracePath;
 
     /**
@@ -86,10 +86,10 @@ public class RoutingSimulationTest extends BaseSimulationTest {
         for (int i = 0; i < 8; i++) trace.add(String.format(Locale.US, "%.4f 1.0", (20.0 + i * 0.6)));
 
         String tracePath = createTraceFile(trace);
-        String csvPath = "data/res/spike_diversion.csv";
-        String chartPath = "data/chart/spike_diversion_chart.png";
+        String csvPath = "data/vv/res/spike_diversion.csv";
+        String chartPath = "data/vv/chart/spike_diversion_chart.png";
         
-        ensureDirectories("data/res", "data/chart");
+        ensureDirectories("data/vv/res", "data/vv/chart");
 
         ApplicationConfig baseConfig = TestConfigs.routing(tracePath, RoutingPolicy.DETERMINISTIC, 1, csvPath);
         ApplicationConfig testConfig = new ApplicationConfig(

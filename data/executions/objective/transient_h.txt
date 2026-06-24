@@ -1,0 +1,123 @@
+INFO  LoadManagerSimulator [SIM] - ==================================================================
+INFO  LoadManagerSimulator [SIM] -                 SIMULATION CONFIGURATION OVERVIEW
+INFO  LoadManagerSimulator [SIM] - ==================================================================
+INFO  LoadManagerSimulator [SIM] - [WORKLOAD]
+INFO  LoadManagerSimulator [SIM] -   Type:                  HYPEREXPONENTIAL
+INFO  LoadManagerSimulator [SIM] -   Mean Interarrival:     0.2
+INFO  LoadManagerSimulator [SIM] -   CV Interarrival:       4.0
+INFO  LoadManagerSimulator [SIM] -   Mean Service:          0.25
+INFO  LoadManagerSimulator [SIM] -   CV Service:            4.0
+INFO  LoadManagerSimulator [SIM] - [CLUSTER & ROUTING]
+INFO  LoadManagerSimulator [SIM] -   Initial Web Servers:   1
+INFO  LoadManagerSimulator [SIM] -   Min/Max Web Servers:   1 / 25
+INFO  LoadManagerSimulator [SIM] -   Routing Policy:        LEAST_LOADED
+INFO  LoadManagerSimulator [SIM] -   Spike Server Enabled:  true
+INFO  LoadManagerSimulator [SIM] -   SI_max Threshold:      40
+INFO  LoadManagerSimulator [SIM] - [SCALING]
+INFO  LoadManagerSimulator [SIM] -   Horizontal Scaler:     ENABLED
+INFO  LoadManagerSimulator [SIM] -     Thresholds (Out/In): 6.0 / 3.5
+INFO  LoadManagerSimulator [SIM] -   Vertical Scaler:       ENABLED
+INFO  LoadManagerSimulator [SIM] -     Thresholds (Up/Down):16.0 / 11.2
+INFO  LoadManagerSimulator [SIM] -     Spike CPU % (Base):  100.0
+INFO  LoadManagerSimulator [SIM] -     Vertical Increment:  1.0
+INFO  LoadManagerSimulator [SIM] -   Window Size:           100.0
+INFO  LoadManagerSimulator [SIM] -   Cooldown Period:       10.0
+INFO  LoadManagerSimulator [SIM] - [EXECUTION]
+INFO  LoadManagerSimulator [SIM] -   Method:                BATCH_MEANS
+INFO  LoadManagerSimulator [SIM] -   Seed:                  123456789
+INFO  LoadManagerSimulator [SIM] -   Batches:               64
+INFO  LoadManagerSimulator [SIM] -   Batch Size:            8192
+INFO  LoadManagerSimulator [SIM] -   Warm-up Jobs:          40960
+INFO  LoadManagerSimulator [SIM] - ==================================================================
+
+INFO  TransientAnalysisObjective [OBJ3.2] - Starting Finite Horizon Objective...
+INFO  TransientAnalysisObjective [OBJ3.2] - Running Scenario: High_Load_CV4
+INFO  TransientAnalysisObjective [OBJ3.2] - Running Complete System: lambda=8.0, cv=4.0
+INFO  SimulationFacade [SIM] - Starting 10 independent replications...
+INFO  SimulationFacade [SIM] - Running replication 1/10 with seed 123456789...
+[==================================================] 100% | Jobs: 4023844 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 2/10 with seed 1797289858...
+[==================================================] 100% | Jobs: 4023472 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 3/10 with seed 877920974...
+[==================================================] 100% | Jobs: 4037121 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 4/10 with seed 1943784467...
+[==================================================] 100% | Jobs: 4029678 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 5/10 with seed 728462634...
+[==================================================] 100% | Jobs: 4049474 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 6/10 with seed 183828521...
+[==================================================] 100% | Jobs: 4039119 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 7/10 with seed 831335253...
+[==================================================] 100% | Jobs: 4048958 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 8/10 with seed 457007728...
+[==================================================] 100% | Jobs: 4029980 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 9/10 with seed 382292749...
+[==================================================] 100% | Jobs: 4028517 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 10/10 with seed 1712637403...
+[==================================================] 100% | Jobs: 4038381 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] -
+ ==================================================================
+                   AGGREGATED SIMULATION REPORT
+METHOD: INDEPENDENT REPLICATIONS
+SAMPLES (N): 10
+==================================================================
+Response Time            : Mean = 3,7118, StdDev = 0,0043, HW=0,0031, CI = [3,7087, 3,7148]
+Jobs in System           : Mean = 29,7171, StdDev = 0,0763, HW=0,0546, CI = [29,6625, 29,7717]
+System Utilization       : Mean = 0,7214, StdDev = 0,0010, HW=0,0007, CI = [0,7207, 0,7221]
+Throughput               : Mean = 8,0057, StdDev = 0,0186, HW=0,0133, CI = [7,9924, 8,0190]
+Diverted Jobs            : Mean = 1039816,0000, StdDev = 7850,7618, HW=5616,0967, CI = [1034199,9033, 1045432,0967]
+Avg Active Servers (N)   : Mean = 1,6274, StdDev = 0,0088, HW=0,0063, CI = [1,6212, 1,6337]
+------------------------------------------------------------------
+Scale OUT Actions        : Mean = 9385,1000, StdDev = 48,6152, HW=34,7772, CI = [9350,3228, 9419,8772]
+Scale IN  Actions        : Mean = 9385,0000, StdDev = 48,6393, HW=34,7944, CI = [9350,2056, 9419,7944]
+Scale UP  Actions        : Mean = 7832,9000, StdDev = 97,9472, HW=70,0672, CI = [7762,8328, 7902,9672]
+Scale DOWN Actions       : Mean = 7832,8000, StdDev = 97,7966, HW=69,9595, CI = [7762,8405, 7902,7595]
+Spike Server Avg Speed   : Mean = 1,1594, StdDev = 0,0020, HW=0,0014, CI = [1,1580, 1,1608]
+Spike Server Utilization : Mean = 0,3959, StdDev = 0,0028, HW=0,0020, CI = [0,3938, 0,3979]
+==================================================================
+INFO  ObjectiveUtils [OBJ_UTIL] - Data saved to data\objective\finite\transient_high_load_cv4.csv
+INFO  BaseChartUtility [CHART] - Chart generated: data/objective/finite/transient_high_load_cv4.png
+INFO  TransientAnalysisObjective [OBJ3.2] - Running Scenario: High_Load_CV6
+INFO  TransientAnalysisObjective [OBJ3.2] - Running Complete System: lambda=8.0, cv=6.0
+INFO  SimulationFacade [SIM] - Starting 10 independent replications...
+INFO  SimulationFacade [SIM] - Running replication 1/10 with seed 123456789...
+[==================================================] 100% | Jobs: 4021927 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 2/10 with seed 1915202526...
+[==================================================] 100% | Jobs: 4027956 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 3/10 with seed 106571124...
+[==================================================] 100% | Jobs: 4044864 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 4/10 with seed 367955394...
+[==================================================] 100% | Jobs: 4015251 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 5/10 with seed 1383042792...
+[==================================================] 100% | Jobs: 4064079 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 6/10 with seed 584740870...
+[==================================================] 100% | Jobs: 4038211 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 7/10 with seed 925365738...
+[==================================================] 100% | Jobs: 4022491 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 8/10 with seed 968860263...
+[==================================================] 100% | Jobs: 4016474 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 9/10 with seed 234297835...
+[==================================================] 100% | Jobs: 4039823 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] - Running replication 10/10 with seed 351228271...
+[==================================================] 100% | Jobs: 4032983 | Clock: 504000,00s
+INFO  SimulationFacade [SIM] -
+ ==================================================================
+                   AGGREGATED SIMULATION REPORT
+METHOD: INDEPENDENT REPLICATIONS
+SAMPLES (N): 10
+==================================================================
+Response Time            : Mean = 3,4832, StdDev = 0,0066, HW=0,0047, CI = [3,4784, 3,4879]
+Jobs in System           : Mean = 27,8700, StdDev = 0,1501, HW=0,1074, CI = [27,7626, 27,9774]
+System Utilization       : Mean = 0,7092, StdDev = 0,0016, HW=0,0011, CI = [0,7081, 0,7103]
+Throughput               : Mean = 8,0008, StdDev = 0,0298, HW=0,0213, CI = [7,9795, 8,0221]
+Diverted Jobs            : Mean = 1160233,7000, StdDev = 7372,5092, HW=5273,9754, CI = [1154959,7246, 1165507,6754]
+Avg Active Servers (N)   : Mean = 1,6581, StdDev = 0,0117, HW=0,0083, CI = [1,6498, 1,6665]
+------------------------------------------------------------------
+Scale OUT Actions        : Mean = 9504,4000, StdDev = 83,6703, HW=59,8541, CI = [9444,5459, 9564,2541]
+Scale IN  Actions        : Mean = 9504,2000, StdDev = 83,6817, HW=59,8623, CI = [9444,3377, 9564,0623]
+Scale UP  Actions        : Mean = 8947,3000, StdDev = 54,0577, HW=38,6705, CI = [8908,6295, 8985,9705]
+Scale DOWN Actions       : Mean = 8946,9000, StdDev = 54,0236, HW=38,6461, CI = [8908,2539, 8985,5461]
+Spike Server Avg Speed   : Mean = 1,1900, StdDev = 0,0014, HW=0,0010, CI = [1,1890, 1,1910]
+Spike Server Utilization : Mean = 0,4228, StdDev = 0,0020, HW=0,0015, CI = [0,4214, 0,4243]
+==================================================================
+INFO  ObjectiveUtils [OBJ_UTIL] - Data saved to data\objective\finite\transient_high_load_cv6.csv
+INFO  BaseChartUtility [CHART] - Chart generated: data/objective/finite/transient_high_load_cv6.png

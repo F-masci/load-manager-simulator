@@ -1,8 +1,9 @@
 package it.uniroma2.pmcsn.simulator;
 
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
-import it.uniroma2.pmcsn.configs.TestConfigs;
+import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.facade.SimulationFacade;
+import it.uniroma2.pmcsn.model.load.routing.RoutingPolicy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +64,6 @@ public class SimpleSystemSimulationTest extends BaseSimulationTest {
             ApplicationConfig.LoadConfig.singleHyperexponentialServer(ARRIVAL_MEAN, HYPEREXP_CV, SERVICE_MEAN, HYPEREXP_CV),
             ApplicationConfig.ClusterConfig.singleServer(),
             ApplicationConfig.ScalingConfig.disabled(),
-            // Simulator run for 25_000_000 sample, so we use this to build batch means params
             ApplicationConfig.ExecutionConfig.batchRun(512, 16_384, 0)
         );
 
@@ -84,5 +84,33 @@ public class SimpleSystemSimulationTest extends BaseSimulationTest {
         assertEquals(3.0118, results.jobsInSystem().mean(), results.jobsInSystem().halfWidth() * scalingFactor, "Mean Jobs in System mismatch");
         assertEquals(0.6239, results.utilization().mean(), results.utilization().halfWidth() * scalingFactor, "Mean Utilization mismatch");
         assertEquals(2.5023, results.throughput().mean(), results.throughput().halfWidth() * scalingFactor, "Mean Throughput mismatch");
+    }
+
+    /**
+     * Validates simulation results against simulator metrics.
+     */
+    @Test
+    public void testSimplifiedSystemSimulationMetrics() {
+        logTestStep("Validating system metrics: lambda=2.5, mu=4.0");
+
+        ApplicationConfig testConfig = new ApplicationConfig(
+                new ApplicationConfig.LoadConfig(WorkloadType.HYPEREXPONENTIAL, 0.40,  0.25, RoutingPolicy.DETERMINISTIC, 10),
+                ApplicationConfig.ClusterConfig.fixedServer(1, true),
+                ApplicationConfig.ScalingConfig.disabled(),
+                ApplicationConfig.ExecutionConfig.batchRun(4_096, 4_096, 0)
+        );
+
+        SimulationFacade facade = new SimulationFacade(testConfig);
+        SimulationFacade.AggregatedResults results = facade.runSimulation();
+
+        logDebug("Results - RT: {}, JIS: {}, Util: {}, Thr: {}",
+                results.responseTime().mean(), results.jobsInSystem().mean(),
+                results.utilization().mean(), results.throughput().mean());
+
+        // Expected results taken from book simulator
+        final int scalingFactor = 5;
+        assertEquals(0.9043, results.responseTime().mean(), results.responseTime().halfWidth() * scalingFactor, "Mean Response Time mismatch");
+        assertEquals(2.2749, results.jobsInSystem().mean(), results.jobsInSystem().halfWidth() * scalingFactor, "Mean Jobs in System mismatch");
+        assertEquals(2.4953, results.throughput().mean(), results.throughput().halfWidth() * scalingFactor, "Mean Throughput mismatch");
     }
 }
