@@ -954,7 +954,7 @@ Per verificare l'adattamento del numero di server attivi guidato dal tempo di ri
 % =========================================================================
 % LINEA DEL TEMPO DEL CARICO DI LAVORO
 % =========================================================================
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \begin{tikzpicture}[x=0.35cm, y=0.45cm, >=stealth, line width=0.7pt]
         
@@ -1237,11 +1237,11 @@ Anche per questo scenario è stata eseguita una stima preliminare dei Batch Mean
     \label{tab:validation_system_batch}
 \end{table}
 
-\begin{figure}[H]
+\begin{figure}[t]
     \centering
 
     \includegraphics[
-        width=0.88\textwidth,
+        width=0.95\textwidth,
         trim=0 380 0 25,
         clip
     ]{../data/simulation/simple_system/job}
@@ -1249,7 +1249,7 @@ Anche per questo scenario è stata eseguita una stima preliminare dei Batch Mean
     \vspace{0.02\textheight}
 
     \includegraphics[
-        width=0.88\textwidth,
+        width=0.95\textwidth,
         trim=0 380 0 25,
         clip
     ]{../data/simulation/simple_system/response}
@@ -1257,7 +1257,7 @@ Anche per questo scenario è stata eseguita una stima preliminare dei Batch Mean
     \vspace{0.02\textheight}
 
     \includegraphics[
-        width=0.88\textwidth,
+        width=0.95\textwidth,
         trim=0 380 0 25,
         clip
     ]{../data/simulation/simple_system/throughput}
@@ -1268,7 +1268,7 @@ Anche per questo scenario è stata eseguita una stima preliminare dei Batch Mean
 
 La campagna Java definitiva è stata configurata con $4096$ batch da $4096$ job. I risultati in Tabella~\ref{tab:validation_system_comparison} mostrano una buona aderenza tra le due implementazioni indipendenti. Il throughput, indice particolarmente sensibile alla corretta conservazione del flusso, differisce solo dello $0.34\%$ e gli intervalli di confidenza si sovrappongono. Anche il numero medio di job nel sistema mantiene uno scarto contenuto, pari a circa $1.31\%$, con sovrapposizione tra gli intervalli. Il tempo di risposta medio del simulatore Java risulta leggermente più alto di quello JSIM ($0.9157\text{ s}$ contro $0.9043\text{ s}$), con uno scostamento relativo pari a circa $1.26\%$: tale differenza è coerente con la semplificazione adottata nel modello JSIM per approssimare il router a soglia e con la diversa logica di arresto statistico usata dai due strumenti.
 
-\begin{table}[htbp]
+\begin{table}[t]
     \centering
     \small
     \renewcommand{\arraystretch}{1.3}
@@ -1294,7 +1294,7 @@ Nel complesso, la validazione esterna mostra che il simulatore implementato repl
 % RISULTATI
 % =========================================================================
 \section{Risultati e Analisi}
-In questo capitolo vengono presentati e discussi i risultati ottenuti dalle diverse campagne di simulazione, evidenziando il raggiungimento degli obiettivi prefissati e analizzando le prestazioni del sistema sotto diversi scenari operativi. L'esposizione segue lo stesso percorso sperimentale adottato nel progetto: prima vengono fissati i parametri di dimensionamento, poi viene valutata l'architettura completa in termini di costo, dinamica transitoria e robustezza rispetto alla variabilità del carico, infine viene discusso il miglioramento ottenuto introducendo una banda di isteresi nel meccanismo di dirottamento.
+In questo capitolo vengono presentati e discussi i risultati ottenuti dalle diverse campagne di simulazione, evidenziando il raggiungimento degli obiettivi prefissati e analizzando le prestazioni del sistema sotto diversi scenari operativi. L'esposizione segue lo stesso percorso sperimentale adottato nel progetto: prima vengono fissati i parametri di dimensionamento, poi viene valutata l'architettura completa in termini di costo, dinamica transitoria e robustezza rispetto alla variabilità del carico, infine viene discusso il miglioramento ottenuto introducendo una banda nel meccanismo di dirottamento.
 
 
 \subsection{Dimensionamento}
@@ -1305,7 +1305,7 @@ L'ottimizzazione delle politiche di instradamento è stata condotta tramite la c
 Il confronto ha coinvolto le quattro strategie \textit{Round Robin}, \textit{Random}, \textit{Least Loaded} e \textit{Power of Two Choices}. I risultati quantitativi, riportati in Tabella~\ref{tab:routing_policy_results}, mostrano una gerarchia netta e stabile. La politica \textbf{Least Loaded} risulta la migliore in assoluto, con un tempo medio di risposta pari a $0.2843\text{ s}$, una \textit{Half-Width} di appena $0.0011\text{ s}$ e una deviazione standard pari a $0.0243\text{ s}$; rispetto a \textit{Round Robin} riduce la latenza media di circa il $24.7\%$, mentre il guadagno sale a circa il $33.3\%$ rispetto alla politica \textit{Random}. La tecnica \textit{Power of Two Choices} si colloca in seconda posizione con $R_0 = 0.3147\text{ s}$, confermando di essere un compromesso molto efficace tra qualità del bilanciamento e costo informativo, mentre \textit{Random} risulta la politica meno efficiente a causa dell'assenza di qualunque meccanismo di correzione delle collisioni locali.
 
 Il risultato osservato è coerente con l'aspettativa teorica. In uno scenario con server omogenei e carico altamente variabile, la politica che osserva direttamente il numero di job residenti deve ridurre più efficacemente la congestione locale; al contrario, una politica cieca come \textit{Random} può produrre collisioni temporanee anche quando esiste capacità libera altrove. Non emergono quindi anomalie sperimentali: la classifica ottenuta riflette il diverso livello informativo disponibile al router.
-\begin{table}[H]
+\begin{table}[t]
     \centering
     \small
     \renewcommand{\arraystretch}{1.3}
@@ -1379,7 +1379,14 @@ La calibrazione statistica preliminare ha rilevato, con il metodo ACF, un cutoff
 
 I risultati riportati in Tabella~\ref{tab:vertical_step_sizing_results} mostrano che la variazione dell'incremento di velocità non introduce alcun miglioramento prestazionale sostanziale. L'aspettativa iniziale era osservare almeno una riduzione moderata di $R_0$ per speedup più elevati, nel caso in cui lo Spike Server fosse il collo di bottiglia dominante; l'esito sperimentale mostra invece che tale ipotesi non è verificata. Il tempo medio di risposta resta infatti compreso in un intervallo estremamente ristretto, tra $5.5103\text{ s}$ e $5.5162\text{ s}$, e tutti gli intervalli di confidenza al $95\%$ risultano completamente sovrapposti. Anche il grafico in Figura~\ref{fig:vertical_step_sizing} conferma l'andamento sostanzialmente piatto della curva di $R_0$: l'aumento della capacità verticale disponibile non modifica in modo apprezzabile il comportamento globale del sistema, perché il collo di bottiglia dominante non è la velocità istantanea dello Spike Server, ma il momento in cui il traffico viene effettivamente dirottato dal Web Server ordinario.
 
-\begin{table}[H]
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../data/objective/vertical_step_sizing}
+    \caption{Effetto dell'incremento di velocità verticale su tempo di risposta, velocità media e utilizzazione dello Spike Server.}
+    \label{fig:vertical_step_sizing}
+\end{figure}
+
+\begin{table}[t]
     \centering
     \small
     \renewcommand{\arraystretch}{1.3}
@@ -1397,13 +1404,6 @@ I risultati riportati in Tabella~\ref{tab:vertical_step_sizing_results} mostrano
     \caption{Analisi dell'impatto dell'incremento di velocità verticale sul tempo medio di risposta.}
     \label{tab:vertical_step_sizing_results}
 \end{table}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.86\textwidth]{../data/objective/vertical_step_sizing}
-    \caption{Effetto dell'incremento di velocità verticale su tempo di risposta, velocità media e utilizzazione dello Spike Server.}
-    \label{fig:vertical_step_sizing}
-\end{figure}
 
 Questa evidenza porta a una conclusione progettuale precisa: aumentare ulteriormente lo speedup verticale non è conveniente. Dal punto di vista economico, una capacità di picco più elevata comporterebbe un costo potenziale maggiore senza produrre una riduzione statisticamente significativa della latenza media. Per questo motivo si è scelto di adottare un incremento di velocità pari a \textbf{1.0}, corrispondente a un raddoppio della potenza disponibile quando lo scaling verticale viene attivato. Tale configurazione rappresenta la scelta più sobria e difendibile: garantisce una risposta sufficiente nelle fasi di picco, evita sovradimensionamenti inutili e mantiene il costo operativo dello Spike Server sotto controllo.
 
@@ -1431,7 +1431,7 @@ I risultati, sintetizzati nella Tabella~\ref{tab:horizontal_scaling_results}, ev
     \label{tab:horizontal_scaling_results}
 \end{table}
 
-La soglia di \textit{Scale In} deve quindi essere scelta in modo da favorire il ritorno a una sola unità quando il carico nominale è prossimo a $\lambda = 5$, ma senza autorizzare contrazioni pericolose nella regione in cui un singolo Web Server non è più sostenibile. Poiché $R^{max}=6.0\text{ s}$ rappresenta già la soglia superiore di violazione dello SLA, non sarebbe corretto usare lo stesso valore anche come soglia di riduzione: verrebbe infatti annullata la banda di isteresi tra espansione e contrazione, rendendo il controller troppo incline a rimuovere risorse appena il sistema rientra formalmente sotto il limite. Alla luce dei risultati aggiornati, una scelta più coerente per lo scenario principale è \textbf{$R^{min}=3.5\text{ s}$}. Questo valore mantiene un margine sufficiente rispetto allo SLA, evita oscillazioni eccessive vicino alla soglia critica e consente comunque il ritorno verso configurazioni più economiche quando il carico si trova nella regione ordinaria del progetto.
+La soglia di \textit{Scale In} deve quindi essere scelta in modo da favorire il ritorno a una sola unità quando il carico nominale è prossimo a $\lambda = 5$, ma senza autorizzare contrazioni pericolose nella regione in cui un singolo Web Server non è più sostenibile. Poiché $R^{max}=6.0\text{ s}$ rappresenta già la soglia superiore di violazione dello SLA, non sarebbe corretto usare lo stesso valore anche come soglia di riduzione: verrebbe infatti annullata la banda tra espansione e contrazione, rendendo il controller troppo incline a rimuovere risorse appena il sistema rientra formalmente sotto il limite. Alla luce dei risultati aggiornati, una scelta più coerente per lo scenario principale è \textbf{$R^{min}=3.5\text{ s}$}. Questo valore mantiene un margine sufficiente rispetto allo SLA, evita oscillazioni eccessive vicino alla soglia critica e consente comunque il ritorno verso configurazioni più economiche quando il carico si trova nella regione ordinaria del progetto.
 
 \begin{figure}[H]
     \centering
@@ -1442,7 +1442,7 @@ La soglia di \textit{Scale In} deve quindi essere scelta in modo da favorire il 
 
 Per scenari di carico più elevato, prossimi a $\lambda = 9.5$ o $\lambda = 11$, la soglia a $6\text{ s}$ modifica sensibilmente l'interpretazione. Due server non garantiscono più il rispetto del vincolo, poiché producono rispettivamente $R_0 = 6.5519\text{ s}$ e $R_0 = 7.7255\text{ s}$; al contrario, cinque server mantengono la latenza entro margini molto ampi, con $R_0 = 0.3303\text{ s}$ a $\lambda = 9.5$ e $R_0 = 0.3776\text{ s}$ a $\lambda = 11$. La configurazione a tre server resta valida fino a $\lambda=9.5$, ma nello scenario più intenso risulta inconclusiva nella verifica di convergenza; per questo motivo, in presenza di workload persistentemente elevati, una soglia di \textit{Scale In} tra $1.5\text{ s}$ e $2.0\text{ s}$ rimarrebbe la scelta più conservativa, perché manterrebbe più facilmente tre o più server attivi e offrirebbe maggiore margine rispetto a burst improvvisi. Il valore $R^{min}=3.5\text{ s}$ va invece interpretato come una scelta coerente con un profilo di carico centrato su $\lambda \simeq 5$, non come soglia ottimale per workload persistentemente elevati.
 
-In conclusione, il dimensionamento dello scaling orizzontale dipende dal carico nominale atteso. Nel caso di studio principale, centrato su valori di $\lambda$ prossimi a 5 e con SLA pari a $6\text{ s}$, la scelta \textbf{$R^{min}=3.5\text{ s}$} è coerente con una politica orientata al contenimento dei costi: preserva il risparmio economico nei regimi sostenibili da un solo Web Server, ma conserva una banda di isteresi rispetto a $R^{max}$ sufficiente a evitare rimozioni premature. Per workload persistentemente più aggressivi, invece, la soglia deve essere abbassata ulteriormente, indicativamente nell'intervallo $1.5$--$2.0\text{ s}$, accettando un costo infrastrutturale maggiore in cambio di una maggiore robustezza operativa. Le verifiche di convergenza hanno mostrato warm-up molto variabili: le configurazioni stabili convergono tipicamente tra $60000$ e $240000$ job, mentre i casi prossimi alla saturazione possono arrivare a $940000$ job senza classificazione conclusiva. Questo risultato conferma la necessità di usare il job di convergenza stimato come warm-up della successiva analisi Batch Means.
+In conclusione, il dimensionamento dello scaling orizzontale dipende dal carico nominale atteso. Nel caso di studio principale, centrato su valori di $\lambda$ prossimi a 5 e con SLA pari a $6\text{ s}$, la scelta \textbf{$R^{min}=3.5\text{ s}$} è coerente con una politica orientata al contenimento dei costi: preserva il risparmio economico nei regimi sostenibili da un solo Web Server, ma conserva una banda rispetto a $R^{max}$ sufficiente a evitare rimozioni premature. Per workload persistentemente più aggressivi, invece, la soglia deve essere abbassata ulteriormente, indicativamente nell'intervallo $1.5$--$2.0\text{ s}$, accettando un costo infrastrutturale maggiore in cambio di una maggiore robustezza operativa. Le verifiche di convergenza hanno mostrato warm-up molto variabili: le configurazioni stabili convergono tipicamente tra $60000$ e $240000$ job, mentre i casi prossimi alla saturazione possono arrivare a $940000$ job senza classificazione conclusiva. Questo risultato conferma la necessità di usare il job di convergenza stimato come warm-up della successiva analisi Batch Means.
 \subsection{Analisi}
 
 \paragraph{Analisi Economica e Trade-off dei Costi}
@@ -1456,7 +1456,7 @@ Il modello economico adottato considera un costo fisso per ogni Web Server attiv
 \]
 In questo modo il costo della capacità orizzontale viene pagato ogni volta che un Web Server resta mediamente acceso, mentre il costo della risorsa di picco cresce solo quando lo Spike Server viene effettivamente utilizzato e accelerato.
 
-I risultati, sintetizzati nella Tabella~\ref{tab:cost_tradeoff_results} e nelle Figure~\ref{fig:cost_analysis_cd5}--\ref{fig:cost_analysis_cd100}, confermano il trade-off atteso. Soglie di \textit{Scale In} basse, come $R^{min}=1.0\text{ s}$ o $R^{min}=2.0\text{ s}$, mantengono più a lungo server aggiuntivi nel cluster: questo abbassa il tempo medio di risposta, soprattutto ad alto carico, ma aumenta sensibilmente il costo medio a causa del maggior numero di Web Server attivi. Al contrario, soglie più permissive, come $R^{min}=5.0\text{ s}$ o $R^{min}=6.0\text{ s}$, riducono il costo operativo perché favoriscono una contrazione più rapida del cluster; il prezzo pagato è un tempo di risposta più elevato, pur rimanendo entro il vincolo SLA in tutti gli scenari simulati.
+I risultati, sintetizzati nella Tabella~\ref{tab:cost_tradeoff_results} e nelle Figure~\ref{fig:cost_analysis_cd5}--\ref{fig:cost_analysis_cd100}, confermano il trade-off atteso. Soglie di \textit{Scale In} basse, come $R^{min}=1.5\text{ s}$ o $R^{min}=2.0\text{ s}$, mantengono più a lungo server aggiuntivi nel cluster: questo abbassa il tempo medio di risposta, soprattutto ad alto carico, ma aumenta sensibilmente il costo medio a causa del maggior numero di Web Server attivi. Al contrario, soglie più permissive, come $R^{min}=3.5\text{ s}$ o $R^{min}=5.0\text{ s}$, riducono il costo operativo perché favoriscono una contrazione più rapida del cluster; il prezzo pagato è un tempo di risposta più elevato, pur rimanendo entro il vincolo SLA in tutti gli scenari simulati.
 
 L'esito è quindi in linea con il comportamento atteso del controller: abbassare la soglia di \textit{Scale In} rende il sistema più prudente e prestazionalmente robusto, ma più costoso; alzarla spinge invece verso configurazioni più economiche, accettando una latenza media maggiore. La campagna serve proprio a quantificare questo compromesso, non a individuare un minimo assoluto valido per qualunque profilo di traffico.
 
@@ -1466,11 +1466,11 @@ L'esito è quindi in linea con il comportamento atteso del controller: abbassare
     \renewcommand{\arraystretch}{1.25}
     \begin{tabular}{lcccc}
         \hline
-        \textbf{$R^{min}$} & \textbf{Cooldown [s]} & \textbf{$\overline{C}_{tot}$} & \textbf{$\overline{R}_0$ [s]} & \textbf{$R_0(\lambda=11)$ [s]} \\ \hline
-        $1.0$ & $10$ & $5.541$ & $2.860$ & $3.262$ \\
-        $2.0$ & $10$ & $5.040$ & $3.106$ & $3.642$ \\
-        $5.0$ & $10$ & $4.302$ & $3.470$ & $4.126$ \\
-        $6.0$ & $10$ & $4.213$ & $3.542$ & $4.207$ \\ \hline
+        \textbf{$R^{min}$} & \textbf{Cooldown [s]} & \textbf{$\overline{C}_{tot}$} & \textbf{$\overline{R}_0$ [s]} \\ \hline
+        $1.5$ & $10$ & $5.282$ & $2.997$ \\
+        $2.0$ & $10$ & $5.040$ & $3.106$ \\
+        $3.5$ & $10$ & $4.496$ & $3.338$ \\
+        $5.0$ & $10$ & $4.302$ & $3.470$ \\ \hline
     \end{tabular}
     \caption{Sintesi del compromesso costo-prestazioni con \textit{Cooldown} fissato a $10\text{ s}$. Le medie sono calcolate sui valori di $\lambda$ simulati.}
     \label{tab:cost_tradeoff_results}
@@ -1478,35 +1478,35 @@ L'esito è quindi in linea con il comportamento atteso del controller: abbassare
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../data/objective/cost/cost_analysis_cooldown_5s}
+    \includegraphics[width=0.95\textwidth]{../data/objective/cost/cost_analysis_cooldown_5s}
     \caption{Andamento del costo totale e del tempo medio di risposta con \textit{Cooldown} pari a $5\text{ s}$.}
     \label{fig:cost_analysis_cd5}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../data/objective/cost/cost_analysis_cooldown_10s}
+    \includegraphics[width=0.95\textwidth]{../data/objective/cost/cost_analysis_cooldown_10s}
     \caption{Andamento del costo totale e del tempo medio di risposta con \textit{Cooldown} pari a $10\text{ s}$.}
     \label{fig:cost_analysis_cd10}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../data/objective/cost/cost_analysis_cooldown_50s}
+    \includegraphics[width=0.95\textwidth]{../data/objective/cost/cost_analysis_cooldown_50s}
     \caption{Andamento del costo totale e del tempo medio di risposta con \textit{Cooldown} pari a $50\text{ s}$.}
     \label{fig:cost_analysis_cd50}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../data/objective/cost/cost_analysis_cooldown_100s}
+    \includegraphics[width=0.95\textwidth]{../data/objective/cost/cost_analysis_cooldown_100s}
     \caption{Andamento del costo totale e del tempo medio di risposta con \textit{Cooldown} pari a $100\text{ s}$.}
     \label{fig:cost_analysis_cd100}
 \end{figure}
 
-Il \textit{Cooldown} ha un ruolo altrettanto rilevante. Un valore troppo breve, pari a $5\text{ s}$, rende il controller molto reattivo ma tende ad aumentare il costo medio: con $R^{min}=6.0\text{ s}$ il costo medio è $4.473$, contro $4.213$ ottenuto con $10\text{ s}$. Valori più lunghi riducono la frequenza delle riconfigurazioni, ma possono ritardare l'adattamento del cluster nei regimi più intensi: con $R^{min}=6.0\text{ s}$ e $\lambda=11$, il tempo medio di risposta passa da $4.2072\text{ s}$ con \textit{Cooldown} pari a $10\text{ s}$ a $4.5817\text{ s}$ con $50\text{ s}$ e $4.8231\text{ s}$ con $100\text{ s}$. D'altra parte, per soglie di \textit{Scale In} molto basse, un \textit{Cooldown} più lungo può anche ridurre leggermente la latenza media, perché mantiene la capacità orizzontale allocata più a lungo dopo un episodio di carico elevato.
+Il \textit{Cooldown} ha un ruolo altrettanto rilevante. Un valore troppo breve, pari a $5\text{ s}$, rende il controller molto reattivo ma tende ad aumentare il costo medio: con $R^{min}=5.0\text{ s}$ il costo medio è $4.622$, contro $4.302$ ottenuto con $10\text{ s}$; con $R^{min}=3.5\text{ s}$ il costo passa analogamente da $4.828$ a $4.496$. Valori più lunghi riducono la frequenza delle riconfigurazioni, ma possono ritardare l'adattamento del cluster nei regimi più intensi: con $R^{min}=5.0\text{ s}$ e $\lambda=11$, il tempo medio di risposta passa da $4.1262\text{ s}$ con \textit{Cooldown} pari a $10\text{ s}$ a $4.4611\text{ s}$ con $50\text{ s}$ e $4.6981\text{ s}$ con $100\text{ s}$. D'altra parte, per soglie di \textit{Scale In} molto basse, un \textit{Cooldown} più lungo può anche ridurre leggermente la latenza media, perché mantiene la capacità orizzontale allocata più a lungo dopo un episodio di carico elevato.
 
-Alla luce di queste evidenze, la configurazione economicamente più difendibile dipende dal profilo di carico atteso. Se si privilegia la robustezza prestazionale, $R^{min}=1.0\text{ s}$ o $R^{min}=2.0\text{ s}$ mantengono tempi di risposta più bassi, ma accettano un costo medio più elevato. Se invece l'obiettivo principale è contenere la spesa mantenendo il rispetto dello SLA, le configurazioni con $R^{min}=5.0\text{ s}$--$6.0\text{ s}$ sono più convenienti. Per le analisi successive si adotta quindi \textbf{\textit{Cooldown} pari a $10.0\text{ s}$}: tale valore preserva una buona reattività nei regimi ad alto carico, mantiene $R_0$ ben al di sotto dello SLA anche per $\lambda=11$ e riduce sensibilmente il costo rispetto al \textit{Cooldown} di $5\text{ s}$.
+Alla luce di queste evidenze, la configurazione economicamente più difendibile dipende dal profilo di carico atteso. Se si privilegia la robustezza prestazionale, $R^{min}=1.5\text{ s}$ o $R^{min}=2.0\text{ s}$ mantengono tempi di risposta più bassi, ma accettano un costo medio più elevato, rispettivamente pari a $5.282$ e $5.040$ con \textit{Cooldown} di $10\text{ s}$. Se invece l'obiettivo principale è contenere la spesa mantenendo il rispetto dello SLA, le configurazioni con $R^{min}=3.5\text{ s}$--$5.0\text{ s}$ sono più convenienti: il costo medio scende a $4.496$ e $4.302$, mentre a $\lambda=11$ il tempo medio di risposta rimane pari a $3.9478\text{ s}$ e $4.1262\text{ s}$. Per le analisi successive si adotta quindi \textbf{\textit{Cooldown} pari a $10.0\text{ s}$}: tale valore preserva una buona reattività nei regimi ad alto carico, mantiene $R_0$ ben al di sotto dello SLA anche per $\lambda=11$ e riduce sensibilmente il costo rispetto al \textit{Cooldown} di $5\text{ s}$.
 
 \paragraph{Analisi Transitoria a Orizzonte Finito}
 L'analisi transitoria è stata condotta tramite la classe \texttt{TransientAnalysisObjective}. A differenza delle campagne steady-state, qui il sistema viene osservato a partire da uno stato iniziale vuoto, usando repliche indipendenti e salvando l'evoluzione temporale del tempo medio di risposta. Sono stati considerati sei scenari sulla sola architettura completa: due a basso carico, due a carico medio e due ad alto carico, variando sia $\lambda$ sia il coefficiente di variazione degli interarrivi. Ogni scenario è stato eseguito con $10$ repliche indipendenti; gli scenari low e medium sono stati simulati fino a circa $1008000\text{ s}$, mentre gli scenari high fino a $504000\text{ s}$, con scala temporale dei grafici convertita in ore per renderli leggibili.
@@ -1534,42 +1534,42 @@ La Tabella~\ref{tab:transient_results} mostra che il sistema rimane ampiamente s
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{../data/objective/finite/transient_low_load_cv2}
-    \caption{Analisi transitoria dello scenario Low Load con $C_V=2.0$.}
+    \caption{Analisi transitoria dello scenario Low Load con $C_V=2.0$ e $\lambda=2.5$.}
     \label{fig:transient_low_cv2}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{../data/objective/finite/transient_low_load_cv4}
-    \caption{Analisi transitoria dello scenario Low Load con $C_V=4.0$.}
+    \caption{Analisi transitoria dello scenario Low Load con $C_V=4.0$ e $\lambda=2.5$}
     \label{fig:transient_low_cv4}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.74\textwidth]{../data/objective/finite/transient_medium_load_cv4}
-    \caption{Analisi transitoria dello scenario Medium Load con $C_V=4.0$.}
+    \includegraphics[width=0.95\textwidth]{../data/objective/finite/transient_medium_load_cv4}
+    \caption{Analisi transitoria dello scenario Medium Load con $C_V=4.0$ e $\lambda=5.0$}
     \label{fig:transient_medium_cv4}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.74\textwidth]{../data/objective/finite/transient_medium_load_cv6}
-    \caption{Analisi transitoria dello scenario Medium Load con $C_V=6.0$.}
+    \includegraphics[width=0.95\textwidth]{../data/objective/finite/transient_medium_load_cv6}
+    \caption{Analisi transitoria dello scenario Medium Load con $C_V=6.0$ e $\lambda=5.0$}
     \label{fig:transient_medium_cv6}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.74\textwidth]{../data/objective/finite/transient_high_load_cv4}
-    \caption{Analisi transitoria dello scenario High Load con $C_V=4.0$.}
+    \includegraphics[width=0.95\textwidth]{../data/objective/finite/transient_high_load_cv4}
+    \caption{Analisi transitoria dello scenario High Load con $C_V=4.0$ e $\lambda=8.0$}
     \label{fig:transient_high_cv4}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.74\textwidth]{../data/objective/finite/transient_high_load_cv6}
-    \caption{Analisi transitoria dello scenario High Load con $C_V=6.0$.}
+    \includegraphics[width=0.95\textwidth]{../data/objective/finite/transient_high_load_cv6}
+    \caption{Analisi transitoria dello scenario High Load con $C_V=6.0$ e $\lambda=8.0$}
     \label{fig:transient_high_cv6}
 \end{figure}
 
@@ -1578,7 +1578,7 @@ I grafici confermano che la fase iniziale non presenta derive instabili: dopo l'
 \paragraph{Robustezza alla Burstiness}
 La robustezza del sistema rispetto alla variabilità degli interarrivi è stata analizzata tramite la classe \texttt{BurstinessRobustnessObjective}. La campagna usa la configurazione completa scelta nelle fasi precedenti e osserva, al variare di $\lambda$ e di $C_V$, non solo il tempo medio di risposta, ma anche job nel sistema, utilizzazione, throughput, job deviati, numero medio di server attivi e numero di azioni di scaling. La stima è stata condotta con $1024$ batch da $4096$ job, riportando per ogni metrica media, deviazione standard, \textit{Half-Width} e intervallo di confidenza al $95\%$. Il comportamento atteso è una maggiore attivazione delle risorse elastiche al crescere della burstiness, con possibile aumento della variabilità delle misure ma senza perdita di stabilità del tempo medio di risposta.
 
-\begin{table}[H]
+\begin{table}[t]
     \centering
     \small
     \renewcommand{\arraystretch}{1.2}
@@ -1602,45 +1602,45 @@ La Tabella~\ref{tab:burstiness_results} evidenzia un risultato importante: l'inc
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_response_time}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_response_time}
     \vspace{0.01\textheight}
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_jobs_in_system}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_jobs_in_system}
     \caption{Robustezza alla burstiness: tempo medio di risposta e numero medio di job nel sistema.}
     \label{fig:burstiness_rt_jis}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_system_utilization}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_system_utilization}
     \vspace{0.01\textheight}
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_throughput}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_throughput}
     \caption{Robustezza alla burstiness: utilizzazione complessiva del sistema e throughput.}
     \label{fig:burstiness_util_thr}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_diverted_jobs}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_diverted_jobs}
     \vspace{0.01\textheight}
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_avg_servers}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_avg_servers}
     \caption{Robustezza alla burstiness: job deviati e numero medio di Web Server attivi.}
     \label{fig:burstiness_diverted_servers}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_scale_out_actions}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_scale_out_actions}
     \vspace{0.01\textheight}
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_scale_in_actions}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_scale_in_actions}
     \caption{Robustezza alla burstiness: azioni di \textit{Scale Out} e \textit{Scale In}.}
     \label{fig:burstiness_scale_horizontal}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_scale_up_actions}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_scale_up_actions}
     \vspace{0.01\textheight}
-    \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_scale_down_actions}
+    \includegraphics[width=0.95\textwidth]{../data/objective/burstiness/burstiness_robustness_scale_down_actions}
     \caption{Robustezza alla burstiness: azioni di \textit{Scale Up} e \textit{Scale Down}.}
     \label{fig:burstiness_scale_vertical}
 \end{figure}
@@ -1658,8 +1658,8 @@ Le figure confermano la natura adattiva dell'architettura. Il throughput segue c
 
 \subsection{Miglioramento}
 
-\paragraph{Ottimizzazione Avanzata: Meccanismo a Bande di Isteresi}
-L'ultimo obiettivo analizza il possibile miglioramento del meccanismo di dirottamento verso lo Spike Server introducendo una banda di isteresi sullo \textit{Spike Indicator}. La classe \texttt{VerticalScalerStabilityObjective} confronta quattro ampiezze di banda, pari a $0$, $5$, $10$ e $20$, mantenendo fisso $SI_{max}=40$ e variando $\lambda$ e il coefficiente di variazione degli interarrivi. Una banda nulla corrisponde alla soglia rigida: il traffico viene dirottato solo quando il server supera la soglia superiore e il rilascio avviene immediatamente appena il valore torna sotto soglia. Le bande positive introducono invece una soglia inferiore $SI_{low}$, stabilizzando la decisione del router. L'attesa progettuale è che bande più ampie riducano l'intermittenza del controllo, migliorando la regolarità del tempo di risposta, ma aumentando l'utilizzo medio dello Spike Server.
+\paragraph{Ottimizzazione tramite Meccanismo a Bande}
+L'ultimo obiettivo analizza il possibile miglioramento del meccanismo di dirottamento verso lo Spike Server introducendo una banda sullo \textit{Spike Indicator}. La classe \texttt{VerticalScalerStabilityObjective} confronta quattro ampiezze di banda, pari a $0$, $5$, $10$ e $20$, mantenendo fisso $SI_{max}=40$ e variando $\lambda$ e il coefficiente di variazione degli interarrivi. Una banda nulla corrisponde alla soglia rigida: il traffico viene dirottato solo quando il server supera la soglia superiore e il rilascio avviene immediatamente appena il valore torna sotto soglia. Le bande positive introducono invece una soglia inferiore $SI_{low}$, stabilizzando la decisione del router. L'attesa progettuale è che bande più ampie riducano l'intermittenza del controllo, migliorando la regolarità del tempo di risposta, ma aumentando l'utilizzo medio dello Spike Server.
 
 L'obiettivo non è ridurre indiscriminatamente l'uso dello Spike Server, ma rendere più regolare il suo impiego. Con una soglia rigida, infatti, il sistema tende ad alternare rapidamente fasi di dirottamento e fasi di ritorno al Web Server ordinario, specialmente quando il numero di job residenti oscilla vicino a $SI_{max}$. Questa dinamica può generare \textit{chattering}: molte decisioni ravvicinate, poco informative e potenzialmente costose. Una banda più ampia evita che il router cambi stato per oscillazioni marginali, accettando una maggiore permanenza del traffico sullo Spike Server in cambio di una risposta più stabile.
 
@@ -1675,7 +1675,7 @@ L'obiettivo non è ridurre indiscriminatamente l'uso dello Spike Server, ma rend
         $10$ & $3.312$ & $11.7$ & $3.846$ & $68.2$ \\
         $20$ & $3.177$ & $13.5$ & $3.758$ & $74.5$ \\ \hline
     \end{tabular}
-    \caption{Effetto della banda di isteresi sul tempo di risposta e sull'utilizzazione dello Spike Server per $C_V=4.0$.}
+    \caption{Effetto della banda sul tempo di risposta e sull'utilizzazione dello Spike Server per $C_V=4.0$.}
     \label{tab:band_results}
 \end{table}
 
@@ -1683,29 +1683,29 @@ I risultati in Tabella~\ref{tab:band_results} mostrano un miglioramento progress
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../data/objective/band/vertical_scaler_stability_band_0}
-    \caption{Stabilità dello scaler verticale e prestazioni con banda di isteresi pari a $0$.}
+    \includegraphics[width=0.80\textwidth]{../data/objective/band/vertical_scaler_stability_band_0}
+    \caption{Stabilità dello scaler verticale e prestazioni con banda pari a $0$.}
     \label{fig:band_0}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../data/objective/band/vertical_scaler_stability_band_5}
-    \caption{Stabilità dello scaler verticale e prestazioni con banda di isteresi pari a $5$.}
+    \includegraphics[width=0.80\textwidth]{../data/objective/band/vertical_scaler_stability_band_5}
+    \caption{Stabilità dello scaler verticale e prestazioni con banda pari a $5$.}
     \label{fig:band_5}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../data/objective/band/vertical_scaler_stability_band_10}
-    \caption{Stabilità dello scaler verticale e prestazioni con banda di isteresi pari a $10$.}
+    \includegraphics[width=0.80\textwidth]{../data/objective/band/vertical_scaler_stability_band_10}
+    \caption{Stabilità dello scaler verticale e prestazioni con banda pari a $10$.}
     \label{fig:band_10}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../data/objective/band/vertical_scaler_stability_band_20}
-    \caption{Stabilità dello scaler verticale e prestazioni con banda di isteresi pari a $20$.}
+    \includegraphics[width=0.80\textwidth]{../data/objective/band/vertical_scaler_stability_band_20}
+    \caption{Stabilità dello scaler verticale e prestazioni con banda pari a $20$.}
     \label{fig:band_20}
 \end{figure}
 
@@ -1720,13 +1720,13 @@ La soglia di dirottamento $SI_{max}$ si è rivelata il parametro centrale per bi
 
 Lo scaling orizzontale completa il controllo sul lungo periodo. La soglia superiore $R^{max}=6.0\text{ s}$ è stata mantenuta coincidente con il vincolo SLA, mentre $R^{min}=3.5\text{ s}$ è risultata coerente con uno scenario nominale centrato su $\lambda\simeq 5$. Le analisi di frontiera mostrano però che questa scelta non è universale: in presenza di carichi persistentemente elevati, prossimi a $\lambda=9.5$ o $\lambda=11$, è preferibile abbassare la soglia di \textit{Scale In} nell'intervallo $1.5$--$2.0\text{ s}$, accettando un maggior costo infrastrutturale in cambio di più margine operativo.
 
-L'analisi economica ha quantificato in modo esplicito il compromesso tra costo e prestazioni. Con \textit{Cooldown} pari a $10\text{ s}$, le soglie di \textit{Scale In} più permissive, come $5.0$ e $6.0\text{ s}$, riducono il costo medio rispettivamente a $4.302$ e $4.213$, mantenendo comunque il tempo medio di risposta sotto SLA anche a $\lambda=11$. Soglie più aggressive, come $1.0$ e $2.0\text{ s}$, garantiscono latenze inferiori ma richiedono un numero medio maggiore di server attivi. Il \textit{Cooldown} pari a $10\text{ s}$ è emerso come scelta ragionevole perché evita sia l'iper-reattività del caso a $5\text{ s}$ sia l'eccessivo ritardo di adattamento osservabile nei casi a $50$ e $100\text{ s}$.
+L'analisi economica ha quantificato in modo esplicito il compromesso tra costo e prestazioni. Con \textit{Cooldown} pari a $10\text{ s}$, le soglie di \textit{Scale In} più permissive, come $3.5$ e $5.0\text{ s}$, riducono il costo medio rispettivamente a $4.496$ e $4.302$, mantenendo comunque il tempo medio di risposta sotto SLA anche a $\lambda=11$. Soglie più aggressive, come $1.5$ e $2.0\text{ s}$, garantiscono latenze inferiori ma richiedono un numero medio maggiore di server attivi, con costi medi pari a $5.282$ e $5.040$. Il \textit{Cooldown} pari a $10\text{ s}$ è emerso come scelta ragionevole perché evita sia l'iper-reattività del caso a $5\text{ s}$ sia l'eccessivo ritardo di adattamento osservabile nei casi a $50$ e $100\text{ s}$.
 
 Le analisi transitorie e di burstiness mostrano la robustezza dell'architettura completa. Partendo da sistema vuoto, tutti i sei scenari a orizzonte finito convergono a tempi medi di risposta ampiamente inferiori allo SLA, anche quando il coefficiente di variazione degli interarrivi aumenta. In regime stazionario, la burstiness non produce instabilità: il sistema reagisce aumentando il ricorso allo Spike Server e alle azioni di scaling, mantenendo però $R_0$ in una regione controllata. Questo comportamento conferma l'efficacia della gerarchia: lo scaling orizzontale assorbe le variazioni strutturali del carico, mentre lo Spike Server protegge i Web Server ordinari dai burst locali che si sviluppano su scala temporale più rapida.
 
-Infine, il meccanismo a bande di isteresi rappresenta il miglioramento più interessante dal punto di vista del controllo. La soglia rigida funziona, ma può generare decisioni intermittenti vicino al limite. L'introduzione di una banda riduce il \textit{chattering}, rende più continuo l'uso dello Spike Server e abbassa il tempo medio di risposta. Una banda pari a $20$ massimizza il beneficio prestazionale, ma aumenta sensibilmente l'utilizzazione della risorsa di picco; una banda pari a $10$ appare quindi come compromesso progettuale più equilibrato, perché migliora la stabilità senza spostare eccessivamente il costo sulla componente verticale.
+Infine, il meccanismo a bande rappresenta il miglioramento più interessante dal punto di vista del controllo. La soglia rigida funziona, ma può generare decisioni intermittenti vicino al limite. L'introduzione di una banda riduce il \textit{chattering}, rende più continuo l'uso dello Spike Server e abbassa il tempo medio di risposta. Una banda pari a $20$ massimizza il beneficio prestazionale, ma aumenta sensibilmente l'utilizzazione della risorsa di picco; una banda pari a $10$ appare quindi come compromesso progettuale più equilibrato, perché migliora la stabilità senza spostare eccessivamente il costo sulla componente verticale.
 
-In sintesi, l'architettura gerarchica proposta risulta efficace perché separa correttamente le scale temporali del problema: routing e Spike Server agiscono come protezione immediata contro i picchi, mentre lo scaling orizzontale governa il dimensionamento strutturale del cluster. Il simulatore sviluppato consente di quantificare questo equilibrio e fornisce linee guida operative precise: \textit{Least Loaded} come politica di routing, $SI_{max}=40$, incremento verticale pari a $1.0$, $R^{max}=6.0\text{ s}$, $R^{min}=3.5\text{ s}$ per il carico nominale, \textit{Cooldown} pari a $10\text{ s}$ e banda di isteresi preferibilmente intermedia. Queste scelte permettono di rispettare lo SLA con margine, contenendo al tempo stesso il costo operativo e mantenendo stabile il comportamento dinamico del sistema.
+In sintesi, l'architettura gerarchica proposta risulta efficace perché separa correttamente le scale temporali del problema: routing e Spike Server agiscono come protezione immediata contro i picchi, mentre lo scaling orizzontale governa il dimensionamento strutturale del cluster. Il simulatore sviluppato consente di quantificare questo equilibrio e fornisce linee guida operative precise: \textit{Least Loaded} come politica di routing, $SI_{max}=40$, incremento verticale pari a $1.0$, $R^{max}=6.0\text{ s}$, $R^{min}=3.5\text{ s}$ per il carico nominale, \textit{Cooldown} pari a $10\text{ s}$ e banda preferibilmente intermedia. Queste scelte permettono di rispettare lo SLA con margine, contenendo al tempo stesso il costo operativo e mantenendo stabile il comportamento dinamico del sistema.
 
 \newpage
 

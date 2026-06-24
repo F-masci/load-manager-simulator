@@ -28,12 +28,12 @@ public class ScalingChartUtility extends BaseChartUtility {
      * @param outputPath path for the output png image
      */
     public static void generateHorizontalScalingChart(String csvPath, String outputPath) {
-        XYSeries activeServersSeries = new XYSeries("Active Web Servers");
-        XYSeries hMetricSeries = new XYSeries("Windowed Response Time");
-        XYSeries cooldownSeries = new XYSeries("Residual Cooldown");
-        XYSeries arrivalSeries = new XYSeries("Arrivals");
-        XYSeries completionSeries = new XYSeries("Completions");
-        XYSeries checkSeries = new XYSeries("Scaling Checks");
+        XYSeries activeServersSeries = new XYSeries("Web Server attivi");
+        XYSeries hMetricSeries = new XYSeries("Tempo di risposta finestrato");
+        XYSeries cooldownSeries = new XYSeries("Cooldown residuo");
+        XYSeries arrivalSeries = new XYSeries("Arrivi");
+        XYSeries completionSeries = new XYSeries("Completamenti");
+        XYSeries checkSeries = new XYSeries("Check scaling");
         
         double scaleOutLimit = 0;
         double scaleInLimit = 0;
@@ -85,12 +85,12 @@ public class ScalingChartUtility extends BaseChartUtility {
         }
 
         // Create subplots using base utilities
-        XYPlot subplot1 = createAreaSubplot(activeServersSeries, "Active Servers", new Color(94, 129, 172, 120));
-        XYPlot subplot2 = createLineSubplot(hMetricSeries, "Avg Response Time (seconds)", new Color(191, 97, 106));
-        XYPlot subplot3 = createLineSubplot(cooldownSeries, "Cooldown (seconds)", new Color(136, 192, 208));
+        XYPlot subplot1 = createAreaSubplot(activeServersSeries, "Web Server attivi", new Color(94, 129, 172, 120));
+        XYPlot subplot2 = createLineSubplot(hMetricSeries, "Tempo di risposta R0 [s]", new Color(191, 97, 106));
+        XYPlot subplot3 = createLineSubplot(cooldownSeries, "Cooldown [s]", new Color(136, 192, 208));
 
         // Annotate subplot with thresholds and markers
-        applyThresholds(subplot2, scaleOutLimit, scaleInLimit, "Scale OUT", "Scale IN");
+        applyThresholds(subplot2, scaleOutLimit, scaleInLimit, "R max", "R min");
         applyEventMarkers(subplot2, arrivalSeries, completionSeries, checkSeries);
 
         // Add vertical lines at scaling events
@@ -103,14 +103,14 @@ public class ScalingChartUtility extends BaseChartUtility {
         }
 
         // Combine into a single vertical stack
-        CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis("Time (seconds)"));
+        CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis("Tempo [s]"));
         plot.setGap(10.0);
         plot.add(subplot1, 2);
         plot.add(subplot2, 2);
         plot.add(subplot3, 1);
         plot.setOrientation(PlotOrientation.VERTICAL);
 
-        JFreeChart chart = new JFreeChart("Horizontal Scaling Dynamics", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+        JFreeChart chart = new JFreeChart("Dinamica scaling orizzontale", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
         chart.setBackgroundPaint(Color.WHITE);
 
         saveChart(chart, outputPath, 1200, 1000);
@@ -123,12 +123,12 @@ public class ScalingChartUtility extends BaseChartUtility {
      * @param outputPath path for the output png image
      */
     public static void generateVerticalScalingChart(String csvPath, String outputPath) {
-        XYSeries spikeSpeedSeries = new XYSeries("Spike Server Speed Multiplier");
-        XYSeries vMetricSeries = new XYSeries("Job in Spike Server");
-        XYSeries cooldownSeries = new XYSeries("Residual Cooldown");
-        XYSeries arrivalSeries = new XYSeries("Arrivals");
-        XYSeries completionSeries = new XYSeries("Completions");
-        XYSeries checkSeries = new XYSeries("Scaling Checks");
+        XYSeries spikeSpeedSeries = new XYSeries("Moltiplicatore Spike Server");
+        XYSeries vMetricSeries = new XYSeries("Job nello Spike Server");
+        XYSeries cooldownSeries = new XYSeries("Cooldown residuo");
+        XYSeries arrivalSeries = new XYSeries("Arrivi");
+        XYSeries completionSeries = new XYSeries("Completamenti");
+        XYSeries checkSeries = new XYSeries("Check scaling");
         
         double vUpperLimit = 0;
         double vLowerLimit = 0;
@@ -176,11 +176,11 @@ public class ScalingChartUtility extends BaseChartUtility {
             return;
         }
 
-        XYPlot subplot1 = createAreaSubplot(spikeSpeedSeries, "Speed Multiplier", new Color(163, 190, 140, 120));
-        XYPlot subplot2 = createLineSubplot(vMetricSeries, "Jobs", new Color(208, 135, 112));
-        XYPlot subplot3 = createLineSubplot(cooldownSeries, "Cooldown (seconds)", new Color(180, 142, 173));
+        XYPlot subplot1 = createAreaSubplot(spikeSpeedSeries, "Moltiplicatore velocita", new Color(163, 190, 140, 120));
+        XYPlot subplot2 = createLineSubplot(vMetricSeries, "Job nello Spike Server", new Color(208, 135, 112));
+        XYPlot subplot3 = createLineSubplot(cooldownSeries, "Cooldown [s]", new Color(180, 142, 173));
 
-        applyThresholds(subplot2, vUpperLimit, vLowerLimit, "Speed UP", "Speed DOWN");
+        applyThresholds(subplot2, vUpperLimit, vLowerLimit, "S up", "S down");
         applyEventMarkers(subplot2, arrivalSeries, completionSeries, checkSeries);
 
         for (double t : speedActionTimes) {
@@ -191,14 +191,14 @@ public class ScalingChartUtility extends BaseChartUtility {
             subplot2.addDomainMarker(marker);
         }
 
-        CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis("Time (seconds)"));
+        CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis("Tempo [s]"));
         plot.setGap(10.0);
         plot.add(subplot1, 2);
         plot.add(subplot2, 2);
         plot.add(subplot3, 1);
         plot.setOrientation(PlotOrientation.VERTICAL);
 
-        JFreeChart chart = new JFreeChart("Vertical Scaling Dynamics", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+        JFreeChart chart = new JFreeChart("Dinamica scaling verticale", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
         chart.setBackgroundPaint(Color.WHITE);
 
         saveChart(chart, outputPath, 1200, 1000);

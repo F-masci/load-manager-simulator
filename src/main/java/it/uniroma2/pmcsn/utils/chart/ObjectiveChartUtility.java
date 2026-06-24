@@ -20,13 +20,9 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.data.xy.YIntervalSeries;
 import org.jfree.data.xy.YIntervalSeriesCollection;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,20 +45,22 @@ public class ObjectiveChartUtility extends BaseChartUtility {
     private static final Color NORD_TEAL = new Color(143, 188, 187);
 
     private static final Color[] PALETTE = { NORD_BLUE, NORD_RED, NORD_GREEN, NORD_ORANGE, NORD_PURPLE, NORD_YELLOW, NORD_CYAN, NORD_TEAL };
+    private static final BasicStroke MAIN_STROKE = new BasicStroke(1.8f);
+    private static final BasicStroke THIN_STROKE = new BasicStroke(0.9f);
 
     private static final List<BurstinessMetric> BURSTINESS_METRICS = List.of(
-            new BurstinessMetric("response_time", "Burstiness - Response Time", "Response Time R0 (s)", true),
-            new BurstinessMetric("jobs_in_system", "Burstiness - Jobs in System", "Jobs in System", false),
-            new BurstinessMetric("system_utilization", "Burstiness - System Utilization", "System Utilization", false),
-            new BurstinessMetric("throughput", "Burstiness - Throughput", "Throughput", false),
-            new BurstinessMetric("diverted_jobs", "Burstiness - Diverted Jobs", "Diverted Jobs", false),
-            new BurstinessMetric("avg_servers", "Burstiness - Avg Active Servers", "Avg Active Servers (N)", false),
-            new BurstinessMetric("scale_out_actions", "Burstiness - Scale OUT Actions", "Scale OUT Actions", false),
-            new BurstinessMetric("scale_in_actions", "Burstiness - Scale IN Actions", "Scale IN Actions", false),
-            new BurstinessMetric("scale_up_actions", "Burstiness - Scale UP Actions", "Scale UP Actions", false),
-            new BurstinessMetric("scale_down_actions", "Burstiness - Scale DOWN Actions", "Scale DOWN Actions", false),
-            new BurstinessMetric("spike_avg_speed", "Burstiness - Spike Server Avg Speed", "Spike Server Avg Speed", false),
-            new BurstinessMetric("spike_utilization", "Burstiness - Spike Server Utilization", "Spike Server Utilization", false)
+            new BurstinessMetric("response_time", "Tempo di risposta del sistema", "Tempo di risposta R0 [s]", true),
+            new BurstinessMetric("jobs_in_system", "Job nel sistema", "Job nel sistema", false),
+            new BurstinessMetric("system_utilization", "Utilizzazione del sistema", "Utilizzazione del sistema [%]", false),
+            new BurstinessMetric("throughput", "Throughput del sistema", "Throughput [job/s]", false),
+            new BurstinessMetric("diverted_jobs", "Job dirottati", "Job dirottati", false),
+            new BurstinessMetric("avg_servers", "Server attivi", "Web Server attivi medi", false),
+            new BurstinessMetric("scale_out_actions", "Azioni di scale out", "Azioni di scale out", false),
+            new BurstinessMetric("scale_in_actions", "Azioni di scale in", "Azioni di scale in", false),
+            new BurstinessMetric("scale_up_actions", "Azioni di speed up", "Azioni di speed up", false),
+            new BurstinessMetric("scale_down_actions", "Azioni di speed down", "Azioni di speed down", false),
+            new BurstinessMetric("spike_avg_speed", "Velocita media dello Spike Server", "Velocita media Spike Server", false),
+            new BurstinessMetric("spike_utilization", "Utilizzazione dello Spike Server", "Utilizzazione Spike Server [%]", false)
     );
 
     /**
@@ -80,7 +78,7 @@ public class ObjectiveChartUtility extends BaseChartUtility {
      */
     public static void main(String[] args) throws IOException {
         if (args.length == 0) {
-            logger.info("Usage: ObjectiveChartUtility <all|horizontal|simax|vertical-step|routing|burstiness|cost|vertical-stability> [inputCsv] [outputPng]");
+            logger.info("Usage: ObjectiveChartUtility <all|horizontal|simax|vertical-step|routing|burstiness|cost|finite|vertical-stability> [inputCsv] [outputPng]");
             return;
         }
 
@@ -97,8 +95,9 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             case "routing" -> regenerateRoutingChart("data/objective/routing_policy_comparison.csv", "data/objective/routing_policy_comparison.png");
             case "burstiness" -> regenerateBurstinessCharts(defaultBurstinessCsvPath(), "data/objective/burstiness/burstiness_robustness.png");
             case "cost" -> regenerateCostChart(defaultCostCsvPath(), "data/objective/cost/cost_analysis.png");
+            case "finite", "transient" -> regenerateFiniteCharts("data/objective/finite");
             case "vertical-stability", "stability" -> regenerateVerticalStabilityChart(defaultBandCsvPath(), "data/objective/band/vertical_scaler_stability.png");
-            default -> logger.info("Unknown chart '{}'. Available charts: all, horizontal, simax, vertical-step, routing, burstiness, cost, vertical-stability", args[0]);
+            default -> logger.info("Unknown chart '{}'. Available charts: all, horizontal, simax, vertical-step, routing, burstiness, cost, finite, vertical-stability", args[0]);
         }
     }
 
@@ -110,6 +109,7 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         regenerateIfPresent(defaultBurstinessCsvPath(), () -> regenerateBurstinessCharts(defaultBurstinessCsvPath(), "data/objective/burstiness/burstiness_robustness.png"));
         regenerateIfPresent(defaultCostCsvPath(), () -> regenerateCostChart(defaultCostCsvPath(), "data/objective/cost/cost_analysis.png"));
         regenerateIfPresent(defaultBandCsvPath(), () -> regenerateVerticalStabilityChart(defaultBandCsvPath(), "data/objective/band/vertical_scaler_stability.png"));
+        regenerateFiniteCharts("data/objective/finite");
     }
 
     private static void regenerateIfPresent(String csvPath, ChartRegenerator regenerator) throws IOException {
@@ -121,39 +121,91 @@ public class ObjectiveChartUtility extends BaseChartUtility {
     }
 
     private static void regenerateSiMaxChart(String inputCsv, String outputPng) throws IOException {
-        XYSeries rtMean = new XYSeries("Mean R0");
-        XYSeries rtLower = new XYSeries("Lower 95% CI");
-        XYSeries rtUpper = new XYSeries("Upper 95% CI");
-        XYSeries spikeCount = new XYSeries("Diverted Jobs (count)");
-        XYSeries spikeUtil = new XYSeries("Spike Utilization (%)");
+        XYSeries rtMean = new XYSeries("R0 medio");
+        XYSeries rtLower = new XYSeries("Limite inferiore CI 95%");
+        XYSeries rtUpper = new XYSeries("Limite superiore CI 95%");
+        XYSeries spikeCount = new XYSeries("Job dirottati");
+        XYSeries spikeUtil = new XYSeries("Utilizzazione Spike Server [%]");
 
         for (String line : dataLines(inputCsv)) {
             String[] raw = line.split(",");
-            int siMax = Integer.parseInt(raw[0].trim());
-            rtMean.add(siMax, commaDecimal(raw, 1));
-            rtLower.add(siMax, commaDecimal(raw, 3));
-            rtUpper.add(siMax, commaDecimal(raw, 5));
-            spikeCount.add(siMax, commaDecimal(raw, 7));
-            spikeUtil.add(siMax, commaDecimal(raw, 11));
+            SiMaxCsvRow row = parseSiMaxCsvRow(raw);
+            rtMean.add(row.siMax(), row.r0Mean());
+            rtLower.add(row.siMax(), row.r0Lower());
+            rtUpper.add(row.siMax(), row.r0Upper());
+            spikeCount.add(row.siMax(), row.spikeJobsCount());
+            spikeUtil.add(row.siMax(), row.spikeUtilizationPct());
         }
 
         generateSiMaxEstimationStackedChart(rtMean, rtLower, rtUpper, spikeCount, spikeUtil, outputPng, ApplicationConfig.SLA_THRESHOLD);
     }
 
+    private static SiMaxCsvRow parseSiMaxCsvRow(String[] raw) {
+        if (raw.length == 7) {
+            return new SiMaxCsvRow(
+                    Integer.parseInt(raw[0].trim()),
+                    Double.parseDouble(raw[1].trim()),
+                    Double.parseDouble(raw[2].trim()),
+                    Double.parseDouble(raw[3].trim()),
+                    Double.parseDouble(raw[4].trim()),
+                    Double.parseDouble(raw[5].trim()),
+                    Double.parseDouble(raw[6].trim())
+            );
+        }
+
+        if (raw.length >= 13) {
+            return new SiMaxCsvRow(
+                    Integer.parseInt(raw[0].trim()),
+                    commaDecimal(raw, 1),
+                    commaDecimal(raw, 3),
+                    commaDecimal(raw, 5),
+                    commaDecimal(raw, 7),
+                    commaDecimal(raw, 9),
+                    commaDecimal(raw, 11)
+            );
+        }
+
+        throw new IllegalArgumentException("Unsupported siMax CSV row format with " + raw.length + " columns.");
+    }
+
     private static void regenerateVerticalStepChart(String inputCsv, String outputPng) throws IOException {
-        XYSeries rtSeries = new XYSeries("Response Time R0");
-        XYSeries speedSeries = new XYSeries("Avg Speed Multiplier");
-        XYSeries utilSeries = new XYSeries("Utilization (%)");
+        XYSeries rtSeries = new XYSeries("Tempo di risposta R0");
+        XYSeries speedSeries = new XYSeries("Moltiplicatore medio");
+        XYSeries utilSeries = new XYSeries("Utilizzazione [%]");
 
         for (String line : dataLines(inputCsv)) {
             String[] raw = line.split(",");
-            double increment = commaDecimal(raw, 0);
-            rtSeries.add(increment, commaDecimal(raw, 2));
-            speedSeries.add(increment, commaDecimal(raw, 6));
-            utilSeries.add(increment, raw.length > 10 ? commaDecimal(raw, 10) : 0.0);
+            VerticalStepCsvRow row = parseVerticalStepCsvRow(raw);
+            rtSeries.add(row.increment(), row.r0());
+            speedSeries.add(row.increment(), row.spikeAvgSpeed());
+            utilSeries.add(row.increment(), row.spikeUtilizationPct());
         }
 
         generateVerticalSizingStackedChart(rtSeries, speedSeries, utilSeries, outputPng, ApplicationConfig.SLA_THRESHOLD);
+    }
+
+    private static VerticalStepCsvRow parseVerticalStepCsvRow(String[] raw) {
+        if (raw.length >= 14) {
+            return new VerticalStepCsvRow(
+                    commaDecimal(raw, 0),
+                    commaDecimal(raw, 2),
+                    commaDecimal(raw, 6),
+                    commaDecimal(raw, 10)
+            );
+        }
+
+        if (raw.length == 7) {
+            return new VerticalStepCsvRow(
+                    Double.parseDouble(raw[0].trim()),
+                    Double.parseDouble(raw[1].trim()),
+                    Double.parseDouble(raw[3].trim()),
+                    Double.parseDouble(raw[5].trim())
+            );
+        }
+
+        throw new IllegalArgumentException(
+                "vertical_step_sizing.csv does not contain Spike_Utilization columns. Re-run VerticalStepSizingObjective to regenerate the CSV."
+        );
     }
 
     private static void regenerateRoutingChart(String inputCsv, String outputPng) throws IOException {
@@ -219,9 +271,9 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         XYSeriesCollection stdDevDataset = new XYSeriesCollection();
         for (Map.Entry<Double, XYSeries> entry : meanByCv.entrySet()) {
             XYSeries source = entry.getValue();
-            XYSeries lower = new XYSeries("CV=" + entry.getKey() + " Lower 95% CI");
-            XYSeries upper = new XYSeries("CV=" + entry.getKey() + " Upper 95% CI");
-            XYSeries stdDev = new XYSeries("CV=" + entry.getKey() + " StdDev");
+            XYSeries lower = new XYSeries("CV=" + entry.getKey() + " limite inferiore CI 95%");
+            XYSeries upper = new XYSeries("CV=" + entry.getKey() + " limite superiore CI 95%");
+            XYSeries stdDev = new XYSeries("CV=" + entry.getKey() + " deviazione standard");
             for (int i = 0; i < source.getItemCount(); i++) {
                 lower.add(source.getX(i), source.getY(i));
                 upper.add(source.getX(i), source.getY(i));
@@ -233,7 +285,7 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             stdDevDataset.addSeries(stdDev);
         }
         generateBurstinessMetricChart(meanDataset, lowerDataset, upperDataset, stdDevDataset,
-                "Response Time vs Burstiness", "Response Time R0 (s)", outputPng, ApplicationConfig.SLA_THRESHOLD);
+                "Tempo di risposta e burstiness", "Tempo di risposta R0 [s]", outputPng, ApplicationConfig.SLA_THRESHOLD);
     }
 
     private static BurstinessDatasets readBurstinessDatasets(List<String> lines, Map<String, Integer> headerIndex, String metricPrefix) {
@@ -246,19 +298,20 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         int stdDevIndex = headerIndex.get(metricPrefix + "_std_dev");
         int lowIndex = headerIndex.get(metricPrefix + "_ci_low");
         int highIndex = headerIndex.get(metricPrefix + "_ci_high");
+        double scale = metricPrefix.endsWith("utilization") ? 100.0 : 1.0;
 
         for (String line : lines.stream().skip(1).filter(l -> !l.isBlank()).toList()) {
             String[] raw = line.split(",");
             double cv = Double.parseDouble(raw[0].trim());
             double lambda = Double.parseDouble(raw[1].trim());
-            double mean = Double.parseDouble(raw[meanIndex].trim());
-            double stdDev = Double.parseDouble(raw[stdDevIndex].trim());
-            double lower = Double.parseDouble(raw[lowIndex].trim());
-            double upper = Double.parseDouble(raw[highIndex].trim());
+            double mean = Double.parseDouble(raw[meanIndex].trim()) * scale;
+            double stdDev = Double.parseDouble(raw[stdDevIndex].trim()) * scale;
+            double lower = Double.parseDouble(raw[lowIndex].trim()) * scale;
+            double upper = Double.parseDouble(raw[highIndex].trim()) * scale;
             meanByCv.computeIfAbsent(cv, ignored -> new XYSeries("CV=" + cv)).add(lambda, mean);
-            lowerByCv.computeIfAbsent(cv, ignored -> new XYSeries("CV=" + cv + " Lower 95% CI")).add(lambda, lower);
-            upperByCv.computeIfAbsent(cv, ignored -> new XYSeries("CV=" + cv + " Upper 95% CI")).add(lambda, upper);
-            stdDevByCv.computeIfAbsent(cv, ignored -> new XYSeries("CV=" + cv + " StdDev")).add(lambda, stdDev);
+            lowerByCv.computeIfAbsent(cv, ignored -> new XYSeries("CV=" + cv + " limite inferiore CI 95%")).add(lambda, lower);
+            upperByCv.computeIfAbsent(cv, ignored -> new XYSeries("CV=" + cv + " limite superiore CI 95%")).add(lambda, upper);
+            stdDevByCv.computeIfAbsent(cv, ignored -> new XYSeries("CV=" + cv + " deviazione standard")).add(lambda, stdDev);
         }
 
         return new BurstinessDatasets(
@@ -304,7 +357,7 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             double lambda = row.lambda();
             double cost = row.cost();
             double r0 = row.r0();
-            String label = "ScaleIn " + scaleIn;
+            String label = "Scale in " + scaleIn + " s";
             String key = cooldown + "|" + label;
 
             costData.computeIfAbsent(cooldown, ignored -> new XYSeriesCollection());
@@ -324,6 +377,69 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         }
 
         generateCostCooldownCharts(costData, rtData, outputPng, ApplicationConfig.SLA_THRESHOLD);
+    }
+
+    private static void regenerateFiniteCharts(String finiteDirectory) throws IOException {
+        Path dir = Path.of(finiteDirectory);
+        if (!Files.isDirectory(dir)) {
+            logger.info("Skipping missing finite directory: {}", finiteDirectory);
+            return;
+        }
+
+        try (var files = Files.list(dir)) {
+            for (Path csv : files
+                    .filter(path -> path.getFileName().toString().startsWith("transient_"))
+                    .filter(path -> path.getFileName().toString().endsWith(".csv"))
+                    .sorted()
+                    .toList()) {
+                XYSeriesCollection dataset = readTransientCsv(csv);
+                String baseName = csv.getFileName().toString().replaceFirst("\\.csv$", "");
+                String outputPng = csv.resolveSibling(baseName + ".png").toString();
+                generateTransientChart(dataset, transientTitleFromFile(baseName), outputPng, ApplicationConfig.SLA_THRESHOLD);
+            }
+        }
+    }
+
+    private static XYSeriesCollection readTransientCsv(Path inputCsv) throws IOException {
+        Map<Integer, XYSeries> seriesByReplication = new LinkedHashMap<>();
+        for (String line : dataLines(inputCsv.toString())) {
+            String[] raw = line.split(",");
+            int replication = Integer.parseInt(raw[2].trim());
+            long seed = Long.parseLong(raw[3].trim());
+            double time = Double.parseDouble(raw[0].trim());
+            double r0 = Double.parseDouble(raw[4].trim());
+            seriesByReplication
+                    .computeIfAbsent(replication, ignored -> new XYSeries("Rep " + replication + " (Seed: " + seed + ")", false, true))
+                    .add(time, r0);
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        seriesByReplication.values().forEach(dataset::addSeries);
+        return dataset;
+    }
+
+    private static String transientTitleFromFile(String baseName) {
+        String scenario = baseName.replace("transient_", "");
+        String load;
+        double lambda;
+        if (scenario.startsWith("low_load")) {
+            load = "basso carico";
+            lambda = 2.5;
+        } else if (scenario.startsWith("medium_load")) {
+            load = "carico medio";
+            lambda = 5.0;
+        } else if (scenario.startsWith("high_load")) {
+            load = "alto carico";
+            lambda = 8.0;
+        } else {
+            load = scenario.replace("_", " ");
+            lambda = Double.NaN;
+        }
+
+        String cv = scenario.contains("cv") ? scenario.substring(scenario.lastIndexOf("cv") + 2) : "";
+        String cvText = cv.isBlank() ? "" : " CV " + cv;
+        String lambdaText = Double.isNaN(lambda) ? "" : " lambda " + String.format(Locale.US, "%.1f", lambda);
+        return "Analisi transitoria " + load + cvText + lambdaText;
     }
 
     private static CostCsvRow parseCostCsvRow(String line) {
@@ -444,9 +560,9 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         StabilitySeries series = seriesByKey.computeIfAbsent(key, ignored -> {
             StabilitySeries created = new StabilitySeries(
                     new XYSeries(label),
-                    new XYSeries(label + " Lower 95% CI"),
-                    new XYSeries(label + " Upper 95% CI"),
-                    new XYSeries(label + " StdDev")
+                    new XYSeries(label + " limite inferiore CI 95%"),
+                    new XYSeries(label + " limite superiore CI 95%"),
+                    new XYSeries(label + " deviazione standard")
             );
             datasets.mean().addSeries(created.mean());
             datasets.lower().addSeries(created.lower());
@@ -519,10 +635,22 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         String[] raw = line.split(",");
         int statusIndex = findStatusIndex(raw);
 
-        double cv = decimal(raw, 0);
-        double lambda = decimal(raw, 2);
-        int servers = Integer.parseInt(raw[4].trim());
-        double r0 = parseOptionalDecimal(raw, 5);
+        double cv;
+        double lambda;
+        int servers;
+        double r0;
+
+        if (raw.length >= 9 && raw[0].contains(".") && raw[1].contains(".")) {
+            cv = Double.parseDouble(raw[0].trim());
+            lambda = Double.parseDouble(raw[1].trim());
+            servers = Integer.parseInt(raw[2].trim());
+            r0 = parseOptionalDouble(raw[3].trim());
+        } else {
+            cv = decimal(raw, 0);
+            lambda = decimal(raw, 2);
+            servers = Integer.parseInt(raw[4].trim());
+            r0 = parseOptionalDecimal(raw, 5);
+        }
         String status = raw[statusIndex].trim();
 
         return new HorizontalCsvRow(cv, lambda, servers, r0, status);
@@ -542,6 +670,10 @@ public class ObjectiveChartUtility extends BaseChartUtility {
     }
 
     private static double decimal(String[] raw, int integerIndex) {
+        String token = raw[integerIndex].trim();
+        if ("NaN".equals(token) || token.contains(".")) {
+            return Double.parseDouble(token);
+        }
         return Double.parseDouble(raw[integerIndex].trim() + "." + raw[integerIndex + 1].trim());
     }
 
@@ -550,6 +682,10 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             return Double.NaN;
         }
         return decimal(raw, integerIndex);
+    }
+
+    private static double parseOptionalDouble(String token) {
+        return "NaN".equals(token) ? Double.NaN : Double.parseDouble(token);
     }
 
     private static List<String> dataLines(String inputCsv) throws IOException {
@@ -602,6 +738,18 @@ public class ObjectiveChartUtility extends BaseChartUtility {
 
     private record CostCsvRow(double scaleIn, double cooldown, double lambda, double cost, double r0) { }
 
+    private record SiMaxCsvRow(
+            int siMax,
+            double r0Mean,
+            double r0Lower,
+            double r0Upper,
+            double spikeJobsCount,
+            double spikeJobsPerc,
+            double spikeUtilizationPct
+    ) { }
+
+    private record VerticalStepCsvRow(double increment, double r0, double spikeAvgSpeed, double spikeUtilizationPct) { }
+
     private record VerticalStabilityCsvRow(int band, double cv, double lambda, double utilization, double r0) { }
 
     private record MetricPoint(double mean, double lower, double upper, double stdDev) { }
@@ -645,34 +793,36 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         rtDataset.addSeries(rtLower);
         rtDataset.addSeries(rtUpper);
 
-        NumberAxis rtAxis = new NumberAxis("Response Time R0 (s)");
+        NumberAxis rtAxis = new NumberAxis("Tempo di risposta R0 [s]");
         XYLineAndShapeRenderer rtRenderer = new XYLineAndShapeRenderer(true, true);
         rtRenderer.setSeriesPaint(0, Color.BLUE);
         rtRenderer.setSeriesStroke(0, new BasicStroke(2.0f));
 
-        Color lightBlue = new Color(0, 0, 255, 100);
-        BasicStroke dashed = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{5, 5}, 0);
-        rtRenderer.setSeriesPaint(1, lightBlue);
+        Color ciBlue = new Color(94, 129, 172, 210);
+        BasicStroke dashed = new BasicStroke(1.3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{7, 5}, 0);
+        rtRenderer.setSeriesPaint(1, ciBlue);
         rtRenderer.setSeriesStroke(1, dashed);
         rtRenderer.setSeriesShapesVisible(1, false);
-        rtRenderer.setSeriesPaint(2, lightBlue);
+        rtRenderer.setSeriesVisibleInLegend(1, true);
+        rtRenderer.setSeriesPaint(2, ciBlue);
         rtRenderer.setSeriesStroke(2, dashed);
         rtRenderer.setSeriesShapesVisible(2, false);
+        rtRenderer.setSeriesVisibleInLegend(2, true);
 
         XYPlot rtPlot = new XYPlot(rtDataset, null, rtAxis, rtRenderer);
         setupPlot(rtPlot);
         applyLimit(rtPlot, slaThreshold, "SLA");
 
         XYSeriesCollection countDataset = new XYSeriesCollection(spikeCount);
-        NumberAxis countAxis = new NumberAxis("Diverted Jobs (count)");
+        NumberAxis countAxis = new NumberAxis("Job dirottati");
         XYLineAndShapeRenderer countRenderer = new XYLineAndShapeRenderer(true, true);
         countRenderer.setSeriesPaint(0, NORD_RED);
 
         XYPlot spikePlot = new XYPlot(countDataset, null, countAxis, countRenderer);
         setupPlot(spikePlot);
 
-        NumberAxis utilAxis = new NumberAxis("Spike Utilization (%)");
-        utilAxis.setRange(0, 105);
+        NumberAxis utilAxis = new NumberAxis("Utilizzazione Spike Server [%]");
+        utilAxis.setRange(0, 100);
         spikePlot.setRangeAxis(1, utilAxis);
         spikePlot.setDataset(1, new XYSeriesCollection(spikeUtil));
         spikePlot.mapDatasetToRangeAxis(1, 1);
@@ -681,13 +831,13 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         utilRenderer.setSeriesPaint(0, NORD_CYAN);
         spikePlot.setRenderer(1, utilRenderer);
 
-        NumberAxis domainAxis = new NumberAxis("SI_max Threshold");
+        NumberAxis domainAxis = new NumberAxis("Soglia SI max");
         CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(domainAxis);
         combinedPlot.add(rtPlot, 2);
         combinedPlot.add(spikePlot, 1);
         combinedPlot.setGap(15.0);
 
-        JFreeChart chart = new JFreeChart("SI_max Calibration (1.1)", JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, true);
+        JFreeChart chart = new JFreeChart("Calibrazione soglia SI max", JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, true);
         chart.setBackgroundPaint(Color.WHITE);
         saveChart(chart, outputPath, 1000, 800);
     }
@@ -705,19 +855,20 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             XYSeries rtSeries, XYSeries speedSeries, XYSeries utilSeries,
             String outputPath, double slaThreshold) {
 
-        XYPlot rtPlot = createLineSubplot(rtSeries, "Response Time (s)", Color.BLUE);
+        XYPlot rtPlot = createLineSubplot(rtSeries, "Tempo di risposta R0 [s]", NORD_BLUE);
         applyLimit(rtPlot, slaThreshold, "SLA");
-        XYPlot speedPlot = createLineSubplot(speedSeries, "Avg Speed Mult", NORD_RED);
-        XYPlot utilPlot = createLineSubplot(utilSeries, "Utilization (%)", NORD_TEAL);
+        XYPlot speedPlot = createLineSubplot(speedSeries, "Moltiplicatore medio", NORD_RED);
+        XYPlot utilPlot = createLineSubplot(utilSeries, "Utilizzazione [%]", NORD_TEAL);
+        configurePercentageAxis((NumberAxis) utilPlot.getRangeAxis());
 
-        NumberAxis domainAxis = new NumberAxis("Incremental Step Size");
+        NumberAxis domainAxis = new NumberAxis("Incremento di velocita");
         CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(domainAxis);
         combinedPlot.add(rtPlot, 1);
         combinedPlot.add(speedPlot, 1);
         combinedPlot.add(utilPlot, 1);
         combinedPlot.setGap(10.0);
 
-        JFreeChart chart = new JFreeChart("Vertical Sizing Analysis (1.2)", JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, true);
+        JFreeChart chart = new JFreeChart("Dimensionamento scaling verticale", JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, true);
         chart.setBackgroundPaint(Color.WHITE);
         saveChart(chart, outputPath, 1000, 900);
     }
@@ -737,14 +888,14 @@ public class ObjectiveChartUtility extends BaseChartUtility {
 
         DefaultStatisticalCategoryDataset barDataset = new DefaultStatisticalCategoryDataset();
         r0Map.keySet().forEach(policy ->
-                barDataset.add(r0Map.get(policy), stdDevMap.get(policy), "Mean R0", policy));
+                barDataset.add(r0Map.get(policy), stdDevMap.get(policy), "R0 medio", policy));
 
         CategoryPlot plot = new CategoryPlot();
-        plot.setDomainAxis(new CategoryAxis("Routing Policy"));
+        plot.setDomainAxis(new CategoryAxis("Politica di routing"));
 
         double maxR0 = r0Map.values().stream().max(Double::compareTo).orElse(1.0);
         double maxStdDev = stdDevMap.values().stream().max(Double::compareTo).orElse(0.0);
-        NumberAxis rangeAxis = new NumberAxis("Time (s)");
+        NumberAxis rangeAxis = new NumberAxis("Tempo di risposta R0 [s]");
         rangeAxis.setRange(0.0, (maxR0 + maxStdDev) * 1.20);
         plot.setRangeAxis(rangeAxis);
 
@@ -754,7 +905,7 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         plot.setDataset(0, barDataset);
         plot.setRenderer(0, barRenderer);
 
-        JFreeChart chart = new JFreeChart("Routing Analysis (2.1) - Batch Means", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+        JFreeChart chart = new JFreeChart("Confronto politiche di routing", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
         chart.setBackgroundPaint(Color.WHITE);
         saveChart(chart, outputPath, 1000, 700);
     }
@@ -775,14 +926,14 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         DefaultStatisticalCategoryDataset barDataset = new DefaultStatisticalCategoryDataset();
         DefaultCategoryDataset lineDataset = new DefaultCategoryDataset();
         r0Map.keySet().forEach(policy -> {
-            barDataset.add(r0Map.get(policy), stdDevMap.get(policy), "Mean R0", policy);
-            lineDataset.addValue(p99Map.get(policy), "99th Percentile", policy);
+            barDataset.add(r0Map.get(policy), stdDevMap.get(policy), "R0 medio", policy);
+            lineDataset.addValue(p99Map.get(policy), "Percentile 99", policy);
         });
 
         CategoryPlot plot = new CategoryPlot();
-        plot.setDomainAxis(new CategoryAxis("Routing Policy"));
+        plot.setDomainAxis(new CategoryAxis("Politica di routing"));
         double maxP99 = p99Map.values().stream().max(Double::compareTo).orElse(3.0);
-        NumberAxis rangeAxis = new NumberAxis("Time (s)");
+        NumberAxis rangeAxis = new NumberAxis("Tempo di risposta R0 [s]");
         rangeAxis.setRange(0.0, Math.max(maxP99, slaThreshold) * 1.20);
         plot.setRangeAxis(rangeAxis);
 
@@ -802,58 +953,9 @@ public class ObjectiveChartUtility extends BaseChartUtility {
 
         applyLimitCategory(plot, slaThreshold, "SLA");
 
-        JFreeChart chart = new JFreeChart("Routing Analysis (2.1)", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+        JFreeChart chart = new JFreeChart("Confronto politiche di routing", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
         chart.setBackgroundPaint(Color.WHITE);
         saveChart(chart, outputPath, 1000, 700);
-    }
-
-    /**
-     * Generates a grid of charts for cost analysis (Objective 3.1).
-     *
-     * @param costData     Map of cooldowns to cost datasets.
-     * @param rtData       Map of cooldowns to response time datasets.
-     * @param outputPath   The path to save the generated image.
-     * @param slaThreshold The SLA threshold for response time.
-     */
-    public static void generateCostCooldownGrid(
-            Map<Double, XYSeriesCollection> costData,
-            Map<Double, XYSeriesCollection> rtData,
-            String outputPath, double slaThreshold) {
-
-        List<Double> sortedCooldowns = new ArrayList<>(costData.keySet());
-        Collections.sort(sortedCooldowns);
-        XYLineAndShapeRenderer sharedRenderer = createCustomRenderer();
-
-        BufferedImage img = prepareImage(1200, 1000, "Economic & Performance Analysis (3.1)");
-        Graphics2D g2 = img.createGraphics();
-
-        int cellW = 1200 / 2;
-        int cellH = (1000 - 100) / 2;
-
-        int idx = 0;
-        for (Double cd : sortedCooldowns) {
-            NumberAxis domainAxis = new NumberAxis("Lambda [CD=" + cd + "s]");
-            CombinedDomainXYPlot subplot = new CombinedDomainXYPlot(domainAxis);
-            subplot.setGap(10.0);
-
-            XYPlot costPlot = createXYSubplot(costData.get(cd), "Cost", sharedRenderer);
-            XYPlot rtPlot = createXYSubplot(rtData.get(cd), "R0 (s)", sharedRenderer);
-            applyLimit(rtPlot, slaThreshold, "SLA");
-
-            subplot.add(costPlot, 1);
-            subplot.add(rtPlot, 1);
-
-            boolean showLegend = (idx == 1);
-            JFreeChart subchart = createSubchart(subplot, showLegend);
-
-            if (showLegend) {
-                configureLegend(subchart, costData.get(sortedCooldowns.get(0)), sharedRenderer);
-            }
-
-            drawSubchart(g2, subchart, idx, cellW, cellH, 60);
-            idx++;
-        }
-        finalizeImage(img, g2, outputPath);
     }
 
     /**
@@ -874,19 +976,19 @@ public class ObjectiveChartUtility extends BaseChartUtility {
 
         for (Double cd : sortedCooldowns) {
             XYLineAndShapeRenderer sharedRenderer = createCustomRenderer();
-            NumberAxis domainAxis = new NumberAxis("Arrival Rate (lambda)");
+            NumberAxis domainAxis = new NumberAxis("Tasso di arrivo lambda [job/s]");
             CombinedDomainXYPlot plot = new CombinedDomainXYPlot(domainAxis);
             plot.setGap(12.0);
 
-            XYPlot costPlot = createXYSubplot(costData.get(cd), "Total Cost", sharedRenderer);
-            XYPlot rtPlot = createXYSubplot(rtData.get(cd), "R0 (s)", sharedRenderer);
+            XYPlot costPlot = createXYSubplot(costData.get(cd), "Costo totale", sharedRenderer);
+            XYPlot rtPlot = createXYSubplot(rtData.get(cd), "Tempo di risposta R0 [s]", sharedRenderer);
             applyLimit(rtPlot, slaThreshold, "SLA");
 
             plot.add(costPlot, 1);
             plot.add(rtPlot, 1);
 
             JFreeChart chart = new JFreeChart(
-                    "Economic & Performance Analysis - Cooldown " + formatCooldown(cd),
+                    "Costo e prestazioni cooldown " + formatCooldown(cd),
                     JFreeChart.DEFAULT_TITLE_FONT,
                     plot,
                     true
@@ -912,118 +1014,6 @@ public class ObjectiveChartUtility extends BaseChartUtility {
     }
 
     /**
-     * Generates a grid of charts for vertical scaler stability (Objective 4.1).
-     *
-     * @param bandStateData Map of bands to state change datasets.
-     * @param bandRtData    Map of bands to response time datasets.
-     * @param outputPath    The path to save the generated image.
-     * @param slaThreshold  The SLA threshold for response time.
-     */
-    public static void generateVerticalScalerStabilityGrid(
-            Map<Integer, XYSeriesCollection> bandStateData,
-            Map<Integer, XYSeriesCollection> bandRtData,
-            String outputPath, double slaThreshold) {
-
-        List<Integer> sortedBands = new ArrayList<>(bandStateData.keySet());
-        Collections.sort(sortedBands);
-
-        Shape[] shapes = {
-            new Ellipse2D.Double(-3, -3, 6, 6), // CV 1.0 (Circle)
-            new Rectangle2D.Double(-3, -3, 6, 6), // CV 4.0 (Square)
-            ShapeUtils.createUpTriangle(3f) // CV 10.0 (Triangle)
-        };
-
-        BufferedImage img = prepareImage(1200, 1000, "Vertical Scaler Stability & Performance (4.1)");
-        Graphics2D g2 = img.createGraphics();
-
-        int cellW = 1200 / 2;
-        int cellH = (1000 - 100) / 2;
-
-        int idx = 0;
-        for (Integer band : sortedBands) {
-            NumberAxis domainAxis = new NumberAxis("Lambda [Band=" + band + "]");
-            CombinedDomainXYPlot subplot = new CombinedDomainXYPlot(domainAxis);
-            subplot.setGap(10.0);
-
-            XYLineAndShapeRenderer stateRenderer = new XYLineAndShapeRenderer(true, true);
-            configureRenderer(stateRenderer, bandStateData.get(band).getSeriesCount(), NORD_RED, shapes);
-
-            XYPlot statePlot = createXYSubplot(bandStateData.get(band), "Spike Utilization (%)", stateRenderer);
-
-            XYLineAndShapeRenderer rtRenderer = new XYLineAndShapeRenderer(true, true);
-            configureRenderer(rtRenderer, bandRtData.get(band).getSeriesCount(), NORD_BLUE, shapes);
-
-            XYPlot rtPlot = createXYSubplot(bandRtData.get(band), "R0 (s)", rtRenderer);
-            applyLimit(rtPlot, slaThreshold, "SLA");
-
-            subplot.add(statePlot, 1);
-            subplot.add(rtPlot, 1);
-
-            boolean showLegend = (idx == 1);
-            JFreeChart subchart = createSubchart(subplot, showLegend);
-
-            if (showLegend) {
-                configureStabilityLegend(subchart, bandStateData.get(sortedBands.get(0)), shapes);
-            }
-
-            drawSubchart(g2, subchart, idx, cellW, cellH, 60);
-            idx++;
-        }
-        finalizeImage(img, g2, outputPath);
-    }
-
-    /**
-     * Generates one vertical scaler stability chart for each hysteresis band.
-     *
-     * @param bandStateData Map of bands to spike-utilization datasets.
-     * @param bandRtData    Map of bands to response-time datasets.
-     * @param outputPath    Base path used to derive one output image per band.
-     * @param slaThreshold  The SLA threshold for response time.
-     */
-    public static void generateVerticalScalerStabilityCharts(
-            Map<Integer, XYSeriesCollection> bandStateData,
-            Map<Integer, XYSeriesCollection> bandRtData,
-            String outputPath, double slaThreshold) {
-
-        List<Integer> sortedBands = new ArrayList<>(bandStateData.keySet());
-        Collections.sort(sortedBands);
-
-        Shape[] shapes = {
-            new Ellipse2D.Double(-3, -3, 6, 6),
-            new Rectangle2D.Double(-3, -3, 6, 6),
-            ShapeUtils.createUpTriangle(3f)
-        };
-
-        for (Integer band : sortedBands) {
-            NumberAxis domainAxis = new NumberAxis("Arrival Rate (lambda)");
-            CombinedDomainXYPlot plot = new CombinedDomainXYPlot(domainAxis);
-            plot.setGap(12.0);
-
-            XYLineAndShapeRenderer utilRenderer = new XYLineAndShapeRenderer(true, true);
-            configureRenderer(utilRenderer, bandStateData.get(band).getSeriesCount(), NORD_RED, shapes);
-            XYPlot utilPlot = createXYSubplot(bandStateData.get(band), "Spike Utilization (%)", utilRenderer);
-
-            XYLineAndShapeRenderer rtRenderer = new XYLineAndShapeRenderer(true, true);
-            configureRenderer(rtRenderer, bandRtData.get(band).getSeriesCount(), NORD_BLUE, shapes);
-            XYPlot rtPlot = createXYSubplot(bandRtData.get(band), "R0 (s)", rtRenderer);
-            applyLimit(rtPlot, slaThreshold, "SLA");
-
-            plot.add(utilPlot, 1);
-            plot.add(rtPlot, 1);
-
-            JFreeChart chart = new JFreeChart(
-                    "Vertical Scaler Stability - Band " + band,
-                    JFreeChart.DEFAULT_TITLE_FONT,
-                    plot,
-                    true
-            );
-            chart.setBackgroundPaint(Color.WHITE);
-            configureStabilityLegend(chart, bandStateData.get(band), shapes);
-            saveChart(chart, bandOutputPath(outputPath, band), 1000, 650);
-        }
-    }
-
-    /**
      * Generates one vertical scaler stability chart for each hysteresis band using
      * mean, standard-deviation bars and 95% confidence intervals.
      *
@@ -1043,18 +1033,18 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         Collections.sort(sortedBands);
 
         for (Integer band : sortedBands) {
-            NumberAxis domainAxis = new NumberAxis("Arrival Rate (lambda)");
+            NumberAxis domainAxis = new NumberAxis("Tasso di arrivo lambda [job/s]");
             CombinedDomainXYPlot plot = new CombinedDomainXYPlot(domainAxis);
             plot.setGap(12.0);
 
             if (systemData.containsKey(band)) {
-                plot.add(createStabilityMetricSubplot(systemData.get(band), "System Utilization (%)", null), 1);
+                plot.add(createStabilityMetricSubplot(systemData.get(band), "Utilizzazione del sistema [%]", null), 1);
             }
-            plot.add(createStabilityMetricSubplot(spikeData.get(band), "Spike Utilization (%)", null), 1);
-            plot.add(createStabilityMetricSubplot(rtData.get(band), "R0 (s)", slaThreshold), 1);
+            plot.add(createStabilityMetricSubplot(spikeData.get(band), "Utilizzazione Spike Server [%]", null), 1);
+            plot.add(createStabilityMetricSubplot(rtData.get(band), "Tempo di risposta R0 [s]", slaThreshold), 1);
 
             JFreeChart chart = new JFreeChart(
-                    "Vertical Scaler Stability - Band " + band,
+                    "Stabilita scaling verticale banda " + band,
                     JFreeChart.DEFAULT_TITLE_FONT,
                     plot,
                     true
@@ -1077,9 +1067,9 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             XYSeries stdDev = datasets.stdDev().getSeries(s);
 
             YIntervalSeries ciSeries = new YIntervalSeries(mean.getKey());
-            YIntervalSeries stdDevSeries = new YIntervalSeries(mean.getKey() + " StdDev");
-            XYSeries lowerBoundary = new XYSeries(mean.getKey() + " Lower 95% CI");
-            XYSeries upperBoundary = new XYSeries(mean.getKey() + " Upper 95% CI");
+            YIntervalSeries stdDevSeries = new YIntervalSeries(mean.getKey() + " deviazione standard");
+            XYSeries lowerBoundary = new XYSeries(mean.getKey() + " limite inferiore CI 95%");
+            XYSeries upperBoundary = new XYSeries(mean.getKey() + " limite superiore CI 95%");
 
             for (int i = 0; i < mean.getItemCount(); i++) {
                 double x = mean.getX(i).doubleValue();
@@ -1101,6 +1091,7 @@ public class ObjectiveChartUtility extends BaseChartUtility {
 
         NumberAxis axis = new NumberAxis(axisLabel);
         axis.setAutoRangeIncludesZero(true);
+        configurePercentageAxis(axis);
 
         DeviationRenderer ciRenderer = new DeviationRenderer(true, true);
         ciRenderer.setAlpha(0.16f);
@@ -1160,13 +1151,13 @@ public class ObjectiveChartUtility extends BaseChartUtility {
     public static void generateHorizontalParameterEstimationChart(
             Map<Double, Map<Integer, XYSeries>> cvResults, String outputPath, double slaThreshold) {
         XYPlot mainPlot = new XYPlot();
-        mainPlot.setDomainAxis(new NumberAxis("Arrival Rate (lambda)"));
+        mainPlot.setDomainAxis(new NumberAxis("Tasso di arrivo lambda [job/s]"));
         List<Double> sortedCvs = new ArrayList<>(cvResults.keySet());
         Collections.sort(sortedCvs);
 
         XYSeriesCollection globalDataset = new XYSeriesCollection();
-        XYSeries divergingMarkers = new XYSeries("Diverging", false, true);
-        XYSeries skippedMarkers = new XYSeries("Skipped / inconclusive", false, true);
+        XYSeries divergingMarkers = new XYSeries("Divergente", false, true);
+        XYSeries skippedMarkers = new XYSeries("Saltata o inconclusiva", false, true);
         double maxConvergedR0 = slaThreshold;
 
         for (Double cv : sortedCvs) {
@@ -1199,13 +1190,13 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         globalDataset.addSeries(divergingMarkers);
         globalDataset.addSeries(skippedMarkers);
 
-        NumberAxis rangeAxis = new NumberAxis("Avg R0 (s)");
+        NumberAxis rangeAxis = new NumberAxis("Tempo di risposta R0 [s]");
         rangeAxis.setRange(0.0, Math.max(slaThreshold * 1.25, maxConvergedR0 * 1.15));
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, true);
         for (int i = 0; i < globalDataset.getSeriesCount(); i++) {
             String key = globalDataset.getSeriesKey(i).toString();
-            boolean diverging = key.equals("Diverging");
-            boolean inconclusive = key.equals("Skipped / inconclusive");
+            boolean diverging = key.equals("Divergente");
+            boolean inconclusive = key.equals("Saltata o inconclusiva");
             boolean skipped = diverging || inconclusive;
             renderer.setSeriesPaint(i, diverging ? NORD_RED : inconclusive ? NORD_ORANGE : PALETTE[i % PALETTE.length]);
             renderer.setSeriesStroke(i, new BasicStroke(2.0f));
@@ -1217,28 +1208,9 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         }
         mainPlot.setDataset(globalDataset); mainPlot.setRenderer(renderer); mainPlot.setRangeAxis(rangeAxis);
         setupPlot(mainPlot); applyLimit(mainPlot, slaThreshold, "SLA");
-        JFreeChart chart = new JFreeChart("Horizontal Scaling Limits (1.3)", JFreeChart.DEFAULT_TITLE_FONT, mainPlot, true);
+        JFreeChart chart = new JFreeChart("Frontiera scaling orizzontale", JFreeChart.DEFAULT_TITLE_FONT, mainPlot, true);
         chart.setBackgroundPaint(Color.WHITE);
         saveChart(chart, outputPath, 1100, 720);
-    }
-
-    /**
-     * Generates a line chart for burstiness robustness (Objective 4.3).
-     *
-     * @param dataset      The dataset containing burstiness levels.
-     * @param outputPath   The path to save the generated image.
-     * @param slaThreshold The SLA threshold for response time.
-     */
-    public static void generateBurstinessLineChart(XYSeriesCollection dataset, String outputPath, double slaThreshold) {
-        JFreeChart chart = ChartFactory.createXYLineChart("Robustness to Burstiness (4.3)", "Arrival Rate", "R0 (s)", dataset, PlotOrientation.VERTICAL, true, true, false);
-        XYPlot plot = chart.getXYPlot();
-        setupPlot(plot);
-
-        XYLineAndShapeRenderer renderer = createCustomRenderer();
-        plot.setRenderer(renderer);
-
-        applyLimit(plot, slaThreshold, "SLA");
-        saveChart(chart, outputPath, 1000, 600);
     }
 
     /**
@@ -1273,9 +1245,9 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             XYSeries stdDev = stdDevDataset.getSeries(s);
 
             YIntervalSeries ciSeries = new YIntervalSeries(mean.getKey());
-            YIntervalSeries stdDevSeries = new YIntervalSeries(mean.getKey() + " StdDev");
-            XYSeries lowerBoundary = new XYSeries(mean.getKey() + " Lower 95% CI");
-            XYSeries upperBoundary = new XYSeries(mean.getKey() + " Upper 95% CI");
+            YIntervalSeries stdDevSeries = new YIntervalSeries(mean.getKey() + " deviazione standard");
+            XYSeries lowerBoundary = new XYSeries(mean.getKey() + " limite inferiore CI 95%");
+            XYSeries upperBoundary = new XYSeries(mean.getKey() + " limite superiore CI 95%");
             for (int i = 0; i < mean.getItemCount(); i++) {
                 double x = mean.getX(i).doubleValue();
                 double y = mean.getY(i).doubleValue();
@@ -1293,9 +1265,10 @@ public class ObjectiveChartUtility extends BaseChartUtility {
             ciBoundaryDataset.addSeries(upperBoundary);
         }
 
-        NumberAxis domainAxis = new NumberAxis("Arrival Rate");
+        NumberAxis domainAxis = new NumberAxis("Tasso di arrivo lambda [job/s]");
         NumberAxis responseAxis = new NumberAxis(yAxisLabel);
         responseAxis.setAutoRangeIncludesZero(true);
+        configurePercentageAxis(responseAxis);
 
         DeviationRenderer ciRenderer = new DeviationRenderer(true, true);
         ciRenderer.setAlpha(0.16f);
@@ -1341,52 +1314,6 @@ public class ObjectiveChartUtility extends BaseChartUtility {
     }
 
     /**
-     * Generates a grid of charts for transient_h.txt analysis (Objective 4.2).
-     *
-     * @param archData     Map of architectures to replication datasets.
-     * @param title        The chart title.
-     * @param outputPath   The path to save the generated image.
-     * @param slaThreshold The SLA threshold for response time.
-     */
-    public static void generateTransientGrid(
-            Map<String, XYSeriesCollection> archData, String title, String outputPath, double slaThreshold) {
-
-        List<String> architectures = new ArrayList<>(archData.keySet());
-        BufferedImage img = prepareImage(1200, 1000, title);
-        Graphics2D g2 = img.createGraphics();
-
-        int cellW = 1200 / 2;
-        int cellH = (1000 - 50) / 2;
-
-        for (int archIdx = 0; archIdx < architectures.size(); archIdx++) {
-            String archName = architectures.get(archIdx);
-            XYSeriesCollection dataset = archData.get(archName);
-
-            NumberAxis xAxis = new NumberAxis("Time (s)");
-            NumberAxis yAxis = new NumberAxis("R0 (s)");
-            yAxis.setAutoRangeIncludesZero(true);
-
-            XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
-            for (int i = 0; i < dataset.getSeriesCount(); i++) {
-                renderer.setSeriesPaint(i, PALETTE[i % PALETTE.length]);
-                renderer.setSeriesStroke(i, new BasicStroke(1.5f));
-            }
-
-            XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
-            setupPlot(plot);
-            applyLimit(plot, slaThreshold, "SLA");
-
-            JFreeChart subchart = new JFreeChart(archName, new Font("SansSerif", Font.BOLD, 16), plot, false);
-            subchart.setBackgroundPaint(Color.WHITE);
-
-            drawSubchart(g2, subchart, archIdx, cellW, cellH, 50);
-        }
-
-        drawTransientLegend(g2, archData.get(architectures.get(0)), 1200, 1000);
-        finalizeImage(img, g2, outputPath);
-    }
-
-    /**
      * Generates a single transient_h.txt chart for the complete architecture.
      *
      * @param dataset      Replication time series.
@@ -1402,8 +1329,8 @@ public class ObjectiveChartUtility extends BaseChartUtility {
 
         JFreeChart chart = ChartFactory.createXYLineChart(
                 title,
-                "Time (" + timeScale.label() + ")",
-                "R0 (s)",
+                "Tempo [" + timeScale.label() + "]",
+                "Tempo di risposta R0 [s]",
                 scaledDataset,
                 PlotOrientation.VERTICAL,
                 true,
@@ -1414,17 +1341,38 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         chart.setBackgroundPaint(Color.WHITE);
         XYPlot plot = chart.getXYPlot();
         setupPlot(plot);
-        plot.getRangeAxis().setAutoRange(true);
+        // applyTransientDomainRange(plot, scaledDataset);
+        // applyRobustTransientRange(plot, scaledDataset);
 
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
         for (int i = 0; i < scaledDataset.getSeriesCount(); i++) {
-            renderer.setSeriesPaint(i, PALETTE[i % PALETTE.length]);
-            renderer.setSeriesStroke(i, new BasicStroke(1.5f));
+            Color color = PALETTE[i % PALETTE.length];
+            renderer.setSeriesPaint(i, new Color(color.getRed(), color.getGreen(), color.getBlue(), 175));
+            renderer.setSeriesStroke(i, THIN_STROKE);
         }
         plot.setRenderer(renderer);
 
-        applyLimit(plot, slaThreshold, "SLA");
+        if (isLimitVisible(plot, slaThreshold)) {
+            applyLimit(plot, slaThreshold, "SLA");
+        }
         saveChart(chart, outputPath, 1100, 650);
+    }
+
+    private static void applyTransientDomainRange(XYPlot plot, XYSeriesCollection dataset) {
+        double maxDomain = 0.0;
+        for (int s = 0; s < dataset.getSeriesCount(); s++) {
+            XYSeries series = dataset.getSeries(s);
+            for (int i = 0; i < series.getItemCount(); i++) {
+                maxDomain = Math.max(maxDomain, series.getX(i).doubleValue());
+            }
+        }
+
+        if (maxDomain <= 25.0) {
+            return;
+        }
+
+        double visibleUpper = Math.min(maxDomain, Math.max(25.0, maxDomain * 0.75));
+        ((NumberAxis) plot.getDomainAxis()).setRange(0.0, visibleUpper);
     }
 
     private static TimeScale transientTimeScale(XYSeriesCollection dataset) {
@@ -1437,12 +1385,52 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         }
 
         if (maxSeconds >= 3_600.0) {
-            return new TimeScale(3_600.0, "hours");
+            return new TimeScale(3_600.0, "ore");
         }
         if (maxSeconds >= 60.0) {
-            return new TimeScale(60.0, "minutes");
+            return new TimeScale(60.0, "minuti");
         }
         return new TimeScale(1.0, "s");
+    }
+
+    private static void applyRobustTransientRange(XYPlot plot, XYSeriesCollection dataset) {
+        List<Double> values = new ArrayList<>();
+        for (int s = 0; s < dataset.getSeriesCount(); s++) {
+            XYSeries series = dataset.getSeries(s);
+            for (int i = 0; i < series.getItemCount(); i++) {
+                double value = series.getY(i).doubleValue();
+                if (Double.isFinite(value)) {
+                    values.add(value);
+                }
+            }
+        }
+
+        if (values.size() < 5) {
+            plot.getRangeAxis().setAutoRange(true);
+            return;
+        }
+
+        Collections.sort(values);
+        double lower = percentile(values, 0.03);
+        double upper = percentile(values, 0.97);
+        double span = Math.max(upper - lower, 0.15);
+        double margin = Math.max(span * 0.45, 0.15);
+        ((NumberAxis) plot.getRangeAxis()).setRange(Math.max(0.0, lower - margin), upper + margin);
+    }
+
+    private static boolean isLimitVisible(XYPlot plot, double limit) {
+        return limit >= plot.getRangeAxis().getLowerBound() && limit <= plot.getRangeAxis().getUpperBound();
+    }
+
+    private static double percentile(List<Double> sortedValues, double p) {
+        double index = p * (sortedValues.size() - 1);
+        int lower = (int) Math.floor(index);
+        int upper = (int) Math.ceil(index);
+        if (lower == upper) {
+            return sortedValues.get(lower);
+        }
+        double weight = index - lower;
+        return sortedValues.get(lower) * (1.0 - weight) + sortedValues.get(upper) * weight;
     }
 
     private static XYSeriesCollection scaleDomain(XYSeriesCollection dataset, double factor) {
@@ -1470,26 +1458,21 @@ public class ObjectiveChartUtility extends BaseChartUtility {
         plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
     }
 
+    private static void configurePercentageAxis(NumberAxis axis) {
+        String label = axis.getLabel();
+        if (label != null && label.contains("[%]")) {
+            axis.setRange(0.0, 100.0);
+            axis.setAutoRange(false);
+        }
+    }
+
     private static XYPlot createXYSubplot(XYSeriesCollection dataset, String label, XYLineAndShapeRenderer renderer) {
         NumberAxis axis = new NumberAxis(label);
         axis.setAutoRangeIncludesZero(false);
+        configurePercentageAxis(axis);
         XYPlot plot = new XYPlot(dataset, null, axis, renderer);
         plot.setBackgroundPaint(Color.WHITE);
         return plot;
-    }
-
-    private static JFreeChart createSubchart(CombinedDomainXYPlot plot, boolean showLegend) {
-        JFreeChart subchart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, plot, showLegend);
-        subchart.setBackgroundPaint(Color.WHITE);
-        return subchart;
-    }
-
-    private static void configureRenderer(XYLineAndShapeRenderer renderer, int count, Color color, Shape[] shapes) {
-        for (int i = 0; i < count; i++) {
-            renderer.setSeriesPaint(i, color);
-            renderer.setSeriesStroke(i, new BasicStroke(2.0f));
-            renderer.setSeriesShape(i, shapes[i % shapes.length]);
-        }
     }
 
     private static void configureLegend(JFreeChart chart, XYSeriesCollection series, XYLineAndShapeRenderer renderer) {
@@ -1499,23 +1482,6 @@ public class ObjectiveChartUtility extends BaseChartUtility {
                 () -> {
                     LegendItemCollection result = new LegendItemCollection();
                     for (int i = 0; i < series.getSeriesCount(); i++) result.add(renderer.getLegendItem(0, i));
-                    return result;
-                }
-            });
-        }
-    }
-
-    private static void configureStabilityLegend(JFreeChart chart, XYSeriesCollection series, Shape[] shapes) {
-        LegendTitle legend = chart.getLegend();
-        if (legend != null) {
-            legend.setSources(new LegendItemSource[] {
-                () -> {
-                    LegendItemCollection result = new LegendItemCollection();
-                    result.add(new LegendItem("Spike Utilization (%)", null, null, null, new Line2D.Double(0, 0, 10, 0), new BasicStroke(2.0f), NORD_RED));
-                    result.add(new LegendItem("Avg Response Time R0", null, null, null, new Line2D.Double(0, 0, 10, 0), new BasicStroke(2.0f), NORD_BLUE));
-                    for (int i = 0; i < series.getSeriesCount(); i++) {
-                        result.add(new LegendItem(series.getSeriesKey(i).toString(), null, null, null, shapes[i % shapes.length], Color.DARK_GRAY));
-                    }
                     return result;
                 }
             });
@@ -1543,49 +1509,6 @@ public class ObjectiveChartUtility extends BaseChartUtility {
                     return result;
                 }
             });
-        }
-    }
-
-    private static BufferedImage prepareImage(int width, int height, String title) {
-        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = img.createGraphics();
-        g2.setColor(Color.WHITE);
-        g2.fillRect(0, 0, width, height);
-        g2.setColor(Color.BLACK);
-        g2.setFont(new Font("SansSerif", Font.BOLD, 20));
-        int titleWidth = g2.getFontMetrics().stringWidth(title);
-        g2.drawString(title, (width - titleWidth) / 2, 35);
-        g2.dispose();
-        return img;
-    }
-
-    private static void drawSubchart(Graphics2D g2, JFreeChart subchart, int idx, int cellW, int cellH, int topOffset) {
-        int x = (idx % 2) * cellW;
-        int y = topOffset + (idx / 2) * cellH;
-        subchart.draw(g2, new Rectangle(x, y, cellW, cellH));
-    }
-
-    private static void drawTransientLegend(Graphics2D g2, XYSeriesCollection sampleDataset, int width, int height) {
-        int legendY = height - 80;
-        int legendX = 50;
-        g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        for (int i = 0; i < sampleDataset.getSeriesCount(); i++) {
-            g2.setColor(PALETTE[i % PALETTE.length]);
-            g2.fillRect(legendX, legendY, 20, 10);
-            g2.setColor(Color.BLACK);
-            g2.drawString(sampleDataset.getSeriesKey(i).toString(), legendX + 25, legendY + 10);
-            legendX += 200;
-            if (legendX > width - 200) { legendX = 50; legendY += 20; }
-        }
-    }
-
-    private static void finalizeImage(BufferedImage img, Graphics2D g2, String outputPath) {
-        g2.dispose();
-        try {
-            ImageIO.write(img, "png", new File(outputPath));
-            logger.info("Chart generated: {}", outputPath);
-        } catch (IOException e) {
-            logger.error("Failed to save chart: {}", outputPath, e);
         }
     }
 

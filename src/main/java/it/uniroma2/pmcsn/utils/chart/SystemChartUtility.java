@@ -32,11 +32,11 @@ public class SystemChartUtility extends BaseChartUtility {
      * @param outputPath path for the output png image
      */
     public static void generateLoadComparisonChart(String csvPath, String outputPath) {
-        XYSeries wsSeries = new XYSeries("Web Server (Active Jobs)");
-        XYSeries ssSeries = new XYSeries("Spike Server (Active Jobs)");
-        XYSeries totalSeries = new XYSeries("Total System Load");
-        XYSeries arrivalSeries = new XYSeries("Arrivals");
-        XYSeries completionSeries = new XYSeries("Completions");
+        XYSeries wsSeries = new XYSeries("Web Server");
+        XYSeries ssSeries = new XYSeries("Spike Server");
+        XYSeries totalSeries = new XYSeries("Carico totale");
+        XYSeries arrivalSeries = new XYSeries("Arrivi");
+        XYSeries completionSeries = new XYSeries("Completamenti");
 
         double siMaxVal = 0;
 
@@ -72,8 +72,8 @@ public class SystemChartUtility extends BaseChartUtility {
         }
 
         // Initialize Plot with specific axes
-        NumberAxis xAxis = new NumberAxis("Time (seconds)");
-        NumberAxis yAxis = new NumberAxis("Number of Jobs");
+        NumberAxis xAxis = new NumberAxis("Tempo [s]");
+        NumberAxis yAxis = new NumberAxis("Numero di job");
         XYPlot plot = new XYPlot();
         plot.setDomainAxis(xAxis);
         plot.setRangeAxis(yAxis);
@@ -123,9 +123,9 @@ public class SystemChartUtility extends BaseChartUtility {
         plot.setRangeGridlinePaint(new Color(230, 230, 230));
 
         // Capacity Limit Line using base utility
-        applyLimit(plot, siMaxVal, "SI Max");
+        applyLimit(plot, siMaxVal, "SI max");
 
-        JFreeChart chart = new JFreeChart("System Load Dynamics", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
+        JFreeChart chart = new JFreeChart("Dinamica del carico", JFreeChart.DEFAULT_TITLE_FONT, plot, true);
         chart.setBackgroundPaint(Color.WHITE);
 
         saveChart(chart, outputPath, 1200, 800);

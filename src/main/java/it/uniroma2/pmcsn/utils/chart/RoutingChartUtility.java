@@ -59,7 +59,7 @@ public class RoutingChartUtility extends BaseChartUtility {
         }
 
         // Create a vertically stacked chart for comparison
-        CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(new NumberAxis("Time (seconds)"));
+        CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(new NumberAxis("Tempo [s]"));
         combinedPlot.setGap(10.0);
         combinedPlot.setOrientation(PlotOrientation.VERTICAL);
 
@@ -75,7 +75,7 @@ public class RoutingChartUtility extends BaseChartUtility {
             combinedPlot.add(subplot, 1);
         }
 
-        JFreeChart chart = new JFreeChart("Routing Policy Distribution: " + policy, JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, true);
+        JFreeChart chart = new JFreeChart("Distribuzione routing " + formatPolicy(policy), JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, true);
         chart.setBackgroundPaint(Color.WHITE);
 
         // Dynamic height based on number of servers
@@ -92,7 +92,7 @@ public class RoutingChartUtility extends BaseChartUtility {
      */
     private static XYPlot createRoutingSubplot(XYSeries series, Color color) {
         XYSeriesCollection dataset = new XYSeriesCollection(series);
-        NumberAxis rangeAxis = new NumberAxis("Jobs (" + series.getKey() + ")");
+        NumberAxis rangeAxis = new NumberAxis("Job " + formatServerName(series.getKey().toString()));
         rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         XYStepAreaRenderer renderer = new XYStepAreaRenderer(XYStepAreaRenderer.AREA);
         renderer.setSeriesPaint(0, color);
@@ -100,5 +100,21 @@ public class RoutingChartUtility extends BaseChartUtility {
         subplot.setBackgroundPaint(Color.WHITE);
         subplot.setRangeGridlinePaint(new Color(230, 230, 230));
         return subplot;
+    }
+
+    private static String formatPolicy(RoutingPolicy policy) {
+        return switch (policy) {
+            case ROUND_ROBIN -> "Round Robin";
+            case LEAST_LOADED -> "Least Loaded";
+            case DETERMINISTIC -> "Deterministic";
+            case POWER_OF_TWO -> "Power of Two Choices";
+            case RANDOM -> "Random";
+        };
+    }
+
+    private static String formatServerName(String rawName) {
+        return rawName
+                .replace("server_", "Server ")
+                .replace("_", " ");
     }
 }

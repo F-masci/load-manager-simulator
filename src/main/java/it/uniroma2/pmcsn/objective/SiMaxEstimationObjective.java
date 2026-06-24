@@ -11,6 +11,8 @@ import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
 import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import org.jfree.data.xy.XYSeries;
 
+import java.util.Locale;
+
 /**
  * Objective 1.1: SI_max Estimation (What-If Analysis)
  * Vary siMax from 10 to 200 to find the maximum value where R0 <= 5.0s.
@@ -111,7 +113,7 @@ public class SiMaxEstimationObjective extends BaseObjective {
             report.append(String.format("%-10d | %-10.4f | %-10s | %-15.1f | %-15.2f%% | %-15.2f%%\n", 
                     siMax, r0, feasible ? "OK" : "VIOLATED", meanDiverted, percDiverted, meanSpikeUtil));
             
-            csv.append(String.format("%d,%.4f,%.4f,%.4f,%.1f,%.2f,%.2f\n", 
+            csv.append(String.format(Locale.US, "%d,%.4f,%.4f,%.4f,%.1f,%.2f,%.2f\n", 
                     siMax, r0, r0L, r0U, meanDiverted, percDiverted, meanSpikeUtil));
 
             rtMean.add(siMax, r0);

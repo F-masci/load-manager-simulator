@@ -14,6 +14,7 @@ import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import org.jfree.data.xy.XYSeries;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -112,7 +113,7 @@ public class HorizontalScalingEstimationObjective extends BaseObjective {
                     } else {
                         inconclusiveSeries.add(lambda, ApplicationConfig.SLA_THRESHOLD * 6.0);
                     }
-                    csv.append(String.format("%.1f,%.2f,%d,NaN,NaN,%s,0,NaN,0\n",
+                    csv.append(String.format(Locale.US, "%.1f,%.2f,%d,NaN,NaN,%s,0,NaN,0\n",
                             ApplicationConfig.CV_INTERARRIVAL, lambda, n, "SKIPPED_AFTER_" + skipReason));
                     continue;
                 }
@@ -130,7 +131,7 @@ public class HorizontalScalingEstimationObjective extends BaseObjective {
                     } else {
                         inconclusiveSeries.add(lambda, ApplicationConfig.SLA_THRESHOLD * 6.0);
                     }
-                    csv.append(String.format("%.1f,%.2f,%d,NaN,NaN,%s,%d,%.4f,0\n",
+                    csv.append(String.format(Locale.US, "%.1f,%.2f,%d,NaN,NaN,%s,%d,%.4f,0\n",
                             ApplicationConfig.CV_INTERARRIVAL, lambda, n,
                             convergenceReport.status(), convergenceJobs, convergenceTime));
                     continue;
@@ -151,7 +152,7 @@ public class HorizontalScalingEstimationObjective extends BaseObjective {
                 double r0 = results.responseTime().mean();
                 series.add(lambda, r0);
 
-                csv.append(String.format("%.1f,%.2f,%d,%.4f,%.4f,%s,%d,%.4f,%d\n",
+                csv.append(String.format(Locale.US, "%.1f,%.2f,%d,%.4f,%.4f,%s,%d,%.4f,%d\n",
                         ApplicationConfig.CV_INTERARRIVAL, lambda, n, r0, results.responseTime().halfWidth(),
                         convergenceReport.status(), convergenceJobs, convergenceTime, warmupJobs));
             }

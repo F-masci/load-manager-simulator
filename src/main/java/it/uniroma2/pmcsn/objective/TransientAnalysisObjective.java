@@ -34,8 +34,8 @@ public class TransientAnalysisObjective extends BaseObjective {
 
         String chartTitle() {
             return String.format(Locale.US,
-                    "Finite Horizon Analysis: %s (CV=%.1f, Lambda=%.1f)",
-                    label.replace("_", " "), cv, lambda);
+                    "Analisi transitoria %s CV %.1f lambda %.1f",
+                    label.replace("_", " ").toLowerCase(Locale.ROOT), cv, lambda);
         }
     }
 
@@ -148,5 +148,4 @@ public class TransientAnalysisObjective extends BaseObjective {
         }
     }
 }
-
 

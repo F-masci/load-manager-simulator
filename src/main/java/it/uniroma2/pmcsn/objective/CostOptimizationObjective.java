@@ -86,10 +86,10 @@ public class CostOptimizationObjective extends BaseObjective {
 
         // Fixed upper threshold as per default, varying lower threshold
         Map<String, Double> candidates = new LinkedHashMap<>();
-        candidates.put("ScaleIn 1.0", 1.0);
+        candidates.put("ScaleIn 1.5", 1.5);
         candidates.put("ScaleIn 2.0", 2.0);
+        candidates.put("ScaleIn 3.5", 3.5);
         candidates.put("ScaleIn 5.0", 5.0);
-        candidates.put("ScaleIn 6.0", 6.0);
 
         double[] cooldownsMs = {5.0, 10.0, 50.0, 100.0};
 

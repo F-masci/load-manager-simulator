@@ -45,3 +45,7 @@ report/auxil
 report/report.*
 !report/report.pdf
 !report/report.tex
+
+### Data ###
+# Too large to be stored in GitHub
+data/objective/finite/*.csv

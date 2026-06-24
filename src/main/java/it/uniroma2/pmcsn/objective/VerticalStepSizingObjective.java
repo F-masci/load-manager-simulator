@@ -9,6 +9,8 @@ import it.uniroma2.pmcsn.utils.chart.ObjectiveChartUtility;
 import it.uniroma2.pmcsn.utils.objective.ObjectiveUtils;
 import org.jfree.data.xy.XYSeries;
 
+import java.util.Locale;
+
 /**
  * Objective 1.2: Vertical Step Sizing
  * Test different step increments to compare reactivity vs waste.
@@ -94,10 +96,10 @@ public class VerticalStepSizingObjective extends BaseObjective {
             double spikeUtil = results.spikeUtilization().mean() * 100.0;
 
             report.append(String.format("%-10.2f | %-10.4f | %-20.4f | %-15.2f%%\n", inc, r0, spikeSpeed, spikeUtil));
-            csv.append(String.format("%.2f,%.4f,%.4f,%.4f,%.2f\n", inc,
+            csv.append(String.format(Locale.US, "%.2f,%.4f,%.4f,%.4f,%.4f,%.2f,%.2f\n", inc,
                     r0, results.responseTime().halfWidth(),
                     spikeSpeed, results.spikeAvgSpeed().halfWidth(),
-                    spikeUtil, results.spikeUtilization().halfWidth()
+                    spikeUtil, results.spikeUtilization().halfWidth() * 100.0
             ));
 
             rtSeries.add(inc, r0);
