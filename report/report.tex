@@ -17,8 +17,78 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows, positioning, backgrounds, fit}
 
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{inconsolata}
+
+\definecolor{codergray}{rgb}{0.5,0.5,0.5}
+\definecolor{codekeyword}{rgb}{0.13,0.29,0.53}
+\definecolor{codestring}{rgb}{0.29,0.54,0.13}
+\definecolor{codecomment}{rgb}{0.53,0.57,0.53}
+\definecolor{codebackground}{rgb}{0.97,0.97,0.98} 
+\definecolor{codeframe}{rgb}{0.88,0.88,0.88}
+
+\lstdefinestyle{professionalJava}{
+    language=Java,
+    backgroundcolor=\color{codebackground},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codekeyword}\bfseries,
+    stringstyle=\color{codestring},
+    commentstyle=\color{codecomment}\itshape,
+    morekeywords={var, Record, String},
+    %
+    % Numerazione delle righe
+    numbers=left,
+    numberstyle=\tiny\color{codergray},
+    numbersep=8pt,
+    %
+    % Struttura e Bordi
+    frame=single,
+    frameround=eeee,
+    rulecolor=\color{codeframe},
+    %
+    % Gestione degli spazi e allineamento
+    breaklines=true,
+    breakatwhitespace=true,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    tabsize=4,
+    %
+    % Margini interni
+    xleftmargin=15pt,
+    framexleftmargin=15pt,
+    %
+    % Spaziatura verticale esterna
+    aboveskip=15pt,
+    belowskip=15pt
+}
+
+% Imposta lo stile come predefinito
+\lstset{style=professionalJava}
+
 % Configurazione dei margini
 \geometry{a4paper, top=2.8cm, bottom=2cm, left=2cm, right=2cm, headheight=28pt}
+
+% Stile specifico per il frontespizio
+\fancypagestyle{firstpage}{
+    \fancyhf{}
+    \fancyhead[L]{}
+    \fancyhead[C]{}
+    \fancyhead[R]{}
+    \fancyfoot[C]{}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% Stile specifico per l'indice
+\fancypagestyle{indexpage}{
+    \fancyhf{}
+    \fancyhead[L]{}
+    \fancyhead[C]{}
+    \fancyhead[R]{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
 
 % Configurazione dello stile delle pagine con intestazione
 \fancypagestyle{formalstyle}{
@@ -27,16 +97,6 @@
     \fancyhead[C]{\small\scshape Performance Modeling of C.S.N.}
     \fancyhead[R]{\small F Masci}
     \fancyfoot[C]{\thepage}
-    \renewcommand{\headrulewidth}{0.4pt}
-}
-
-% Stile specifico per il frontespizio
-\fancypagestyle{firstpage}{
-    \fancyhf{}
-    \fancyhead[L]{\small 0365258}
-    \fancyhead[C]{\small\scshape Performance Modeling of C.S.N.}
-    \fancyhead[R]{\small F Masci}
-    \fancyfoot[C]{}
     \renewcommand{\headrulewidth}{0.4pt}
 }
 
@@ -64,7 +124,7 @@
 % =========================================================================
 \begin{titlepage}
     \thispagestyle{firstpage}
-    \vspace*{0.5cm}
+    \vspace*{0.35cm}
     
     \begin{center}
         % Logo dell'Università centrato
@@ -72,7 +132,7 @@
         \vspace{0.6cm}
         
         \begin{singlespace}
-            \Large{\textsc{Università degli Studi di Roma ``Tor Vergatà'}} \\
+            \Large{\textsc{Università degli Studi di Roma "Tor Vergata"}} \\
             \vspace{0.2cm}
             \large{\textsc{Facoltà di Ingegneria}} \\
             \vspace{0.1cm}
@@ -103,30 +163,34 @@
     \end{center}
 \end{titlepage}
 
-\newpage
+\clearpage
 
 % =========================================================================
-% INDICE GENERALE
+% INDICE
 % =========================================================================
-\begin{singlespace}
-    \tableofcontents
-\end{singlespace}
-\newpage
+\pagestyle{indexpage}
+\pagenumbering{Roman}
 
+\tableofcontents
+
+\clearpage
+
+\pagestyle{formalstyle}
+\pagenumbering{arabic}
 % =========================================================================
 % INTRODUZIONE
 % =========================================================================
 \section{Introduzione}\label{sec:introduzione}
 
-L'attuale paradigma del \textit{Cloud Computing} ha rivoluzionato le modalità di erogazione dei servizi software, offrendo alle organizzazioni la capacità di attingere a risorse computazionali virtualmente illimitate con un modello di consumo \textit{pay-per-use}. In questo scenario, l'efficienza operativa dipende strettamente dalla capacità di gestire dinamicamente le risorse in risposta a carichi di lavoro intrinsecamente volatili. La garanzia della continuità del servizio e il rispetto dei \textit{Service Level Agreements} rappresentano requisiti fondamentali per la competitività e la reputazione aziendale nel mercato digitale globale.
+L'attuale paradigma del \textit{Cloud Computing} ha rivoluzionato le modalità di erogazione dei servizi software, offrendo alle organizzazioni la capacità di attingere a risorse computazionali virtualmente illimitate con un modello di consumo \textit{pay-per-use}. In questo scenario, l'efficienza operativa ed economica dipende strettamente dalla capacità di gestire dinamicamente le risorse in risposta a carichi di lavoro intrinsecamente volatili. La garanzia della continuità del servizio e il rispetto dei \textit{Service Level Agreements} rappresentano requisiti fondamentali per la competitività e la reputazione aziendale nel mercato digitale globale.
 
-Le fluttuazioni del carico sui server di datacenter, sia privati che pubblici, sono dovute agli effetti combinati di due diversi aspetti stocastici: la variabilità della frequenza del traffico in ingresso e la variabilità del tempo di calcolo richiesto per il soddisfacimento delle singole richieste di servizio. Tali fluttuazioni presentano intensità, durate e scale di tempo marcatamente eterogenee, che possono essere classificate in due macro-categorie:
+Le fluttuazioni del carico sui server dei datacenter, sia privati che pubblici, sono dovute agli effetti combinati di due diversi aspetti stocastici: la variabilità della frequenza del traffico in ingresso e la variabilità del tempo di calcolo richiesto per il soddisfacimento delle singole richieste di servizio. Tali fluttuazioni presentano intensità, durate e scale di tempo marcatamente eterogenee, che possono essere classificate in due macro-categorie:
 \begin{itemize}
-    \item \textbf{Long-term fluctuations:} caratterizzate da bassa frequenza e intensità medio/bassa, tipicamente provocate dalla tendenza fisiologica di crescita del carico nel tempo.
+    \item \textbf{Long-term fluctuations:} oscillazioni a bassa frequenza e intensità medio/bassa, tipicamente guidate dall'evoluzione dei pattern di utilizzo del server e dai trend di consumo sul lungo periodo.
     \item \textbf{Short-term fluctuations:} caratterizzate da alta frequenza, intensità elevata e breve durata; tali picchi transitori possono manifestarsi a istanti di tempo impredicibili, saturando repentinamente le risorse computazionali.
 \end{itemize}
 
-A fronte di questa dinamicità, emerge il problema del corretto dimensionamento, volto a determinare il minimo numero di risorse necessarie a raggiungere gli obiettivi di performance prestabiliti minimizzando i costi operativi. Un dimensionamento statico fallisce inevitabilmente esponendo il sistema a due scenari critici: l'\textit{over-provisioning}, che si traduce in uno spreco inefficiente di risorse e capitale economico, e l'\textit{under-provisioning}, responsabile della saturazione delle code, dell'innalzamento asintotico dei tempi di risposta e della conseguente violazione delle metriche di Quality of Service imposte dagli SLA.
+A fronte di questa dinamicità, emerge il problema del corretto dimensionamento, volto a determinare il corretto numero di risorse necessarie a raggiungere gli obiettivi di performance prestabiliti minimizzando i costi operativi. Un dimensionamento statico fallisce inevitabilmente esponendo il sistema a due scenari critici: l'\textit{over-provisioning}, che si traduce in uno spreco inefficiente di risorse e capitale economico, e l'\textit{under-provisioning}, responsabile della saturazione delle code, dell'innalzamento asintotico dei tempi di risposta e della conseguente violazione delle metriche di Quality of Service imposte dagli SLA.
 
 Sebbene le tecniche tradizionali di \textit{horizontal autoscaling} offrano ottimi risultati nel contrastare le fluttuazioni a lungo termine, la loro applicazione a carichi soggetti a \textit{short-term fluctuations} si rivela ampiamente insoddisfacente. La natura reattiva degli algoritmi orizzontali e i ritardi intrinseci legati ai tempi di boot delle istanze provocano una congestione dinamica delle risorse, innescando tempi di risposta estremamente elevati. Inoltre, la rapida transitorietà dei picchi può indurre l'ottimizzatore a decisioni di scaling contraddittorie in intervalli temporali ridotti, generando pericolose oscillazioni e instabilità nel numero di risorse fornite.
 
@@ -140,14 +204,14 @@ Per ovviare a tali inconvenienti, il presente studio si propone di analizzare l'
 % =========================================================================
 \section{Descrizione del Sistema}\label{sec:description}
 
-L'infrastruttura oggetto di studio è un datacenter orientato all'erogazione di servizi web, governato da un modulo di controllo intelligente delle risorse distribuite. L'architettura è concepita per rispondere in modo coordinato a carichi di lavoro complessi, caratterizzati dalla sovrapposizione di dinamiche transitorie e strutturali che mettono a rischio la stabilità delle prestazioni e il rispetto degli accordi sui livelli di servizio. 
+L'infrastruttura oggetto di studio è un datacenter orientato all'erogazione di servizi web, governato da un modulo di controllo intelligente delle risorse distribuite: il Load controller. L'architettura è concepita per rispondere in modo coordinato a carichi di lavoro complessi, caratterizzati dalla sovrapposizione di dinamiche transitorie e strutturali che mettono a rischio la stabilità delle prestazioni e il rispetto degli accordi sui livelli di servizio.
 
-Il sistema si fonda su una netta separazione tra i flussi operativi ordinari e i canali d'emergenza, orchestrati da entità logiche che monitorano lo stato computazionale per alterare l'instradamento del traffico e la topologia delle risorse su scale temporali differenti.
+Il funzionamento del sistema si fonda sulla separazione tra la gestione dei flussi operativi ordinari (Layer 1) e l'attivazione dei canali d'emergenza (Layer 2). Questa orchestrazione è interamente affidata al Load controller, il quale monitora costantemente lo stato computazionale dell'infrastruttura per gestire in modo integrato sia l'instradamento dinamico del traffico in ingresso, sia lo scaling delle risorse su scale temporali differenti.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=1\textwidth]{system}
-    \caption{Rappresentazione schematica dell'architettura ad alto livello dell'autoscaler gerarchico (ripresa da \cite[Fig.~6.8]{serazzi-jmt-book}).}
+    \caption{Rappresentazione schematica dell'architettura ad alto livello dell'autoscaler gerarchico \cite[Fig.~6.8]{serazzi-jmt-book}.}
     \label{fig:system_architecture}
 \end{figure}
 
@@ -204,10 +268,10 @@ A seconda del risultato del confronto con la soglia d'allarme, si determinano du
 \end{figure}
 
 \paragraph{Scenario Ordinario - $SI < SI^{max}$:}
-Questo scenario si verifica nel momento in cui lo \textit{Spike Indicator} calcolato sul Web Server selezionato soddisfa la condizione di stabilità, indicando che l'intensità istantanea del traffico e le relative domande di servizio si mantengono entro i margini di capacità del nodo computazionale di linea. In questo caso, il Load Controller convalida l'affidabilità immediata del server target e vi immette direttamente la richiesta in ingresso per l'ordinaria esecuzione. Contestualmente, poichè la richiesta viene interamente presa in carico ed elaborata dal cluster di linea, lo \textit{Spike Server} non viene coinvolta nel flusso e permane in uno stato di quiescenza, ottimizzando l'efficienza energetica e computazionale complessiva del datacenter ed evitando lo spreco di risorse hardware.
+Questo scenario si verifica nel momento in cui lo \textit{Spike Indicator} calcolato sul Web Server selezionato soddisfa la condizione di stabilità, indicando che l'intensità istantanea del traffico e le relative domande di servizio si mantengono entro i margini di capacità del nodo computazionale di linea. In questo caso, il Load Controller convalida la scelta del server target e vi immette direttamente la richiesta in ingresso per l'ordinaria esecuzione; poichè la richiesta viene interamente presa in carico ed elaborata dal cluster di linea, lo \textit{Spike Server} non viene coinvolta nel flusso.
 
 \paragraph{Scenario di Alto Carico - $SI \ge SI^{max}$:}
-Questo scenario si attiva nel momento esatto in cui il controllo rileva che l'occupazione istantanea del server target ha raggiunto o superato il limite di tolleranza, indicando l'insorgenza di un picco transitorio causato da un improvviso addensamento del tasso di arrivo o da un incremento imprevisto della complessità intrinseca dei task in esecuzione. Per prevenire un collasso prestazionale del \textit{Web Server} selezionato e il drastico innalzamento dei tempi di risposta, il modulo attiva immediatamente una deviazione d'emergenza, instradando la richiesta corrente verso lo \textit{Spike Server}. Di conseguenza, il \textit{Web Server} target sperimenta un'interruzione mirata dei nuovi arrivi che gli permette di operare in una modalità di svuotamento controllato, concentrando la potenza di calcolo esclusivamente sullo smaltimento dei processi precedentemente presi in carico; in questo modo, lo \textit{Spike Indicator} decresce progressivamente man mano che i task completano l'esecuzione e abbandonano la stazione. Contestualmente, lo \textit{Spike Server}, caratterizzato da un'elevata capacità computazionale e da logiche di scaling verticale, si fa carico dell'intero surplus di traffico fungendo da camera di compensazione e assorbendo l'impatto stocastico del picco. Questo isolamento garantisce che il carico accumulato sul Web Server principale non degradi le prestazioni dei nuovi arrivi, smorzando la varianza e il valore medio del tempo di risposta globale del sistema. Il dirottamento applicato alle nuove richieste decade poi istantaneamente non appena un successivo arrivo campiona un valore dello \textit{Spike Indicator} ritornato strettamente al di sotto della soglia di sicurezza $SI^{max}$, ripristinando la normale allocazione sul cluster di linea.
+Questo scenario si attiva nel momento esatto in cui il controllo rileva che l'occupazione istantanea del server target ha raggiunto o superato il limite di tolleranza, indicando l'insorgenza di un picco transitorio causato da un improvviso addensamento del tasso di arrivo o da un incremento imprevisto della complessità intrinseca dei task in esecuzione. Per prevenire un collasso prestazionale del \textit{Web Server} selezionato e il drastico innalzamento dei tempi di risposta, il modulo attiva immediatamente una deviazione d'emergenza, instradando la richiesta corrente verso lo \textit{Spike Server}. Di conseguenza, il \textit{Web Server} target sperimenta un'interruzione mirata dei nuovi arrivi che gli permette di operare in una modalità di svuotamento controllato, concentrando la potenza di calcolo esclusivamente sullo smaltimento dei processi precedentemente presi in carico; in questo modo, lo \textit{Spike Indicator} decresce progressivamente man mano che i task completano l'esecuzione e abbandonano la stazione. Il dirottamento applicato alle nuove richieste decade poi istantaneamente non appena un successivo arrivo campiona un valore dello \textit{Spike Indicator} ritornato strettamente al di sotto della soglia di sicurezza $SI^{max}$, ripristinando la normale allocazione sul cluster di linea.
 
 
 \subsection{Logiche di Scaling}
@@ -217,9 +281,9 @@ L'efficienza complessiva dell'architettura gerarchica risiede nella cooperazione
 Questa logica agisce sulla dimensionalità quantitativa del cluster principale e opera su una scala temporale macroscopica a bassa frequenza, erigendosi a presidio delle variazioni strutturali e a lungo termine del traffico. Il meccanismo valuta la necessità di ridimensionare il pool di linea monitorando costantemente il tempo medio di risposta delle richieste, calcolato all'interno di una finestra temporale mobile; l'adozione di tale media mobile si rivela fondamentale per filtrare il rumore stocastico e prevenire reazioni premature a fluttuazioni transitorie. Quando il tempo medio di risposta supera la soglia di sbarramento superiore $R^{max}$ e il periodo di vincolo temporale dall'ultima riconfigurazione è completamente esaurito, l'orchestratore dispone l'allocazione e l'integrazione immediata di un nuovo server nel cluster per ripristinare i livelli di servizio attesi. Al contrario, qualora la metrica basata sulla finestra mobile si attesti stabilmente al di sotto della soglia inferiore $R^{min}$, il sistema pianifica la dismissione delle risorse in esubero per minimizzare i costi operativi. Al fine di preservare la continuità del servizio e non penalizzare le transazioni in corso, la contrazione della capacità applica una rigida politica di svuotamento controllato: il nodo designato alla rimozione viene immediatamente rimosso dalle rotazioni del Load Controller per bloccare l'ingresso di nuovi flussi, ma viene mantenuto alimentato ed attivo il tempo necessario a consentire il totale completamento di tutti i processi precedentemente presi in carico e rimasti pendenti nella sua coda.
 
 % =========================================================================
-% DIAGRAMMA AUTOSCALING ORIZZONTALE
+% DIAGRAMMA SCALING ORIZZONTALE
 % =========================================================================
-\begin{figure}[!h]
+\begin{figure}[H]
     \centering
     \usetikzlibrary{shapes.geometric, arrows, positioning}
     
@@ -243,10 +307,9 @@ Questa logica agisce sulla dimensionalità quantitativa del cluster principale e
         \draw [arrow] (cooldown.east) -- node [near start, above] {No} ([xshift=1.0cm]cooldown.east -| scalein.east) |- (nessuna.east);
         
         % Frecce dal blocco decisionale delle soglie
-        \draw [arrow] (scelta.west) -- node [near start, above] {$\ge R^{max}$} (scaleout.east);
-        \draw [arrow] (scelta.east) -- node [near start, above] {$\le R^{min}$} (scalein.west);
+        \draw [arrow] (scelta.west) -- node [near start, above, xshift=-0.15cm] {$\ge R^{max}$} (scaleout.east);
+        \draw [arrow] (scelta.east) -- node [near start, above, xshift=0.15cm] {$\le R^{min}$} (scalein.west);
         
-        % Testo "Altrimenti" posizionato a lato della freccia inferiore
         \draw [arrow] (scelta.south) -- (nessuna.north);
         \node [right=0.05cm of scelta.south, yshift=-0.3cm, font=\small] {Altrimenti};
         
@@ -256,10 +319,10 @@ Questa logica agisce sulla dimensionalità quantitativa del cluster principale e
 \end{figure}
 
 \paragraph{Scaler Verticale:}
-Questa logica interviene sulla capacità computazionale qualitativa dell'unità di riserva e opera su una scala temporale microscopica ad attivazione immediata, rispondendo alle repentine e violente variazioni indotte dai picchi di traffico ad alta frequenza. Il meccanismo di controllo agisce in modo dinamico modulando la quota di capacità hardware dedicata allo Spike Server (il moltiplicatore di velocità della CPU) in base al carico istantaneo, valutato direttamente in termini di numero assoluto di richieste concorrenti simultaneamente attive all'interno della sua stazione. Nel momento esatto in cui il volume di task deviati e presi in carico dall'unità ausiliaria eguaglia o supera una determinata soglia limite superiore, e nel rispetto del tempo di sosta imposto dal relativo \textit{cooldown}, l'ottimizzatore verticale interviene istantaneamente incrementando la potenza dio calcolo allocata per accelerare i tempi di soddisfacimento dei processi d'emergenza. Questa accelerazione funge da scudo immediato e temporaneo, assorbendo il picco transitorio senza la necessità di attendere i lunghi tempi di boot tipici del provisioning orizzontale. Non appena la pressione stocastica si attenua e lo svuotamento delle code fa flettere il numero di richieste attive al di sotto della soglia di rilascio inferiore, il sistema revoca l'assegnazione straordinaria di risorse ripristinando il moltiplicatore di velocità alla sua configurazione di base, riducendo istantaneamente l'impronta economica e salvaguardando l'efficienza energetica del datacenter.
+Questa logica interviene sulla capacità computazionale dell'unità di riserva e opera su una scala temporale ad attivazione immediata, rispondendo alle repentine e violente variazioni indotte dai picchi di traffico ad alta frequenza. Il meccanismo di controllo agisce in modo dinamico modulando la quota di capacità hardware dedicata allo Spike Server (il fattore di capacità elaborativa della CPU) in base al carico istantaneo, valutato direttamente in termini di numero assoluto di richieste concorrenti simultaneamente attive all'interno della sua stazione. Nel momento esatto in cui il volume di task deviati e presi in carico dall'unità ausiliaria eguaglia o supera una determinata soglia limite superiore, e nel rispetto del tempo di sosta imposto dal relativo \textit{cooldown}, l'ottimizzatore verticale interviene istantaneamente incrementando la potenza dio calcolo allocata per accelerare i tempi di soddisfacimento dei processi d'emergenza. Questa accelerazione funge da scudo immediato e temporaneo, assorbendo il picco transitorio senza la necessità di attendere i lunghi tempi di boot tipici del provisioning orizzontale. Non appena la pressione stocastica si attenua e lo svuotamento delle code fa flettere il numero di richieste attive al di sotto della soglia di rilascio inferiore, il sistema revoca l'assegnazione straordinaria di risorse ripristinando il fattore di capacità elaborativa alla sua configurazione di base, riducendo istantaneamente l'impronta economica e salvaguardando l'efficienza energetica del datacenter.
 
 % =========================================================================
-% DIAGRAMMA AUTOSCALING VERTICALE
+% DIAGRAMMA SCALING VERTICALE
 % =========================================================================
 \begin{figure}[H]
     \centering
@@ -275,8 +338,8 @@ Questa logica interviene sulla capacità computazionale qualitativa dell'unità 
         \node (nessuna) [start, below=of scelta, yshift=-0.4cm] {Nessuna Azione};
         
         % Esiti laterali
-        \node (scaleup) [spikeserver, left=of scelta, xshift=-0.2cm] {\textbf{Scale-Up}\\Incremento CPU Multiplier};
-        \node (scaledown) [webserver, right=of scelta, xshift=0.2cm] {\textbf{Scale-Down}\\Ripristino Base Speed};
+        \node (scaleup) [spikeserver, left=of scelta, xshift=-0.3cm] {\textbf{Scale-Up}\\Incremento CPU Multiplier};
+        \node (scaledown) [webserver, right=of scelta, xshift=0.3cm] {\textbf{Scale-Down}\\Ripristino Base Speed};
         
         % Connessioni lineari e bivi
         \draw [arrow] (inizio) -- (metric);
@@ -285,10 +348,9 @@ Questa logica interviene sulla capacità computazionale qualitativa dell'unità 
         \draw [arrow] (cooldown.east) -- node [near start, above] {No} ([xshift=1.0cm]cooldown.east -| scaledown.east) |- (nessuna.east);
         
         % Frecce dal blocco decisionale delle soglie
-        \draw [arrow] (scelta.west) -- node [near start, above] {$\ge$ Upper} (scaleup.east);
-        \draw [arrow] (scelta.east) -- node [near start, above] {$\le$ Lower} (scaledown.west);
+        \draw [arrow] (scelta.west) -- node [near start, above, xshift=-0.25cm] {$\ge$ Upper} (scaleup.east);
+        \draw [arrow] (scelta.east) -- node [near start, above, xshift=0.25cm] {$\le$ Lower} (scaledown.west);
         
-        % Testo "Altrimenti"
         \draw [arrow] (scelta.south) -- (nessuna.north);
         \node [right=0.05cm of scelta.south, yshift=-0.3cm, font=\small] {Altrimenti};
         
@@ -303,7 +365,7 @@ Questa logica interviene sulla capacità computazionale qualitativa dell'unità 
 % =========================================================================
 % OBIETTIVI
 % =========================================================================
-\section{Obiettivi del Progetto}
+\section{Obiettivi della Simulazione}
 La progettazione e lo sviluppo del simulatore a eventi discreti oggetto del presente studio sono orientati alla definizione, quantificazione e validazione empirica delle metriche analitiche e prestazionali che governano l'infrastruttura gerarchica proposta. L'obiettivo fondamentale della ricerca risiede nella dimostrazione, condotta attraverso un rigoroso approccio sperimentale, dell'efficacia derivante dalla stretta cooperazione e sinergia tra le decisioni di \textbf{routing reattivo istantaneo} (operate al Layer 2 dal Load Controller) e i meccanismi di \textbf{adattamento dinamico delle risorse} (attuati tramite le logiche di scaling orizzontale e verticale). 
 
 Attraverso la riproduzione di scenari sintetici caratterizzati da differenti intensità stocastiche e coefficienti di variabilità del traffico, la campagna di simulazione mira a mappare le interdipendenze tra l'allocazione hardware e la degradazione dei tempi di risposta. Questo percorso metodologico si articola in tre macro-aree di indagine sequenziali e strettamente interconnesse, orientate rispettivamente al dimensionamento ottimale dei parametri operativi, all'analisi di sensibilità economica e computazionale del sistema in contesti sia dinamici che stazionari, e infine all'introduzione di meccanismi ottimizzati per l'abbattimento dei fenomeni di instabilità computazionale nei casi limite.
@@ -313,17 +375,17 @@ Attraverso la riproduzione di scenari sintetici caratterizzati da differenti int
 La fase di dimensionamento si occupa di identificare la configurazione strutturale ottimale e i parametri operativi di base necessari a garantire che l'infrastruttura sia in grado di sostenere i livelli di traffico attesi, massimizzando l'efficienza hardware. In particolare, l'intero processo di calibrazione parametrica è guidato dal vincolo di progetto di mantenere un valore target massimo del tempo di risposta globale del sistema impostato rigorosamente a 6 secondi. Tale soglia critica rappresenta il limite di tolleranza oltre il quale il sistema viene considerato in uno stato di degradazione prestazionale, e funge da benchmark fondamentale per valutare l'efficacia delle decisioni di routing e delle soglie di intervento dei moduli di autoscaling.
 
 \paragraph{Politiche di Instradamento:}
-L'obiettivo primario sul piano della ripartizione del traffico risiede nella valutazione comparativa e quantitativa di diverse discipline stocastiche e deterministiche di bilanciamento del carico. Attraverso la campagna di simulazione, si intende analizzare in che misura l'adozione di differenti algoritmi influenzi la distribuzione dei job all'interno del cluster ordinario, indipendentemente dallo \textit{Spike Server}. L'indagine mira a identificare la politica di routing ottimale capace di minimizzare la formazione di code e l'insorgenza di fenomeni di sbilanciamento locale, garantendo un utilizzo equo delle risorse di linea e concorrendo attivamente alla riduzione del tasso di attivazione del meccanismo di dirottamento verso lo Spike Server.
+L'obiettivo primario sul piano della ripartizione del traffico risiede nella valutazione comparativa e quantitativa di diverse discipline stocastiche e deterministiche di bilanciamento del carico, assumendo come principale metrica di prestazione il tempo di risposta medio del sistema. Attraverso la campagna di simulazione, si intende analizzare in che misura l'adozione di differenti algoritmi influenzi l'efficienza del cluster ordinario, indipendentemente dallo \textit{Spike Server}. L'indagine mira a identificare la politica di routing ottimale capace di minimizzare i tempi medi di attesa e di elaborazione dei job, riducendo l'insorgenza di colli di bottiglia locali e concorrendo attivamente a limitare la necessità di ricorrere al meccanismo di offloading verso lo \textit{Spike Server}.
 
 \paragraph{Calibrazione dello Scaling Verticale:}
-In questo contesto, la ricerca si prefigge di validare l'efficacia e la stabilità della strategia di adattamento verticale applicata all'unità ausiliaria di gestione dei picchi. L'obiettivo si focalizza sulla calibrazione precisa dei parametri operativi che governano la capacità di questa risorsa di variare istantaneamente la propria potenza computazionale, modulando il moltiplicatore di velocità della CPU in risposta al superamento delle soglie di carico stimate. L'analisi punta a verificare la capacità di tale scudo ad alta frequenza nel contenere le derive della latenza e della coda nei transitori critici in cui il cluster principale sperimenta una saturazione temporanea.
+In questo contesto, la ricerca si prefigge di validare l'efficacia e la stabilità della strategia di adattamento verticale applicata all'unità ausiliaria di gestione dei picchi. L'obiettivo si focalizza sulla calibrazione precisa dei parametri operativi che governano la capacità di questa risorsa di variare istantaneamente la propria potenza computazionale, modulando il fattore di capacità elaborativa della CPU in risposta al superamento delle soglie di carico stimate. L'analisi punta a verificare la capacità di tale scudo ad alta frequenza nel contenere le derive della latenza e della coda nei transitori critici in cui il cluster principale sperimenta una saturazione temporanea.
 
 \paragraph{Dimensionamento dello Scaling Orizzontale:}
 L'obiettivo è l'identificazione e il dimensionamento accurato dei parametri macroscopici che regolano la variazione della numerosità dei server attivi nel cluster principale. Sfruttando l'approccio empirico della simulazione, si intendono determinare le soglie critiche ottimali di aggiunta e di rimozione delle istanze computazionali, basate sulle metriche temporali aggregate ed elaborate tramite la finestra mobile. La ricerca è volta a definire una configurazione topologica bilanciata, capace di rispondere con agilità e precisione a variazioni di carico strutturali e sostenute nel tempo, minimizzando sia i ritardi di provisioning che potrebbero esporre il sistema a congestioni prolungate incompatibili con il target prestazionale, sia i fenomeni di instabilità o oscillazioni della capacità hardware.
 
 
 \subsection{Analisi delle Prestazioni}
-In questa fase si procede a una valutazione approfondita e sistematica delle prestazioni computazionali e dei costi operativi dell'infrastruttura, esaminandone il comportamento sia in contesti dinamici fortemente perturbati sia in condizioni stazionarie di regime. L'obiettivo centrale di questa indagine è verificare se, applicando i parametri operativi calibrati nella precedente fase di dimensionamento, l'infrastruttura sia effettivamente in grado di garantire e mantenere i Quality of Service attesi sul tempo di risposta globale. Contestualmente, l'analisi si propone di quantificare l'efficienza della soluzione proposta attraverso una valutazione comparativa dell'impatto economico, misurando i benefici finanziari e strutturali che si ottengono dall'adozione dello scaler gerarchico rispetto a una strategia rigida di provisioning fisso delle risorse.
+In questa fase si procede a una valutazione approfondita e sistematica delle prestazioni computazionali e dei costi operativi dell'infrastruttura, esaminandone il comportamento sia in contesti dinamici fortemente perturbati sia in condizioni stazionarie di regime. L'obiettivo centrale di questa indagine è verificare se, applicando i parametri operativi calibrati nella precedente fase di dimensionamento, l'infrastruttura sia effettivamente in grado di garantire e mantenere i Quality of Service attesi sul tempo di risposta globale. Contestualmente, l'analisi si propone di quantificare l'efficienza della soluzione proposta attraverso uno studio comparativo dell'impatto economico, misurando i benefici finanziari associati ai differenti profili di reattività del sistema.
 
 \paragraph{Analisi dei Costi e Trade-off Economico:}
 Viene condotta un'analisi economica orientata alla quantificazione del \textit{trade-off} vincolante tra i costi operativi infrastrutturali e il guadagno prestazionale ottenuto. L'obiettivo finale consiste nell'individuare un punto di equilibrio ottimale che permetta di minimizzare la spesa operativa totale del datacenter, dimostrando la sostenibilità economica dello scaling gerarchico rispetto ai costi ridondanti legati a un provisioning fisso, pur garantendo il rispetto del vincolo del tempo di risposta entro il target stabilito per l'utente finale.
@@ -332,14 +394,14 @@ Viene condotta un'analisi economica orientata alla quantificazione del \textit{t
 L'indagine focalizzata sulle dinamiche transitorie del sistema viene condotta avviando deliberatamente l'ambiente di simulazione in uno stato completamente vuoto e inattivo. Questo approccio metodologico, basato sull'inizializzazione a zero delle code e delle risorse computazionali, si rivela indispensabile per mappare l'evoluzione temporale del sistema fuori dal regime e determinare con precisione l'istante di convergenza in cui l'infrastruttura raggiunge la stabilità operativa. Lo studio del transitorio iniziale permette così di quantificare la durata della fase di \textit{warm-up}, necessaria affinchè le metriche prestazionali si liberino dal bias delle condizioni iniziali, e di misurare empiricamente il tempo di reazione e i ritardi di adattamento dei moduli hardware a seguito dell'immissione del traffico stocastico. L'analisi consente infine di sottoporre a stress test il coordinamento microscopico tra i meccanismi di routing e le soglie di attivazione degli scaler proprio nelle fasi più volatili e critiche di avvio, verificando la tempestività dell'intero impianto gerarchico nel preservare i QoS legati alla latenza prima del consolidamento del regime stazionario.
 
 \paragraph{Analisi in Stato Stazionario:}
-Una volta esauriti completamente gli effetti dei transitori di avvio e superata la fase di warm-up, l'obiettivo si sposta sulla caratterizzazione e sulla verifica empirica del comportamento del sistema in stato stazionario. Questa indagine è finalizzata a osservare e validare le risposte operative e le prestazioni dell'infrastruttura a regime sotto l'effetto dei parametri strutturali precedentemente deliberati. Attraverso il monitoraggio puntuale di indicatori chiave, quali il livello di utilizzazione media dello Spike Server e il tempo medio di risposta stabilizzato, lo studio si propone di confermare che la configurazione architetturale selezionata sia in grado di sostenere i tassi di arrivo costanti nel lungo periodo. L'analisi mira a certificare la robustezza intrinseca del sistema e la convergenza asintotica dei Quality of Service ai valori nominali di progetto, garantendo la stabilità dei flussi anche in presenza di sorgenti di traffico affette da un'elevata variabilità stocastica.
+Una volta esauriti completamente gli effetti dei transitori di avvio e superata la fase di warm-up, l'obiettivo si sposta sulla caratterizzazione e sulla verifica empirica del comportamento del sistema in stato stazionario. Questa indagine è finalizzata a osservare e validare le risposte operative e le prestazioni dell'infrastruttura a regime sotto l'effetto dei parametri strutturali precedentemente deliberati. Attraverso il monitoraggio puntuale di indicatori chiave, come il livello di utilizzazione medio dello Spike Server e il tempo medio di risposta stabilizzato, lo studio si propone di confermare che la configurazione architetturale selezionata sia in grado di sostenere i tassi di arrivo costanti nel lungo periodo. L'analisi mira a certificare la robustezza intrinseca del sistema e la convergenza asintotica dei Quality of Service ai valori nominali di progetto, garantendo la stabilità dei flussi anche in presenza di sorgenti di traffico affette da un'elevata variabilità stocastica.
 
 
 \subsection{Mitigazione dell'Instabilità}
-L'ultima macro-area di indagine si concentra su una proposta evolutiva del sistema attraverso l'introduzione di logiche algoritmiche ottimizzate, ingegnerizzate specificamente per la stabilizzazione dei controlli nei casi limite e negli scenari di transizione critica.
+L'ultima macro-area di indagine si concentra su una proposta evolutiva del sistema attraverso l'introduzione di logiche algoritmiche ottimizzate specificamente per la stabilizzazione dei controlli nei casi limite e negli scenari di transizione critica.
 
-\paragraph{Meccanismo di Controllo a Soglie Differenziate:}
-L'obiettivo conclusivo del progetto risiede nella valutazione empirica di una soluzione migliorativa volta a ottimizzare la gestione dei fenomeni di saturazione sui singoli nodi computazionali. Nello specifico, si analizza lo scenario fortemente critico in cui un Web Server del cluster si trova a operare in stretta prossimità della soglia di allarme dello \textit{Spike Indicator} $SI^{max}$: in assenza di contromisure, la natura stocastica e l'arrivo ravvicinato di molteplici richieste potrebbero provocare repentine oscillazioni nelle decisioni di routing. Questo fenomeno di instabilità decisionale rischierebbe di indurre continui e sterili cicli di attivazione e disattivazione del dirottamento, con il potenziale effetto di degradare le prestazioni generali e mantenere il server in uno stato di micro-congestione inefficiente. La ricerca intende quindi investigare se l'introduzione di un meccanismo a doppia soglia di tolleranza, governato dall'azione combinata della soglia critica superiore $SI^{max}$ e di una potenziale soglia di rilascio inferiore $SI^{min}$, consenta effettivamente di stabilizzare le scelte del router. Lo studio mira a osservare come la definizione di questo intervallo di transizione controllato influenzi lo smorzamento delle fluttuazioni ad alta frequenza, analizzando l'impatto reale che tale logica esercita sulla fluidità di gestione del traffico eccedente, sulla linearità dei QoS e sul tempo di risposta globale del sistema, a fronte di un ipotizzabile incremento nel tasso di utilizzazione dello Spike Server in condizioni di carico limite.
+\paragraph{Meccanismo di Controllo Migliorativo:}
+L'obiettivo conclusivo dello studio risiede nella valutazione empirica di una soluzione migliorativa volta a ottimizzare la gestione dei fenomeni di saturazione sui singoli nodi computazionali. Nello specifico, si analizza lo scenario critico in cui un Web Server del cluster opera in prossimità della soglia di allarme dello \textit{Spike Indicator} $SI^{max}$: in assenza di contromisure, la natura stocastica del carico può produrre oscillazioni frequenti nelle decisioni di routing. Lo studio mira quindi a verificare se una logica di controllo più stabile, introdotta solo nella fase finale del progetto, consenta di ridurre tali oscillazioni senza compromettere il rispetto dello SLA e senza trasferire in modo eccessivo il costo operativo sullo Spike Server.
 
 \clearpage
 
@@ -445,7 +507,7 @@ Il sistema viene formalizzato come una rete aperta di code operante in parallelo
         \draw[arrow] (s_spike.east) -- (exit_spike);
 
         % =================================================================
-        % RECTANGLES & LABEL
+        % RETTANGOLI
         % =================================================================
         \begin{scope}[on background layer]
             % Evidenziazione Pool Web Server
@@ -470,15 +532,43 @@ Il sistema viene formalizzato come una rete aperta di code operante in parallelo
 \end{figure}
 
 
+\subsection{Variabili di Input}
+La modellazione concettuale non si limita a descrivere la topologia logica del sistema, ma identifica anche l'insieme di parametri che verranno successivamente sottoposti a calibrazione sperimentale. Tali grandezze rappresentano le leve attraverso cui il controllore modifica il comportamento dell'infrastruttura e, di conseguenza, determinano il compromesso tra prestazioni, stabilità e costo operativo.
+
+I parametri di input si distinguono in tre famiglie principali. La prima riguarda il \textbf{workload}, cioè il processo stocastico che alimenta il sistema: tasso medio di arrivo, variabilità degli interarrivi, domanda media di servizio e variabilità del servizio. La seconda comprende i \textbf{parametri strutturali} dell'architettura, come il numero minimo e massimo di Web Server e la presenza dello Spike Server. La terza raccoglie i \textbf{parametri di controllo}, cioè le soglie e i tempi di attesa che governano routing, scaling orizzontale e scaling verticale.
+
+\begin{table}[t]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabular}{llp{8.2cm}}
+        \hline
+        \textbf{Parametro} & \textbf{Categoria} & \textbf{Ruolo nel modello} \\ \hline
+        $\lambda$ & Workload & Tasso medio di ingresso delle richieste nel sistema; controlla l'intensità del carico applicato. \\
+        $C_V^A$ & Workload & Coefficiente di variazione degli interarrivi; permette di passare da traffico regolare a traffico fortemente bursty. \\
+        $E[S]$, $C_V^S$ & Workload & Domanda media di servizio e relativa variabilità; determinano la complessità computazionale dei job. \\
+        $\pi_R$ & Routing & Politica usata per selezionare il Web Server candidato all'arrivo di un nuovo job, scelta tra \textit{Round Robin}, \textit{Least Loaded}, \textit{Random} e \textit{Power of Two Choices}. \\
+        $SI_{max}$ & Routing & Soglia di attivazione del dirottamento verso lo Spike Server nel modello base. \\
+        $R^{max}$, $R^{min}$ & Scaling orizzontale & Soglie sul tempo medio di risposta osservato nella finestra mobile, usate per decidere \textit{Scale Out} e \textit{Scale In}. \\
+        $\Delta v_s$ & Scaling verticale & Incremento additivo del fattore di capacità elaborativa dello Spike Server. \\
+        $T_c$ & Controllo & Tempo di \textit{cooldown} tra due valutazioni effettive di scaling, usato per evitare oscillazioni troppo ravvicinate. \\ \hline
+    \end{tabular}
+    \caption{Parametri di input del modello concettuale sottoposti a calibrazione o analisi di sensitività.}
+    \label{tab:conceptual_tuning_parameters}
+\end{table}
+
+Questa separazione è utile anche dal punto di vista metodologico: i parametri di workload definiscono gli scenari sperimentali, i limiti strutturali delimitano le configurazioni ammissibili, mentre i parametri di controllo costituiscono l'oggetto principale del tuning. In particolare, la campagna di risultati procederà fissando progressivamente politica di routing, soglia $SI_{max}$, incremento verticale, soglie e finestra dello scaling orizzontale e \textit{cooldown}; solo dopo tale calibrazione il sistema completo verrà valutato rispetto a costo, transitorio, burstiness e stabilità con il meccanismo di miglioramento.
+
+
 \subsection{Caratterizzazione dei Centri di Servizio}
 Ciascun componente strutturale viene astratto come un preciso centro di servizio, definito univocamente dalle proprie variabili di stato, capacità di memorizzazione e algebra di ripartizione della risorsa computazionale.
 
 \begin{itemize}
-    \item \textbf{Load Controller:} Viene modellato concettualmente come un centro a servizio istantaneo e capacità di accumulo nulla. Non possiede code di attesa nè servitori reali; agisce esclusivamente come operatore di scomposizione e indirizzamento del flusso poissoniano globale in ingresso, avente tasso di arrivo $\lambda$. La sua unica funzione nel modello è ripartire il tasso di ingresso ai vari centri in base alle politiche di routing.
+    \item \textbf{Load Controller:} Viene modellato concettualmente come un centro a servizio istantaneo e capacità di accumulo nulla, privo di code di attesa o servitori reali. Esso agisce come l'organo centrale di governo dell'infrastruttura, responsabile sia della scomposizione e instradamento del flusso poissoniano globale in ingresso in base alle politiche di routing, sia dell'attivazione delle logiche di scaling orizzontale e verticale per variare dinamicamente la topologia delle risorse computazionali.
 
-    \item \textbf{Pool dei Web Server:} Costituito da un insieme di $N(t)$ stazioni di servizio parallele, disaccoppiate e indipendenti, dove la numerosità dei nodi attivi è regolata nel lungo termine dall'ottimizzatore orizzontale. Dal punto di vista analitico, ciascun nodo del pool è formalizzato come una stazione a capacità di accodamento infinita e a singolo servente. La disciplina di servizio implementata è il \textit{Processor Sharing}: ciò implica che il tasso di servizio nominale del server, pari a $\mu_{web}$, venga costantemente e uniformemente suddiviso tra tutti i job $k_i(t)$ simultaneamente residenti all'interno della stazione.
+    \item \textbf{Pool dei Web Server:} Costituito da un insieme di $N(t)$ stazioni di servizio parallele, disaccoppiate e indipendenti, dove la numerosità dei nodi attivi è regolata nel lungo termine dall'ottimizzatore orizzontale. Dal punto di vista analitico, ciascun nodo del pool è formalizzato come una stazione a capacità di accodamento infinita e a singolo servente con disciplina di servizio \textit{Processor Sharing}.
 
-    \item \textbf{Spike Server:} Viene astratto come una stazione di servizio singola a capacità illimitata, isolata topologicamente e operante anch'essa sotto disciplina \textit{Processor Sharing} per garantire l'omogeneità analitica dei tempi di sosta. La peculiarità computazionale di questo centro risiede nell'elasticità del proprio parametro di servizio, il quale non è costante bensì tempo-variante: $\mu_{spike}(t) = \kappa(t) \cdot \mu_{base}$, dove $\kappa(t) \in \mathbb{N}^+$ rappresenta il moltiplicatore discreto della capacità elaborativa imposto dalle decisioni dello scaling verticale. Il centro è caratterizzato da un tasso di arrivo intermittente, nullo in condizioni nominali e attivato esclusivamente al superamento delle soglie critiche del pool superiore.
+    \item \textbf{Spike Server:} Viene astratto come una stazione di servizio singola a capacità illimitata, isolata topologicamente e operante anch'essa sotto disciplina \textit{Processor Sharing} per garantire l'omogeneità analitica dei tempi di sosta.
 \end{itemize}
 
 
@@ -493,25 +583,15 @@ La componente legata all'infrastruttura hardware e all'allocazione del carico è
     \item $N(t) \in \{N_{min}, \dots, N_{max}\}$ rappresenta la numerosità istantanea dei Web Server attivi nel cluster di linea, governata dallo scaling orizzontale.
     \item $\mathbf{n}(t) = (n_1(t), n_2(t), \dots, n_{N(t)}(t))$ indica il vettore del carico corrente del pool, in cui ciascuna componente $n_i(t) \in \mathbb{N}$ esprime il numero di richieste concorrenti in fase di elaborazione all'interno del server $i$-esimo.
     \item $n_s(t) \in \mathbb{N}$ rappresenta la quantità di task simultaneamente presi in carico e in fase di processamento presso lo Spike Server.
-    \item $v_s(t) \in \{v_{base}, v_{speed}\}$ definisce il moltiplicatore di velocità applicato alla capacità elaborativa della stazione di picco, modulato dalle decisioni dello scaling verticale.
+    \item $v_s(t) \in \{v_{base}, v_{base}+\Delta v_s\}$ definisce il fattore di capacità elaborativa della stazione di picco, modulato in forma additiva dalle decisioni dello scaling verticale.
 \end{itemize}
 
 Le variabili di controllo, necessarie per tracciare la memoria storica dell'algoritmo e determinare l'evoluzione dei controllori, sono invece definite come:
 \begin{itemize}
     \item $\hat{W}_{mw}(t) \in \mathbb{R}^+$ indica la stima del tempo medio di risposta globale del sistema, calcolata dinamicamente sull'orizzonte temporale della finestra mobile attiva al tempo $t$, che funge da metrica di input per la logica di scaling orizzontale.
     \item $\tau_h(t) \in \mathbb{R}^+$ esprime il tempo di \textit{cooldown} residuo per l'autoscaling orizzontale; se $\tau_h(t) > 0$, qualsiasi azione di \textit{Scale-Out} o \textit{Scale-In} viene temporaneamente inibita, e il timer decade linearmente con il progredire del tempo.
-    \item $\tau_v(t) \in \mathbb{R}^+$ definisce il tempo di \textit{cooldown} residuo associato al modulo di scaling verticale dell'unità ausiliaria, agendo come vincolo temporale per impedire oscillazioni ad alta frequenza sul moltiplicatore di velocità dello Spike Server.
+    \item $\tau_v(t) \in \mathbb{R}^+$ definisce il tempo di \textit{cooldown} residuo associato al modulo di scaling verticale dell'unità ausiliaria, agendo come vincolo temporale per impedire oscillazioni ad alta frequenza sul fattore di capacità elaborativa dello Spike Server.
 \end{itemize}
-
-
-\subsection{Transizioni di Stato}
-L'evoluzione dinamica del vettore di stato $S(t)$ è regolata dalle leggi microscopiche che governano il processamento dei job, l'instradamento dei flussi e i trigger di attivazione dei controllori.
-
-\paragraph{Evoluzione del Tasso di Servizio:}
-All'interno di ciascuna stazione attiva (sia essa un Web Server $i$ o lo Spike Server), l'effettivo tasso di completamento unitario non è costante, ma evolve in modo asincrono a ogni transizione del carico locale. Definita la capacità nominale del centro, il tasso di servizio istantaneo erogato dal singolo servitore logico al task generico è condizionato inversamente dallo stato di occupazione del centro stesso:
-\begin{equation}
-    \mu_{i}(t) = \frac{\mu_{web}}{n_i(t)}, \quad \mu_{s}(t) = \frac{v_s(t) \cdot \mu_{base}}{n_s(t)}
-\end{equation}
 
 \paragraph{Transizioni nei Moduli di Scaling:}
 Le variazioni delle variabili di controllo dello stato avvengono su scale temporali disaccoppiate e secondo logiche distinte:
@@ -522,7 +602,7 @@ Le variazioni delle variabili di controllo dello stato avvengono su scale tempor
 
 
 \subsection{Analisi degli Eventi Discreti}
-L'evoluzione temporale del modello è orchestrata da un motore di simulazione a eventi discreti, in cui lo stato del sistema muta esclusivamente in corrispondenza di istanti temporali isolati e asincroni. Poiché l'infrastruttura implementa una disciplina di servizio \textit{Processor Sharing}, i tempi di uscita dal sistema non dipendono unicamente dalla domanda di servizio originaria del job; di conseguenza, il simulatore è vincolato a ricalcolare dinamicamente e a rischedulare i futuri eventi di fine elaborazione a ogni transizione di stato che modifichi i vettori di carico $n_i(t)$ o $n_s(t)$.
+L'evoluzione temporale del modello è orchestrata da un motore di simulazione a eventi discreti, in cui lo stato del sistema muta esclusivamente in corrispondenza di tali istanti temporali isolati.
 
 Il ciclo di vita della simulazione è governato da tre tipologie fondamentali di eventi operativi:
 
@@ -534,87 +614,508 @@ Il ciclo di vita della simulazione è governato da tre tipologie fondamentali di
     Segnala la fine del processamento di un job all'interno di un centro di servizio. L'evento determina il decremento unitario della variabile di occupazione del rispettivo nodo, $n_i(t) \leftarrow n_i(t) - 1$ oppure $n_s(t) \leftarrow n_s(t) - 1$,  e la contestuale rimozione del job dal sistema. In questa esatta transizione, il simulatore effettua il campionamento della metrica sul tempo di risposta individuale, ne invia il valore al modulo della finestra mobile e rimodula al rialzo la velocità di elaborazione per i task rimasti all'interno della stazione.
 
     \item \textbf{Evento Periodico di Monitoraggio:} 
-    Rappresenta un evento di clock deterministico e ricorrente, totalmente disaccoppiato dai flussi di traffico. Al verificarsi di questo trigger, gli agenti di controllo analizzano i valori assunti dalle metriche aggregate memorizzate nello stato, specificamente il tempo medio di risposta globale sulla finestra mobile $\hat{W}_{mw}(t)$ e l'occupazione della risorsa di picco $n_s(t)$, per valutare l'opportunità di variare la topologia del cluster $N(t)$ o lo \textit{speedup} verticalizzato $v_s(t)$, aggiornando i relativi vettori dei cooldown qualora un'azione di scaling venga effettivamente validata e rischedulando un evento di monitoraggio ad una distanza pari proprio al cooldown.
+    Rappresenta un evento di clock deterministico e ricorrente, totalmente disaccoppiato dai flussi di traffico. Al verificarsi di questo trigger, gli agenti di controllo analizzano i valori assunti dalle metriche aggregate memorizzate nello stato, specificamente il tempo medio di risposta globale sulla finestra mobile $\hat{W}_{mw}(t)$ e l'occupazione della risorsa di picco $n_s(t)$, per valutare l'opportunità di variare la topologia del cluster $N(t)$ o il fattore di capacità elaborativa $v_s(t)$, aggiornando i relativi vettori dei cooldown qualora un'azione di scaling venga effettivamente validata e rischedulando un evento di monitoraggio ad una distanza pari proprio al cooldown.
 \end{enumerate}
 
 \clearpage
 
 
+% =========================================================================
+% MODELLO SPECIFICHE
+% =========================================================================
 \section{Modello delle Specifiche}
-Il modello delle specifiche definisce in modo puntuale i parametri operativi, le variabili di controllo e gli indici di prestazione che caratterizzano il sistema simulato, fornendo una base quantitativa per l'analisi dei risultati.
+Il modello delle specifiche traduce il modello concettuale in vincoli quantitativi e leggi operative. In questa sezione vengono quindi fissati i processi di ingresso, la disciplina di servizioe  le probabilità effettive di routing.
 
-\subsection{Variabili di Ingresso e Carico (Workload)}
-Il carico di lavoro è modellato come un processo stocastico caratterizzato dalle seguenti grandezze:
-\begin{itemize}
-    \item \textbf{Tasso di Arrivo ($\lambda$)}: Rappresenta il numero medio di richieste al secondo che entrano nel sistema. L'intertempo tra gli arrivi ($\tau$) segue distribuzioni statistiche variabili in base allo scenario di test (es. Esponenziale per traffico regolare, Iperesponenziale per traffico \textit{bursty}).
-    \item \textbf{Coefficiente di Variazione degli Arrivi ($CV_a$)}: Utilizzato per modellare la variabilità e la dispersione degli interarrivi, fondamentale per lo studio della robustezza al burstiness.
-    \item \textbf{Tempo di Servizio Medio ($E[S]$)}: La domanda di servizio media di ogni job, espressa in secondi di tempo CPU.
-    \item \textbf{Coefficiente di Variazione del Servizio ($CV_s$)}: Definisce l'eterogeneità della complessità computazionale dei job.
-\end{itemize}
+Le assunzioni comuni a tutte le specifiche sono: code a capacità illimitata, assenza di perdita di job, overhead nullo per routing e scaling, indipendenza tra interarrivi e domande di servizio e conservazione del lavoro nei centri \textit{Processor Sharing}.
 
-\subsection{Parametri di Configurazione del Sistema}
-L'infrastruttura è governata da un insieme di costanti e soglie decisionali che ne determinano il comportamento dinamico:
-\begin{itemize}
-    \item \textbf{Configurazione del Cluster}: 
-    \begin{itemize}
-        \item $N_{min}, N_{max}$: Limiti inferiore e superiore al numero di Web Server attivi nel cluster.
-        \item $COOLDOWN$: Intervallo di tempo minimo tra due azioni consecutive di scaling orizzontale, necessario per evitare instabilità strutturali.
-    \end{itemize}
-    \item \textbf{Soglie di Instradamento (Routing)}:
-    \begin{itemize}
-        \item $SI_{max}$ (\textit{Spike Indicator Max}): Soglia di carico oltre la quale un server devia il traffico verso l'unità di picco.
-        \item $SI_{low}$ (\textit{Spike Indicator Low}): Soglia di ripristino per il ritorno allo stato operativo normale.
-    \end{itemize}
-    \item \textbf{Parametri di Scaling}:
-    \begin{itemize}
-        \item $R^{max}, R^{min}$: Soglie temporali (sul tempo di risposta medio) per attivare rispettivamente lo \textit{Scale Out} e lo \textit{Scale In}.
-        \item $\Delta v_s$: Incremento discreto applicato al moltiplicatore di velocità dello Spike Server durante l'adattamento verticale.
-    \end{itemize}
-\end{itemize}
+\subsection{Tempi di Interarrivo}
+Il flusso esterno è rappresentato da una sequenza di job indicizzati da $j=1,2,\dots$, ciascuno associato a un istante di arrivo $A_j$. Gli interarrivi sono definiti come
+\begin{equation}
+    T_j = A_j - A_{j-1},
+\end{equation}
+con valore medio $E[T]=1/\lambda$.
 
-\subsection{Indici di Prestazione (Performance Indices)}
-L'efficacia del sistema è valutata attraverso il monitoraggio dei seguenti indici di uscita:
-\begin{itemize}
-    \item \textbf{Tempo di Risposta Medio ($R_0$)}: Tempo totale trascorso da un job nel sistema (attesa + elaborazione). Rappresenta la metrica principale per la verifica degli SLA.
-    \item \textbf{Utilizzazione ($U$)}: Frazione di tempo in cui i centri di servizio (Web Server e Spike Server) risultano occupati.
-    \item \textbf{Numero Medio di Job nel Sistema ($E[N]$)}: Valore atteso della popolazione di richieste correntemente in gestione.
-    \item \textbf{Throughput ($X$)}: Numero di richieste completate nell'unità di tempo.
-\end{itemize}
+Per rappresentare regimi operativi differenti sono stati costruiti scenari a basso, medio e alto carico, variando il tasso medio di arrivo e il coefficiente di variazione degli interarrivi. La Tabella~\ref{tab:interarrival_scenarios} riporta i valori usati come specifica del workload nelle simulazioni a orizzonte finito ee infinito.
 
-\subsection{Assunzioni del Modello}
-Per garantire la trattabilità del problema e la coerenza della simulazione, sono state adottate le seguenti assunzioni:
-\begin{itemize}
-    \item \textbf{Capacità Infinita}: I centri di servizio sono dotati di code a capacità illimitata (nessuna perdita di job per \textit{buffer overflow}).
-    \item \textbf{Assenza di Overhead di Controllo}: Le operazioni di routing e le decisioni di scaling sono considerate istantanee e non consumano risorse CPU aggiuntive.
-    \item \textbf{Indipendenza Stocastica}: Gli interarrivi e i tempi di servizio sono considerati variabili aleatorie mutuamente indipendenti.
-    \item \textbf{Conservazione del Lavoro}: La disciplina \textit{Processor Sharing} garantisce che la risorsa CPU non rimanga mai oziosa se vi sono job nel centro.
-\end{itemize}
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.22}
+    \begin{tabular}{lcccp{5.6cm}}
+        \hline
+        \textbf{Scenario} & \textbf{$\lambda$ [job/s]} & \textbf{$E[T]$ [s]} & \textbf{$C_V^A$} & \textbf{Obiettivo modellistico} \\ \hline
+        Basso carico & $2.5$ & $0.400$ & $2.0,\ 4.0$ & Osservare il comportamento con risorse ordinariamente scariche e basso ricorso allo Spike Server. \\
+        Medio carico & $5.0$ & $0.200$ & $4.0,\ 6.0$ & Rappresentare il regime nominale del progetto, vicino al carico usato per il tuning principale. \\
+        Alto carico & $8.0$ & $0.125$ & $4.0,\ 6.0$ & Valutare la reazione del sistema in condizioni più stressanti, con maggiore probabilità di congestioni locali. \\
+        Frontiera di capacità & $2.0$--$14.0$ & $0.500$--$0.071$ & $4.0$ & Ricostruire la regione di stabilità al variare del numero di Web Server attivi. \\ \hline
+    \end{tabular}
+    \caption{Scenari di interarrivo utilizzati per simulare regimi di carico differenti.}
+    \label{tab:interarrival_scenarios}
+\end{table}
 
+Per gli esperimenti viene usata una distribuzione iperesponenziale a due fasi, indicata come $H_2$, in modo da riprodurre interarrivi con coefficiente di variazione maggiore di uno. Questa scelta consente di generare sequenze in cui periodi di arrivi ravvicinati si alternano a intervalli più lunghi di quiete, comportamento più vicino ai carichi cloud reali. In forma generale, la variabile di interarrivo è descritta da:
+\begin{equation}
+    T \sim
+    \begin{cases}
+        Exp(m_1) & \text{con probabilità } p, \\
+        Exp(m_2) & \text{con probabilità } 1-p,
+    \end{cases}
+\end{equation}
+dove i parametri dei due rami sono scelti con il metodo dei \textit{balanced means}. Indicando con $m$ la media desiderata e con $c$ il coefficiente di variazione, il simulatore calcola:
+\begin{equation}
+    p = \frac{1}{2}\left(1-\sqrt{\frac{c^2-1}{c^2+1}}\right),
+    \qquad
+    m_1 = \frac{m}{2p},
+    \qquad
+    m_2 = \frac{m}{2(1-p)}.
+\end{equation}
+Nel caso nominale degli interarrivi, $m=0.20$ e $c=4.0$, da cui si ottiene $p\simeq0.0303$, $m_1\simeq3.297\text{ s}$ e $m_2\simeq0.103\text{ s}$. La componente breve, molto più frequente, genera sequenze ravvicinate di arrivi; la componente lunga introduce periodi di quiete. Nel modello, l'aumento di $C_V^A$ non modifica il tasso medio $\lambda$, ma aumenta la dispersione temporale degli arrivi e quindi la probabilità di congestioni locali temporanee.
+
+
+\subsection{Tempi di Servizio e Processor Sharing}
+Ogni job è caratterizzato da una domanda di servizio $S_j$, espressa in secondi di CPU normalizzata. Anche per il servizio sono considerate distribuzioni iperesponenziali; il valore medio $E[S]$ determina la capacità nominale richiesta da ogni job, mentre $C_V^S$ modella l'eterogeneità della complessità computazionale delle richieste. Nel caso nominale si usa $E[S]=0.25\text{ s}$ e $C_V^S=4.0$, quindi $\mu_{web}=4.0\text{ job/s}$. Applicando gli stessi calcoli della distribuzione $H_2$ si ottengono $p\simeq0.0303$, $m_1\simeq4.121\text{ s}$ e $m_2\simeq0.129\text{ s}$ per la domanda di servizio.
+
+\paragraph{Evoluzione del Tasso di Servizio:}
+All'interno di ciascuna stazione attiva, sia essa un Web Server $i$ o lo Spike Server, l'effettivo tasso di completamento unitario non è costante, ma evolve in modo asincrono a ogni transizione del carico locale. Definita la capacità nominale del centro, il tasso di servizio istantaneo erogato al singolo job è condizionato inversamente dallo stato di occupazione del centro stesso.
+
+Le stazioni di servizio adottano disciplina \textit{Processor Sharing}. Un job accettato da un Web Server o dallo Spike Server entra immediatamente nell'insieme dei job attivi, senza attendere in una coda FCFS. Se al tempo $t$ nel server $i$ sono presenti $n_i(t)>0$ job, ciascun job riceve una frazione della capacità disponibile pari a:
+\begin{equation}
+    \mu_i^{job}(t)=\frac{\mu_i(t)}{n_i(t)}.
+\end{equation}
+Per un Web Server ordinario si ha $\mu_i(t)=\mu_{web}$. Lo Spike Server presenta invece una capacità di servizio tempo-variante, determinata dal fattore di capacità elaborativa $v_s(t)$:
+\begin{equation}
+    \mu_s(t)=v_s(t)\mu_{base},
+    \qquad
+    v_s(t)=
+    \begin{cases}
+        v_{base}, & \text{nello stato nominale},\\
+        v_{base}+\Delta v_s, & \text{nello stato scalato}.
+    \end{cases}
+\end{equation}
+La variazione applicata dallo scaling verticale è quindi additiva rispetto al fattore di base: il termine $\Delta v_s$ viene sommato a $v_{base}$ (impostato pari a $1.0$ negli esperimenti) quando il numero di job attivi supera la soglia superiore, e il fattore torna al valore nominale al raggiungimento della soglia inferiore. Sotto disciplina \textit{Processor Sharing}, la capacità istantanea assegnata a ciascuno degli $n_s(t)$ job presenti sullo Spike Server risulta pertanto:
+\begin{equation}
+    \mu_s^{job}(t)=\frac{v_s(t)\mu_{base}}{n_s(t)}.
+\end{equation}
+
+Ad esempio, fissando $\mu_{web}=4.0\text{ job/s}$ e assumendo per semplicità una domanda media $E[S]=0.25\text{ s}$, la capacità assegnata al singolo job decresce al crescere dei job concorrenti. Con $n_i(t)=4$ job attivi, ogni job riceve un tasso istantaneo pari a $\mu_i^{job}=4/4=1\text{ job/s}$; in un intervallo di $1\text{ s}$ ciascun job consuma quindi una unità di lavoro normalizzata. Con $n_i(t)=8$, invece, il tasso per job scende a $0.5\text{ job/s}$ e nello stesso intervallo ogni richiesta consuma solo metà del lavoro che avrebbe ricevuto nel caso precedente. La Tabella~\ref{tab:ps_example} mostra alcuni valori rappresentativi.
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{cccc}
+        \hline
+        \textbf{Job attivi $n_i(t)$} & \textbf{Tasso totale $\mu_{web}$} & \textbf{Tasso per job $\mu_i^{job}$} & \textbf{Lavoro ricevuto in $1\text{ s}$} \\ \hline
+        $1$ & $4.0$ & $4.00$ & $4.00$ \\
+        $2$ & $4.0$ & $2.00$ & $2.00$ \\
+        $4$ & $4.0$ & $1.00$ & $1.00$ \\
+        $8$ & $4.0$ & $0.50$ & $0.50$ \\ \hline
+    \end{tabular}
+    \caption{Esempio numerico di ripartizione della capacità sotto disciplina Processor Sharing.}
+    \label{tab:ps_example}
+\end{table}
+
+Questa scelta ha una conseguenza importante sulla gestione del tempo: il completamento schedulato di un job non è definitivo fino a quando il numero di job residenti nella stazione rimane invariato. Ogni arrivo, completamento o variazione di velocità modifica infatti la quota di CPU assegnata a tutti i job attivi e richiede la rischedulazione dei futuri eventi di completamento. Nel modello non esiste quindi un tempo di attesa separato in senso FCFS; il tempo di risposta coincide con il tempo trascorso dal job all'interno della stazione, durante il quale esso riceve servizio in modo continuo ma condiviso.
+
+
+\subsection{Probabilità di Routing}
+Il Load Controller implementa due decisioni consecutive. La prima seleziona il Web Server candidato in base alla politica di routing ordinaria; la seconda valuta se il job debba essere effettivamente inviato al server candidato o deviato allo Spike Server.
+
+Indicando con $p_i$ la probabilità operazionale che un arrivo venga inizialmente assegnato al Web Server $i$, il flusso nominale verso il server è:
+\begin{equation}
+    \lambda_i^{cand} = p_i \lambda, \qquad \sum_{i=1}^{N(t)} p_i = 1.
+\end{equation}
+Il valore di $p_i$ non è necessariamente costante: in \textit{Round Robin} tende a distribuirsi uniformemente, in \textit{Random} è uniforme in media, mentre in \textit{Least Loaded} e \textit{Power of Two Choices} dipende dallo stato istantaneo del cluster.
+
+La seconda decisione introduce la probabilità effettiva di dirottamento. Detto $q_i$ il valore osservato, a regime, della probabilità che un job candidato per il server $i$ venga inviato allo Spike Server, i flussi effettivi possono essere espressi tramite:
+\begin{equation}
+    \lambda_i = (1-q_i)p_i\lambda,
+    \qquad
+    \lambda_s = \sum_{i=1}^{N(t)} q_i p_i \lambda.
+\end{equation}
+Il tasso di arrivo dello Spike Server è quindi intermittente e dipende dallo stato del cluster ordinario. In assenza di Web Server oltre soglia si ha $q_i=0$ per ogni $i$ e, di conseguenza, $\lambda_s=0$; il flusso verso la risorsa ausiliaria si attiva esclusivamente quando almeno un job candidato viene dirottato in seguito al superamento della soglia critica del relativo Web Server.
+Il valore di $q_i$ non è imposto a priori, ma emerge dalla politica a soglia sullo \textit{Spike Indicator}. Nel modello base, adottato per la calibrazione iniziale del sistema, il dirottamento avviene quando il Web Server candidato soddisfa:
+\begin{equation}
+    SI_i(t) \ge SI_{max}.
+\end{equation}
+La decisione sul singolo job può essere rappresentata dalla funzione indicatrice:
+\begin{equation}
+    d_i(t)=
+    \begin{cases}
+        1 & \text{se } SI_i(t)\ge SI_{max},\\
+        0 & \text{se } SI_i(t)<SI_{max}.
+    \end{cases}
+\end{equation}
+Questa percentuale non indica che tutto il traffico globale venga deviato, ma che il job candidato per quel server viene inviato integralmente allo Spike Server oppure integralmente al Web Server ordinario. La percentuale aggregata di traffico deviato a regime viene invece stimata tramite throughput:
+\begin{equation}
+    D_{spike} = \frac{X_{spike}}{X_0}
+    \simeq
+    \frac{\lambda_s}{\lambda},
+\end{equation}
+dove $X_{spike}$ è il throughput dei job completati dallo Spike Server e $X_0$ è il throughput complessivo del sistema. In questo modo il dirottamento viene letto come quota percentuale effettiva del lavoro servito dalla risorsa ausiliaria. La formulazione rende esplicito che il routing verso lo Spike Server non modifica il carico esterno complessivo, ma ne ridistribuisce una frazione quando il singolo nodo ordinario entra in una regione di congestione locale.
+
+\clearpage
+
+
+% =========================================================================
+% MODELLO COMPUTAZIONALE
+% =========================================================================
 \section{Modello Computazionale}
-Il modello computazionale definisce l'architettura software e gli algoritmi implementati per tradurre la modellazione concettuale in una simulazione eseguibile. L'approccio adottato è quello della simulazione guidata dagli eventi (\textit{Next-Event Time Advance}).
+Il modello computazionale traduce il modello concettuale e delle specifiche in un simulatore Java a eventi discreti. Il codice è organizzato nel repository del progetto, disponibile all'indirizzo \cite{github-repository}, e adotta una separazione esplicita fra configurazione, oggetti di dominio, motore next-event, componenti di controllo, raccolta dati e output analysis. Questa organizzazione consente di mantenere separati i due livelli del lavoro: da una parte la logica del sistema simulato, dall'altra la logica sperimentale necessaria per verifica, validazione e tuning.
 
-\subsection{Gestione del Tempo e Lista degli Eventi}
-L'orologio di simulazione (variabile \textit{clock}) non avanza in modo continuo, ma salta al tempo esatto in cui è schedulato il prossimo evento, garantendo precisione assoluta ed efficienza computazionale.
+La struttura principale del progetto è suddivisa per responsabilità:
+\begin{itemize}
+    \item \texttt{configs}: definizione dei parametri di carico, cluster, routing, scaling e metodo di esecuzione;
+    \item \texttt{model}: rappresentazione di job, eventi, sorgenti di workload, server, cluster, routing e scaler;
+    \item \texttt{controller}: interfaccia comune del simulatore e implementazione del motore a eventi discreti;
+    \item \texttt{builder}: costruzione degli scenari a partire dalla configurazione;
+    \item \texttt{facade}: API sperimentale ad alto livello per Batch Means, repliche indipendenti e aggregazione dei risultati;
+    \item \texttt{controller.decorator}: raccolta di serie temporali, checkpoint di convergenza e salvataggio dei dati;
+    \item \texttt{lib.rng} e \texttt{lib.statistics}: generatori pseudo-casuali, variate aleatorie, accumulatori statistici, autocorrelazione e intervalli di confidenza;
+    \item \texttt{objective}: campagne sperimentali usate per stimare parametri e confrontare le alternative progettuali.
+\end{itemize}
 
-Il cuore del motore di simulazione è la \textbf{Event List}, implementata come una coda di priorità (\textit{Priority Queue}). Ogni entità nella lista è definita da un timestamp, una tipologia e un riferimento al job e/o al server coinvolto. Per prevenire conflitti logici e garantire la consistenza dello stato quando più eventi sono schedulati nello stesso istante, è stata definita una stretta gerarchia di priorità:
-\begin{enumerate}
-    \item \textbf{Completion (Priorità 1)}: L'uscita di un job ha la massima priorità per liberare istantaneamente le risorse prima di valutarne l'assegnazione.
-    \item \textbf{Arrival (Priorità 2)}: L'ingresso di nuovi job viene gestito solo dopo aver aggiornato lo stato dei server con le eventuali partenze concorrenti.
-    \item \textbf{Scale Check (Priorità 3 e 4)}: Le valutazioni periodiche di scaling (orizzontale e verticale) hanno priorità minima, calcolando le metriche sullo stato finale stabilizzato.
-\end{enumerate}
+\subsection{Oggetti di Dominio e Rappresentazione dello Stato}
+Il modello di simulazione è costruito a partire da un insieme ristretto di oggetti di dominio. La classe \texttt{Job} rappresenta una richiesta del sistema e contiene le informazioni necessarie per ricostruirne la storia: identificativo, istante di arrivo, domanda di servizio iniziale, domanda residua, istante di inizio ed istante di completamento. Il tempo di risposta $R_j$ viene quindi ottenuto direttamente come:
+\begin{equation}
+    R_j = C_j - A_j,
+\end{equation}
+dove $A_j$ è il tempo di arrivo e $C_j$ il tempo di completamento del job. La presenza della domanda residua è fondamentale per implementare correttamente il Processor Sharing, poiché il servizio non viene prelevato in un'unica soluzione ma consumato progressivamente tra due eventi consecutivi.
 
-\subsection{Generazione dei Numeri Pseudo-Casuali (RNG)}
-Il realismo della simulazione si fonda sulla robustezza della generazione delle sequenze stocastiche. Il sistema si avvale di un generatore lineare congruenziale (LCG) a flussi multipli (\textit{Multiple-Stream PRNG}), in particolare l'implementazione \texttt{Rngs} derivata dalle librerie standard per la modellazione delle prestazioni. L'utilizzo di flussi indipendenti garantisce l'assenza di correlazione incrociata tra le diverse variabili aleatorie (es. un flusso per gli arrivi, uno distinto per i servizi).
+Gli eventi sono rappresentati dalla classe \texttt{Event}, ordinata temporalmente all'interno della \textit{Future Event List}. Ogni evento contiene il tempo di occorrenza, il tipo e, quando necessario, il job e il server coinvolti. I tipi di evento gestiti dal simulatore sono: arrivo, completamento, controllo di scaling orizzontale e controllo di scaling verticale. Questa scelta mantiene esplicite le uniche transizioni che possono modificare lo stato del sistema.
 
-\paragraph{Tecniche di Generazione delle Variate Aleatorie}
-A partire dai numeri pseudo-casuali uniformi in $(0, 1)$, i tempi di interarrivo e di servizio vengono ottenuti tramite il \textbf{Metodo della Trasformata Inversa}. In particolare, per il caso standard, si genera una distribuzione \textit{Esponenziale} applicando l'inversa della funzione di ripartizione.
+\paragraph{Astrazione comune dei server.}
+La classe astratta \texttt{Server} definisce il comportamento comune dei nodi di servizio. Essa contiene l'identificativo del server, il fattore di capacità elaborativa, la lista dei job attivi, gli accumulatori statistici e le operazioni di accettazione, completamento e avanzamento del lavoro. La coda tradizionale è mantenuta solo per coerenza di interfaccia: nel modello PS i job accedono immediatamente al servizio e quindi non esiste tempo di attesa separato dal tempo di risposta.
 
-Per simulare scenari di traffico altamente irregolare (\textit{bursty}), fondamentali per testare la robustezza del sistema, si adotta una distribuzione \textbf{Iperesponenziale} a due fasi. La generazione avviene tramite il \textbf{Metodo di Composizione}:
-\begin{enumerate}
-    \item Si seleziona un primo flusso RNG per effettuare una scelta probabilistica (con parametro $p$) tra due rami.
-    \item In base all'esito, si interroga uno di due flussi RNG dedicati per generare una variata esponenziale con media $\mu_1$ o $\mu_2$.
-\end{enumerate}
-Questo approccio permette di modellare coefficienti di variazione ($CV > 1$) che simulano raffiche di richieste alternate a periodi di calma, tipici dei reali carichi di lavoro cloud.
+Il nucleo computazionale del Processor Sharing è il metodo \texttt{processJobs}. Se durante un intervallo $\Delta t$ sono presenti $n(t)$ job attivi e il fattore di capacità elaborativa del server è $s$, ciascun job riceve:
+\begin{equation}
+    \Delta w_j = \frac{s \Delta t}{n(t)}.
+\end{equation}
+Nel codice questa regola è implementata in modo diretto:
+\begin{lstlisting}[language=Java]
+public void processJobs(double elapsed) {
+    if (elapsed <= 0.0 || activeJobs.isEmpty()) {
+        return;
+    }
+    double workPerJob = (elapsed * speedMultiplier)
+                      / activeJobs.size();
+    for (Job job : activeJobs) {
+        job.decreaseRemainingDemand(workPerJob);
+    }
+}
+\end{lstlisting}
+
+I tempi di uscita dal sistema non dipendono unicamente dalla domanda di servizio originaria del job. Ogni volta che un job arriva o completa, il numero di job attivi cambia e quindi cambiano anche le date future di completamento degli altri job; lo stesso accade quando lo scaling verticale modifica il fattore di capacità elaborativa dello Spike Server. Per questo motivo il controller elimina e rischedula gli eventi di completamento relativi al server interessato dopo ciascuna di queste transizioni. Il tempo di completamento previsto per un job con domanda residua $d_j$ è:
+\begin{equation}
+    t_j^{comp} = t + \frac{d_j n(t)}{s}.
+\end{equation}
+Questa formula è coerente con il fatto che, a parità di domanda residua, il completamento si allontana al crescere del numero di job concorrenti e si avvicina al crescere della velocità del server.
+
+\paragraph{WebServer:} specializza \texttt{Server} senza introdurre code aggiuntive o meccanismi di servizio differenti. Il suo ruolo è modellare un nodo applicativo standard del primo livello. L'unica grandezza specifica esposta dalla classe è lo \textit{Spike Indicator}, definito come numero di job attualmente in esecuzione:
+\begin{equation}
+    SI_i(t) = N_i(t).
+\end{equation}
+
+\begin{lstlisting}[language=Java]
+public int getSpikeIndicator() {
+    return activeJobs.size();
+}
+\end{lstlisting}
+
+\paragraph{SpikeServer:}  rappresenta il nodo speciale usato per assorbire richieste di picco. Anch'esso eredita la disciplina Processor Sharing da \texttt{Server}, ma aggiunge un accumulatore time-weighted per il fattore di capacità elaborativa. In questo modo il simulatore può stimare non solo l'utilizzazione dello Spike Server, ma anche la capacità elaborativa media impiegata durante la run. Questa informazione è usata negli obiettivi di costo, nei quali il costo computazionale dipende sia dal tempo di permanenza nello stato scalato sia dal livello medio di capacità allocata.
+
+\paragraph{WebServerCluster}
+Il cluster dei Web Server è gestito dalla classe \texttt{WebServerCluster}. Essa mantiene tre insiemi distinti: server attivi, server in \textit{draining} e server complessivamente creati. La distinzione è necessaria per modellare correttamente lo scale-in: quando un server viene rimosso dal pool attivo non riceve più nuovi job, ma i job già presenti continuano ad essere serviti fino al completamento. Solo quando la lista dei job attivi diventa vuota il server può essere eliminato dalla parte operativa del sistema. In questo modo lo scaling non introduce perdita di lavoro e non altera artificialmente i tempi di risposta dei job già assegnati.
+
+Il cluster aggiorna inoltre il numero medio di server attivi tramite un accumulatore time-weighted e mantiene i contatori delle azioni di scale-out e scale-in. Tali metriche sono poi raccolte dalla Facade e diventano parte degli output sperimentali.
+
+\subsection{Controller e Motore Next-Event}
+Il simulatore adotta un avanzamento temporale \textit{next-event}: l'orologio non procede con passo fisso, ma salta direttamente al tempo del prossimo evento presente nella \textit{Future Event List}.
+
+L'interfaccia \texttt{Simulator} definisce il contratto comune del motore, mentre \texttt{SimulationController} ne implementa la logica concreta. La coda degli eventi futuri è una \texttt{PriorityQueue<Event>}; il ciclo di esecuzione prosegue fino al raggiungimento della condizione di arresto richiesta, che può essere un numero di completamenti, un orizzonte temporale o l'esaurimento della coda eventi:
+\begin{lstlisting}[language=Java]
+while (getTotalJobsCompleted() < targetJobs
+        && getClock() < targetTime
+        && processNextEvent()) {
+    // optional progress reporting
+}
+\end{lstlisting}
+
+L'elaborazione di un singolo evento segue sempre la stessa sequenza: estrazione dell'evento più vicino, avanzamento del lavoro accumulato nell'intervallo trascorso, aggiornamento dell'orologio e dispatch verso il gestore specifico:
+\begin{lstlisting}[language=Java]
+Event event = eventQueue.poll();
+double nextTime = event.getTime();
+
+processActiveJobs(nextTime - clock, nextTime);
+clock = nextTime;
+processEvent(event);
+\end{lstlisting}
+
+Nel caso di un arrivo, il controller genera il job successivo, invoca il \texttt{LoadManager} per la scelta del server, accetta il job nella stazione selezionata, rischedula i completamenti della stazione e aggiorna le statistiche globali. Nel caso di un completamento, il job viene rimosso dal server, il tempo di risposta viene sommato alle statistiche globali, il completamento viene passato allo scaler orizzontale e gli eventi di completamento del server vengono ricalcolati. Nei controlli periodici di scaling, invece, il controller interroga gli scaler e, se la capacità del sistema cambia, rischedula tutti i completamenti perché le velocità effettive o il numero di server disponibili sono stati modificati.
+
+Il controller mantiene anche le grandezze globali del sistema: numero totale di arrivi, completamenti, job dirottati, tempo di risposta cumulato, throughput, numero medio di job nel sistema e utilizzazione media. Le ultime due metriche sono processi a tempo continuo e vengono aggiornate tramite \texttt{TimedWelford}; il numero di job nel sistema è la somma dei job attivi sui Web Server attivi, sui server in draining e, quando abilitato, sullo Spike Server.
+
+\subsection{Routing, Load Manager e Meccanismi di Scaling}
+La logica di controllo del carico è raccolta nella classe \texttt{LoadManager}. Il suo compito non è implementare direttamente una politica specifica, ma coordinare tre componenti sostituibili: il router, lo scaler orizzontale e lo scaler verticale. Questa scelta rende possibile confrontare politiche differenti senza modificare il motore di simulazione.
+
+\paragraph{Routing.}
+Il routing è diviso in due passaggi. Prima viene selezionato un Web Server candidato tramite una strategia fra quelle implementate nel package di routing: Round Robin, Least Loaded, Random, Power of Two Choices e varianti deterministiche. Successivamente la strategia di routing verso lo Spike Server decide se mantenere il job sul Web Server candidato o deviarlo. La classe \texttt{Router} rende esplicita questa composizione:
+\begin{lstlisting}[language=Java]
+public final Server route(Job job, WebServerCluster cluster,
+                          SpikeServer spikeServer) {
+    WebServer targetServer =
+        webServerRoutingStrategy.selectWebServer(job, cluster);
+    if (spikeServerRoutingStrategy.shouldRouteToSpike(targetServer, siMax)) {
+        return spikeServer;
+    }
+    return targetServer;
+}
+\end{lstlisting}
+
+Nel modello base la strategia di dirottamento usa una soglia superiore sullo Spike Indicator. Con la configurazione senza bande, un job viene deviato quando il server candidato soddisfa:
+\begin{equation}
+    SI_i(t) \ge SI_{max}.
+\end{equation}
+Il meccanismo a bande viene introdotto solo nella parte di miglioramento, dove diventa un parametro oggetto di tuning; in questa sezione è sufficiente osservare che il router espone già l'astrazione necessaria per sostituire la regola di instradamento senza cambiare il controller.
+
+\paragraph{Scaling orizzontale.}
+Lo scaling orizzontale è implementato dalla classe \texttt{MovingWindowHorizontalScaler}. Ogni completamento produce una coppia formata dal tempo di completamento e dal tempo di risposta osservato. Lo scaler conserva gli ultimi \texttt{WINDOW\_SIZE} completamenti e calcola la media mobile:
+\begin{equation}
+    \overline{R}_{win}(t)
+    = \frac{1}{|\mathcal{W}(t)|}
+      \sum_{j \in \mathcal{W}(t)} R_j.
+\end{equation}
+Se tale valore supera la soglia di \textit{Scale Out}, il cluster prova ad aggiungere un Web Server; se scende sotto la soglia di \textit{Scale In}, il cluster prova a rimuoverne uno. Entrambe le decisioni rispettano il cooldown, così da evitare oscillazioni troppo frequenti:
+\begin{lstlisting}[language=Java]
+double avgResponse = getCurrentMetric(clock);
+
+if (avgResponse >= scaleOutThreshold) {
+    boolean scaled = cluster.scaleOut(clock);
+    if (scaled) {
+        lastScalingTime = clock;
+        return true;
+    }
+} else if (avgResponse <= scaleInThreshold) {
+    boolean scaled = cluster.scaleIn(clock);
+    if (scaled) {
+        lastScalingTime = clock;
+        return true;
+    }
+}
+\end{lstlisting}
+
+La finestra è espressa in numero di completamenti, non in secondi. Questa scelta rende la regola più legata all'evidenza statistica raccolta dal sistema: a basso carico la finestra copre un intervallo temporale più lungo, mentre ad alto carico si aggiorna più rapidamente.
+
+\paragraph{Scaling verticale.}
+Lo scaling verticale è implementato da \texttt{LoadThresholdVerticalScaler}, che specializza \texttt{ThresholdVerticalScaler}. Il componente osserva il numero di job attivi sullo Spike Server e modifica il fattore di capacità elaborativa quando la metrica supera la soglia alta o scende sotto la soglia bassa. In particolare, lo stato scalato è ottenuto sommando l'incremento configurato al valore di base:
+\begin{equation}
+    s_{spike}(t) =
+    \begin{cases}
+        s_{base}+\Delta v_s, & N_{spike}(t) \ge \theta_{up},\\
+        s_{base}, & N_{spike}(t) \le \theta_{down}.
+    \end{cases}
+\end{equation}
+Anche in questo caso la decisione è vincolata dal cooldown. Dopo una variazione del fattore di capacità, il controller rischedula gli eventi di completamento perché la capacità complessiva del server è cambiata.
+
+\subsection{Builder, Facade e Modalità di Esecuzione}
+La classe \texttt{SimulationBuilder} centralizza la costruzione del simulatore. A partire da \texttt{ApplicationConfig}, essa crea la sorgente del workload, il cluster di Web Server, lo Spike Server, le strategie di routing, gli scaler e il controller. L'estratto seguente mostra il punto in cui la configurazione viene trasformata in componenti eseguibili:
+\begin{lstlisting}[language=Java]
+EventSource eventSource = switch (config.load().workloadType()) {
+    case TRACE -> new TraceEventSource(config.load().tracePath());
+    case HYPEREXPONENTIAL -> new HyperexponentialEventSource(
+        seed,
+        config.load().meanInterarrival(),
+        config.load().cvInterarrival(),
+        config.load().meanService(),
+        config.load().cvService()
+    );
+    case EXPONENTIAL -> new ExponentialEventSource(
+        seed,
+        config.load().meanInterarrival(),
+        config.load().meanService()
+    );
+};
+
+WebServerCluster cluster = new WebServerCluster(
+    config.cluster().minServers(),
+    config.cluster().maxServers()
+);
+\end{lstlisting}
+
+La \texttt{SimulationFacade} rappresenta invece il punto di accesso per le campagne sperimentali. Essa nasconde i dettagli di costruzione del controller e offre tre modalità principali: singola simulazione, simulazione a Batch Means e simulazione a repliche indipendenti. Nel caso Batch Means, la Facade esegue prima un warm-up, azzera le statistiche e poi raccoglie un campione per ciascun batch:
+\begin{lstlisting}[language=Java]
+controller.run(StopCondition.untilJobsCompleted(warmUpJobs));
+controller.resetStatistics();
+
+for (int i = 0; i < numBatches; i++) {
+    controller.run(StopCondition.untilJobsCompleted(batchSize));
+    updateAggregators(controller);
+    controller.resetStatistics();
+}
+\end{lstlisting}
+
+Nel caso delle repliche indipendenti, invece, la Facade ricostruisce un nuovo controller per ogni replica, inizializzando il generatore con il seed previsto per quella run. Le metriche prodotte da ogni replica vengono poi aggregate tramite accumulatori \texttt{Welford}. L'oggetto finale, \texttt{AggregatedResults}, contiene per ciascuna metrica media, deviazione standard, Half-Width e intervallo di confidenza. Le metriche aggregate includono: tempo di risposta, job nel sistema, utilizzazione globale, throughput, job deviati, numero medio di server attivi, azioni di scale-out, scale-in, scale-up, scale-down, fattore medio di capacità dello Spike Server e utilizzazione dello Spike Server.
+
+I decorator completano questa architettura permettendo di aggiungere raccolte dati senza modificare il controller. Ad esempio, \texttt{TimeSerieCollector} raccoglie la serie dei tempi di risposta per la stima dell'autocorrelazione, \texttt{ConvergenceCheckpointCollector} registra metriche a checkpoint comuni fra repliche indipendenti e i decorator di storage salvano i risultati su CSV o JSON.
+
+\subsection{Accumulatori Statistici e Intervalli di Confidenza}
+Le statistiche del simulatore sono divise in due famiglie. Le metriche osservate per evento, come il tempo di risposta o il numero di azioni di scaling per run, sono campioni discreti e vengono aggregate con \texttt{Welford}. Le metriche che descrivono un processo nel tempo, come il numero di job nel sistema, l'utilizzazione e il fattore di capacità elaborativa dello Spike Server, sono invece grandezze time-weighted e vengono aggregate con \texttt{TimedWelford}.
+
+\paragraph{Welford.}
+L'algoritmo di Welford aggiorna media e varianza in modo incrementale, evitando sia la memorizzazione di tutti i campioni sia il calcolo instabile basato sulla differenza fra somma dei quadrati e quadrato della somma. Se $x_n$ è la nuova osservazione, l'aggiornamento è:
+\begin{align}
+    \delta_n &= x_n - \bar{x}_{n-1},\\
+    \bar{x}_n &= \bar{x}_{n-1} + \frac{\delta_n}{n},\\
+    M_{2,n} &= M_{2,n-1} + \delta_n(x_n-\bar{x}_n).
+\end{align}
+Nel codice:
+\begin{lstlisting}[language=Java]
+count++;
+double delta = x - mean;
+mean += delta / count;
+double delta2 = x - mean;
+m2 += delta * delta2;
+\end{lstlisting}
+La varianza campionaria viene poi stimata come $s^2=M_2/(n-1)$. Questo approccio è particolarmente adatto alle simulazioni lunghe, perché consente di elaborare milioni di osservazioni mantenendo memoria costante.
+
+\paragraph{TimedWelford.}
+Per le grandezze a tempo continuo non è corretto calcolare la media aritmetica dei valori osservati agli eventi, perché uno stato che dura molto deve pesare più di uno stato che dura pochissimo. La media corretta è:
+\begin{equation}
+    \bar{x}_T = \frac{1}{T}\int_0^T x(t)\,dt
+    \simeq
+    \frac{\sum_r x_r \Delta t_r}{\sum_r \Delta t_r}.
+\end{equation}
+\texttt{TimedWelford} implementa proprio questa integrazione a tratti costanti: quando il valore cambia al tempo corrente, il valore precedente viene accumulato con peso pari alla durata per cui è rimasto valido.
+\begin{lstlisting}[language=Java]
+double duration = currentTime - lastTime;
+if (duration > 0.0) {
+    update(currentValue, duration);
+}
+currentValue = newValue;
+lastTime = currentTime;
+\end{lstlisting}
+Questa distinzione è essenziale per non distorcere utilizzazione e popolazione media del sistema, che sono grandezze definite rispetto al tempo e non rispetto al numero di eventi.
+
+\paragraph{Intervalli di confidenza.}
+Gli intervalli di confidenza sono stimati con la distribuzione t di Student, coerentemente con la procedura di output analysis per campioni indipendenti con varianza ignota \cite[pp.~3--8]{simulation-interval-estimation}. La Half-Width al livello $1-\alpha$ è:
+\begin{equation}
+    HW = t_{n-1,1-\alpha/2}\frac{s}{\sqrt{n}},
+\end{equation}
+e l'intervallo riportato nelle tabelle è:
+\begin{equation}
+    \left[\bar{x}-HW,\; \bar{x}+HW\right].
+\end{equation}
+La classe \texttt{IntervalEstimator} riceve il numero di campioni, la media e la deviazione standard e restituisce direttamente media, deviazione standard, Half-Width ed estremi dell'intervallo.
+
+\subsection{Autocorrelazione, Cutoff e Scelta dei Batch}
+Nelle simulazioni a orizzonte infinito le osservazioni consecutive prodotte da una singola run lunga non possono essere considerate indipendenti. In particolare, nei sistemi di coda il tempo di risposta di un job è influenzato dallo stato lasciato dai job precedenti; questa dipendenza genera autocorrelazione seriale e rende eccessivamente ottimistici gli intervalli calcolati trattando le osservazioni grezze come indipendenti. Il problema e la necessità di individuare un taglio della correlazione sono discussi nel testo nella parte dedicata alla correlazione seriale e all'output analysis delle simulazioni stazionarie \cite[pp.~180--183]{leemis-park}.
+
+La funzione di autocorrelazione campionaria usata dal simulatore è:
+\begin{equation}
+    \hat{\rho}(h)=
+    \frac{
+        \sum_{i=1}^{n-h}(x_i-\bar{x})(x_{i+h}-\bar{x})
+    }{
+        \sum_{i=1}^{n}(x_i-\bar{x})^2
+    },
+\end{equation}
+dove $h$ è il lag. Il cutoff $L$ è scelto come il primo lag dal quale l'autocorrelazione rimane stabilmente al di sotto della soglia:
+\begin{equation}
+    |\hat{\rho}(h)| < \frac{2}{\sqrt{n}}.
+\end{equation}
+Per evitare di selezionare un lag isolato dovuto a fluttuazioni casuali, l'implementazione richiede che la condizione sia verificata per più lag consecutivi:
+\begin{lstlisting}[language=Java]
+final int requiredConsecutiveLags =
+    (int) Math.max(5, Math.round(2.5 * Math.log10(n)));
+
+if (acf < threshold) {
+    if (consecutiveBelow == 0) {
+        candidateLag = lag;
+    }
+    consecutiveBelow++;
+    if (consecutiveBelow >= requiredConsecutiveLags) {
+        return candidateLag;
+    }
+} else {
+    consecutiveBelow = 0;
+}
+\end{lstlisting}
+
+Il \texttt{BatchMeanEstimator} usa il cutoff per costruire batch sufficientemente distanziati rispetto alla memoria della serie. Nel metodo analitico viene eseguita una run pilota lunga, vengono raccolti i tempi di risposta tramite \texttt{TimeSerieCollector}, si calcola $L$ e si imposta:
+\begin{equation}
+    b = 10L, \qquad k = \left\lfloor \frac{n}{b} \right\rfloor,
+\end{equation}
+dove $b$ è la dimensione del batch e $k$ il numero di batch. La media del batch $j$ è:
+\begin{equation}
+    Y_j = \frac{1}{b}
+    \sum_{i=(j-1)b+1}^{jb} X_i.
+\end{equation}
+Le medie $Y_j$ vengono poi trattate come campioni dell'output stazionario. A valle della costruzione dei batch viene calcolata la lag-1 ACF delle medie: valori prossimi a zero indicano che la struttura scelta ha ridotto in modo adeguato la dipendenza seriale.
+
+Accanto al metodo basato su una run pilota fissa è stata implementata una versione dinamica. Questa procedura parte da una dimensione di batch iniziale, estende progressivamente la simulazione a blocchi e verifica due condizioni: precisione relativa dell'intervallo e autocorrelazione lag-1 delle medie di batch. Se la precisione è insufficiente vengono raccolti altri campioni; se l'autocorrelazione rimane elevata la dimensione del batch viene raddoppiata:
+\begin{lstlisting}[language=Java]
+boolean independent = Math.abs(acf1) < 0.05;
+boolean precise = relativePrecision < TARGET_PRECISION;
+
+if (independent && precise) {
+    converged = true;
+} else if (!independent) {
+    b *= 2;
+}
+\end{lstlisting}
+Questo approccio è stato utile negli obiettivi più onerosi, dove una run pilota molto lunga avrebbe richiesto tempi di calcolo e memoria non convenienti. In tali casi la procedura dinamica fornisce una scelta operativa di $b$ e $k$, poi arrotondata in modo conservativo nei parametri effettivi della campagna sperimentale.
+
+\subsection{Stima della Convergenza e Scelta del Warm-Up}
+La stima del warm-up è separata dalla stima dei batch. Il Batch Mean Estimator cerca parametri adeguati per l'analisi stazionaria, mentre \texttt{ConvergenceEstimator} valuta se e quando una specifica configurazione raggiunge una regione stabile. La procedura usa simulazioni a orizzonte finito con repliche indipendenti: per ogni replica viene eseguita una run lunga e un decorator registra, a checkpoint comuni espressi in numero di job completati, il tempo medio di risposta cumulato, il throughput e il tempo simulato.
+
+I checkpoint non crescono con passo costante per tutta la run. Si parte da un incremento iniziale e, dopo un numero prefissato di finestre valutate, l'incremento viene moltiplicato. In questo modo la parte iniziale della traiettoria, dove il transiente è più importante, viene osservata con granularità maggiore, mentre la coda della simulazione viene esplorata con passi più ampi e costo computazionale minore.
+
+Per ogni checkpoint la classe costruisce un intervallo di confidenza sulle repliche indipendenti. La configurazione viene considerata convergente quando il tempo medio di risposta mostra una variazione relativa inferiore alla tolleranza per un numero consecutivo di finestre e, nello stesso tempo, la Half-Width relativa rimane sotto la soglia di precisione. Viceversa, viene classificata come divergente quando la media cresce in modo statisticamente significativo per più finestre consecutive, con intervalli di confidenza che peggiorano senza sovrapporsi. Il punto di convergenza individuato viene poi usato come stima del numero di job di warm-up per le successive simulazioni a Batch Means.
+
+\subsection{Generatori Pseudo-Casuali e Variate Aleatorie}
+La libreria \texttt{lib.rng} deriva dalle classi \texttt{Rngs}, \texttt{Rvgs} e \texttt{Rvms} di Park, Miller e collaboratori, adottate nei testi di simulazione per la generazione di numeri pseudo-casuali e variate aleatorie \cite{park-miller,leemis-park}. Il generatore di base è un Lehmer multiplicative congruential generator:
+\begin{equation}
+    X_{n+1} = 48271 X_n \bmod (2^{31}-1),
+    \qquad
+    U_n = \frac{X_n}{2^{31}-1}.
+\end{equation}
+Il modulo $m=2147483647$ è primo e il periodo del generatore è $m-1$. L'implementazione usa la forma di Schrage per evitare overflow nel prodotto fra moltiplicatore e stato:
+\begin{lstlisting}[language=Java]
+long Q = MODULUS / MULTIPLIER;
+long R = MODULUS % MULTIPLIER;
+long t = MULTIPLIER * (seed[stream] % Q)
+       - R * (seed[stream] / Q);
+seed[stream] = (t > 0) ? t : t + MODULUS;
+return ((double) seed[stream] / MODULUS);
+\end{lstlisting}
+
+La classe \texttt{Rngs} espone 256 stream indipendenti. Questa caratteristica è importante per la riproducibilità degli esperimenti: arrivi, servizi e selezioni interne delle distribuzioni possono usare stream separati, così da evitare che una modifica locale, ad esempio l'aggiunta di una scelta casuale nel routing, alteri l'intera sequenza di servizi o arrivi. Il metodo \texttt{plantSeeds} inizializza tutti gli stream a partire da un unico seed, mantenendo quindi sia riproducibilità sia separazione delle sorgenti casuali.
+
+Le variate esponenziali sono generate dalla classe \texttt{Rvgs} tramite trasformata inversa. Se $U$ è uniforme in $(0,1)$ e $m$ è la media desiderata, allora:
+\begin{equation}
+    X = -m\ln(1-U).
+\end{equation}
+Il codice è:
+\begin{lstlisting}[language=Java]
+public double exponential(double m) {
+    return (-m * Math.log(1.0 - rngs.random()));
+}
+\end{lstlisting}
+
+La distribuzione iperesponenziale a due fasi viene generata per composizione. Un primo stream decide il ramo, mentre due stream distinti generano la variata esponenziale del ramo selezionato:
+\begin{lstlisting}[language=Java]
+rngs.selectStream(streamSelect);
+double u = rngs.random();
+
+if (u < p) {
+    rngs.selectStream(streamExp1);
+    return exponential(m1);
+} else {
+    rngs.selectStream(streamExp2);
+    return exponential(m2);
+}
+\end{lstlisting}
+I parametri $p$, $m_1$ e $m_2$ sono calcolati con la parametrizzazione bilanciata già introdotta nel modello delle specifiche, in modo da ottenere la media e il coefficiente di variazione richiesti. Nel simulatore, arrivi e servizi usano stream differenti per selezione del ramo e generazione della fase esponenziale; questo rende gli scenari replicabili e riduce il rischio di dipendenze spurie tra processi diversi.
 
 \clearpage
 
@@ -1114,14 +1615,14 @@ La validazione delle logiche di allocazione delle risorse hardware si è concent
     \label{fig:vertical_scaling_trace_timeline}
 \end{figure}
 
-I risultati della simulazione, illustrati graficamente nella Figura~\ref{fig:vertical_scaling_dynamics}, dimostrano una perfetta coincidenza tra il comportamento atteso e le transizioni osservate. Al secondo $t = 2.0$, il cumulo di task all'interno dello Spike Server supera la soglia critica di 3 job attivi. Il controllore verticale interviene senza ritardi temporali registrando 1 azione di \textit{Speed Up}, la quale innalza istantaneamente il moltiplicatore di velocità dell'infrastruttura dal valore base di 4.0 a un livello di picco pari a 8.0. Grazie a questa accelerazione controllata, la coda viene smaltita rapidamente: al secondo $t = 4.4$, il numero di job residenti scende sotto la soglia minima di 1. Il software applica quindi l'esatta transizione duale di \textit{Speed Down}, riportando il moltiplicatore alla frequenza nominale di 4.0. 
+I risultati della simulazione, illustrati graficamente nella Figura~\ref{fig:vertical_scaling_dynamics}, dimostrano una perfetta coincidenza tra il comportamento atteso e le transizioni osservate. Al secondo $t = 2.0$, il cumulo di task all'interno dello Spike Server supera la soglia critica di 3 job attivi. Il controllore verticale interviene senza ritardi temporali registrando 1 azione di \textit{Speed Up}, la quale innalza istantaneamente il fattore di capacità elaborativa dell'infrastruttura dal valore base di 4.0 a un livello di picco pari a 8.0. Grazie a questa accelerazione controllata, la coda viene smaltita rapidamente: al secondo $t = 4.4$, il numero di job residenti scende sotto la soglia minima di 1. Il software applica quindi l'esatta transizione duale di \textit{Speed Down}, riportando il fattore di capacità al valore nominale di 4.0. 
 
-Il perfetto confinamento di queste transizioni all'interno della finestra di massimo carico giustifica il valore del moltiplicatore di velocità medio complessivo registrato nel report finale, attestatosi a 4.3840. Il bilancio di fine simulazione conferma l'esecuzione di esattamente 1 azione di Speed Up e 1 azione di Speed Down, validando la totale assenza di fenomeni di instabilità o derive computazionali nelle routine di controllo verticale.
+Il perfetto confinamento di queste transizioni all'interno della finestra di massimo carico giustifica il valore medio complessivo del fattore di capacità elaborativa registrato nel report finale, attestatosi a 4.3840. Il bilancio di fine simulazione conferma l'esecuzione di esattamente 1 azione di Speed Up e 1 azione di Speed Down, validando la totale assenza di fenomeni di instabilità o derive computazionali nelle routine di controllo verticale.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{../data/vv/chart/scaling/vertical_scaling_chart.png}
-    \caption{Dinamica dello Scaling Verticale: modulazione istantanea del moltiplicatore di velocità in funzione del numero di job residenti nella coda dello Spike Server.}
+    \caption{Dinamica dello Scaling Verticale: modulazione istantanea del fattore di capacità elaborativa in funzione del numero di job residenti nella coda dello Spike Server.}
     \label{fig:vertical_scaling_dynamics}
 \end{figure}
 
@@ -1294,7 +1795,7 @@ Nel complesso, la validazione esterna mostra che il simulatore implementato repl
 % RISULTATI
 % =========================================================================
 \section{Risultati e Analisi}
-In questo capitolo vengono presentati e discussi i risultati ottenuti dalle diverse campagne di simulazione, evidenziando il raggiungimento degli obiettivi prefissati e analizzando le prestazioni del sistema sotto diversi scenari operativi. L'esposizione segue lo stesso percorso sperimentale adottato nel progetto: prima vengono fissati i parametri di dimensionamento, poi viene valutata l'architettura completa in termini di costo, dinamica transitoria e robustezza rispetto alla variabilità del carico, infine viene discusso il miglioramento ottenuto introducendo una banda nel meccanismo di dirottamento.
+In questo capitolo vengono presentati e discussi i risultati ottenuti dalle diverse campagne di simulazione, evidenziando il raggiungimento degli obiettivi prefissati e analizzando le prestazioni del sistema sotto diversi scenari operativi. L'esposizione segue lo stesso percorso sperimentale adottato nel progetto: prima vengono fissati i parametri di dimensionamento, poi viene valutata l'architettura completa in termini di costo, dinamica transitoria e robustezza rispetto alla variabilità del carico, infine viene discusso il miglioramento del meccanismo di dirottamento.
 
 
 \subsection{Dimensionamento}
@@ -1373,16 +1874,16 @@ La Figura~\ref{fig:simax_estimation} rende ancora più evidente la struttura del
 Alla luce di queste evidenze, la scelta finale ricade su \textbf{$SI_{max} = 40$}. Tale valore rappresenta infatti il punto limite immediatamente precedente al superamento della soglia di $6\text{ s}$ fissata dal nostro SLA: con $SI_{max} = 40$ il sistema mantiene ancora $R_0 = 5.5279\text{ s}$ e un intervallo di confidenza $[5.5107, 5.5451]\text{ s}$ interamente al di sotto del vincolo, mentre già al passo successivo, $SI_{max} = 50$, il tempo medio di risposta sale a $7.2009\text{ s}$ violando il requisito di servizio. Inoltre, $SI_{max} = 40$ si colloca nella regione in cui la curva di utilizzazione dello Spike Server si è ormai stabilizzata attorno al $26\%$, rendendo non conveniente spostare ulteriormente in alto la soglia. Questa configurazione costituisce quindi il miglior punto di equilibrio tra protezione del Web Server principale, contenimento dell'uso dello Spike Server e rispetto rigoroso del vincolo SLA a regime.
 
 \paragraph{Scaling Verticale e Sizing dell'Incremento}
-Il dimensionamento dello \textit{speedup} verticale dello Spike Server è stato analizzato tramite la classe \texttt{VerticalStepSizingObjective}. L'obiettivo dell'esperimento era verificare se un incremento più aggressivo della velocità di servizio della risorsa ausiliaria producesse un beneficio misurabile sul tempo medio di risposta, una volta fissata la soglia di dirottamento a $SI_{max} = 40$. Lo scenario è stato mantenuto coerente con la precedente fase di dimensionamento: singolo Web Server ordinario, Spike Server abilitato, scaling orizzontale disabilitato, scaling verticale attivo e carico iperesponenziale ad alta variabilità. La campagna è stata eseguita con $16384$ batch da $1024$ job, scartando una fase iniziale di warm-up pari a $2048$ job.
+Il dimensionamento dell'incremento verticale di capacità dello Spike Server è stato analizzato tramite la classe \texttt{VerticalStepSizingObjective}. L'obiettivo dell'esperimento era verificare se un incremento additivo più aggressivo della capacità elaborativa della risorsa ausiliaria producesse un beneficio misurabile sul tempo medio di risposta, una volta fissata la soglia di dirottamento a $SI_{max} = 40$. Lo scenario è stato mantenuto coerente con la precedente fase di dimensionamento: singolo Web Server ordinario, Spike Server abilitato, scaling orizzontale disabilitato, scaling verticale attivo e carico iperesponenziale ad alta variabilità. La campagna è stata eseguita con $16384$ batch da $1024$ job, scartando una fase iniziale di warm-up pari a $2048$ job.
 
 La calibrazione statistica preliminare ha rilevato, con il metodo ACF, un cutoff pari a $486$, batch da $4860$ job, $1028$ batch e lag-1 ACF pari a $0.0252$. Il metodo dinamico ha invece raggiunto lag-1 ACF pari a $0.0059$, ma con intervalli di confidenza più ampi sulla media. Anche in questo caso la scelta finale dei parametri privilegia quindi una stima più regolare del regime stazionario.
 
-I risultati riportati in Tabella~\ref{tab:vertical_step_sizing_results} mostrano che la variazione dell'incremento di velocità non introduce alcun miglioramento prestazionale sostanziale. L'aspettativa iniziale era osservare almeno una riduzione moderata di $R_0$ per speedup più elevati, nel caso in cui lo Spike Server fosse il collo di bottiglia dominante; l'esito sperimentale mostra invece che tale ipotesi non è verificata. Il tempo medio di risposta resta infatti compreso in un intervallo estremamente ristretto, tra $5.5103\text{ s}$ e $5.5162\text{ s}$, e tutti gli intervalli di confidenza al $95\%$ risultano completamente sovrapposti. Anche il grafico in Figura~\ref{fig:vertical_step_sizing} conferma l'andamento sostanzialmente piatto della curva di $R_0$: l'aumento della capacità verticale disponibile non modifica in modo apprezzabile il comportamento globale del sistema, perché il collo di bottiglia dominante non è la velocità istantanea dello Spike Server, ma il momento in cui il traffico viene effettivamente dirottato dal Web Server ordinario.
+I risultati riportati in Tabella~\ref{tab:vertical_step_sizing_results} mostrano che la variazione dell'incremento additivo di capacità non introduce alcun miglioramento prestazionale sostanziale. L'aspettativa iniziale era osservare almeno una riduzione moderata di $R_0$ per incrementi più elevati, nel caso in cui lo Spike Server fosse il collo di bottiglia dominante; l'esito sperimentale mostra invece che tale ipotesi non è verificata. Il tempo medio di risposta resta infatti compreso in un intervallo estremamente ristretto, tra $5.5103\text{ s}$ e $5.5162\text{ s}$, e tutti gli intervalli di confidenza al $95\%$ risultano completamente sovrapposti. Anche il grafico in Figura~\ref{fig:vertical_step_sizing} conferma l'andamento sostanzialmente piatto della curva di $R_0$: l'aumento della capacità verticale disponibile non modifica in modo apprezzabile il comportamento globale del sistema, perché il collo di bottiglia dominante non è la capacità istantanea dello Spike Server, ma il momento in cui il traffico viene effettivamente dirottato dal Web Server ordinario.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{../data/objective/vertical_step_sizing}
-    \caption{Effetto dell'incremento di velocità verticale su tempo di risposta, velocità media e utilizzazione dello Spike Server.}
+    \caption{Effetto dell'incremento additivo di capacità su tempo di risposta, capacità media e utilizzazione dello Spike Server.}
     \label{fig:vertical_step_sizing}
 \end{figure}
 
@@ -1401,11 +1902,11 @@ I risultati riportati in Tabella~\ref{tab:vertical_step_sizing_results} mostrano
         $4.00$ & $5.5104$ & $0.0192$ & $[5.4912, 5.5296]$ \\
         $5.00$ & $5.5103$ & $0.0192$ & $[5.4911, 5.5295]$ \\ \hline
     \end{tabular}
-    \caption{Analisi dell'impatto dell'incremento di velocità verticale sul tempo medio di risposta.}
+    \caption{Analisi dell'impatto dell'incremento additivo di capacità sul tempo medio di risposta.}
     \label{tab:vertical_step_sizing_results}
 \end{table}
 
-Questa evidenza porta a una conclusione progettuale precisa: aumentare ulteriormente lo speedup verticale non è conveniente. Dal punto di vista economico, una capacità di picco più elevata comporterebbe un costo potenziale maggiore senza produrre una riduzione statisticamente significativa della latenza media. Per questo motivo si è scelto di adottare un incremento di velocità pari a \textbf{1.0}, corrispondente a un raddoppio della potenza disponibile quando lo scaling verticale viene attivato. Tale configurazione rappresenta la scelta più sobria e difendibile: garantisce una risposta sufficiente nelle fasi di picco, evita sovradimensionamenti inutili e mantiene il costo operativo dello Spike Server sotto controllo.
+Questa evidenza porta a una conclusione progettuale precisa: aumentare ulteriormente l'incremento verticale di capacità non è conveniente. Dal punto di vista economico, una capacità di picco più elevata comporterebbe un costo potenziale maggiore senza produrre una riduzione statisticamente significativa della latenza media. Per questo motivo si è scelto di adottare un incremento additivo di capacità pari a \textbf{1.0}; poiché il valore di base impiegato nell'esperimento è anch'esso pari a $1.0$, lo stato scalato raggiunge $1.0+1.0=2.0$, corrispondente in questo caso a un raddoppio della potenza disponibile. Tale configurazione rappresenta la scelta più sobria e difendibile: garantisce una risposta sufficiente nelle fasi di picco, evita sovradimensionamenti inutili e mantiene il costo operativo dello Spike Server sotto controllo.
 
 \paragraph{Scaling Orizzontale e Identificazione delle Soglie}
 La stima dei parametri per lo scaling orizzontale è stata condotta tramite la classe \texttt{HorizontalScalingEstimationObjective}. Il parametro superiore di intervento, cioè la soglia di \textit{Scale Out}, è stato fissato direttamente al valore del vincolo SLA, pari a $R^{max}=6.0\text{ s}$. Questa scelta è coerente con una politica di controllo parsimoniosa: l'aumento del numero di Web Server viene attivato solo quando il tempo medio di risposta supera effettivamente il limite prestazionale concordato, evitando espansioni inutili quando il sistema si trova ancora all'interno dello SLA. Qualora si desiderasse un comportamento più reattivo e prudenziale, lo stesso parametro potrebbe essere abbassato leggermente, anticipando lo \textit{Scale Out} prima del raggiungimento formale della soglia critica e aumentando così il margine di sicurezza rispetto a variazioni improvvise del carico.
@@ -1431,7 +1932,7 @@ I risultati, sintetizzati nella Tabella~\ref{tab:horizontal_scaling_results}, ev
     \label{tab:horizontal_scaling_results}
 \end{table}
 
-La soglia di \textit{Scale In} deve quindi essere scelta in modo da favorire il ritorno a una sola unità quando il carico nominale è prossimo a $\lambda = 5$, ma senza autorizzare contrazioni pericolose nella regione in cui un singolo Web Server non è più sostenibile. Poiché $R^{max}=6.0\text{ s}$ rappresenta già la soglia superiore di violazione dello SLA, non sarebbe corretto usare lo stesso valore anche come soglia di riduzione: verrebbe infatti annullata la banda tra espansione e contrazione, rendendo il controller troppo incline a rimuovere risorse appena il sistema rientra formalmente sotto il limite. Alla luce dei risultati aggiornati, una scelta più coerente per lo scenario principale è \textbf{$R^{min}=3.5\text{ s}$}. Questo valore mantiene un margine sufficiente rispetto allo SLA, evita oscillazioni eccessive vicino alla soglia critica e consente comunque il ritorno verso configurazioni più economiche quando il carico si trova nella regione ordinaria del progetto.
+La soglia di \textit{Scale In} deve quindi essere scelta in modo da favorire il ritorno a una sola unità quando il carico nominale è prossimo a $\lambda = 5$, ma senza autorizzare contrazioni pericolose nella regione in cui un singolo Web Server non è più sostenibile. Poiché $R^{max}=6.0\text{ s}$ rappresenta già la soglia superiore di violazione dello SLA, non sarebbe corretto usare lo stesso valore anche come soglia di riduzione: verrebbe infatti annullato il margine tra espansione e contrazione, rendendo il controller troppo incline a rimuovere risorse appena il sistema rientra formalmente sotto il limite. Alla luce dei risultati aggiornati, una scelta più coerente per lo scenario principale è \textbf{$R^{min}=3.5\text{ s}$}. Questo valore mantiene un margine sufficiente rispetto allo SLA, evita oscillazioni eccessive vicino alla soglia critica e consente comunque il ritorno verso configurazioni più economiche quando il carico si trova nella regione ordinaria del progetto.
 
 \begin{figure}[H]
     \centering
@@ -1442,15 +1943,15 @@ La soglia di \textit{Scale In} deve quindi essere scelta in modo da favorire il 
 
 Per scenari di carico più elevato, prossimi a $\lambda = 9.5$ o $\lambda = 11$, la soglia a $6\text{ s}$ modifica sensibilmente l'interpretazione. Due server non garantiscono più il rispetto del vincolo, poiché producono rispettivamente $R_0 = 6.5519\text{ s}$ e $R_0 = 7.7255\text{ s}$; al contrario, cinque server mantengono la latenza entro margini molto ampi, con $R_0 = 0.3303\text{ s}$ a $\lambda = 9.5$ e $R_0 = 0.3776\text{ s}$ a $\lambda = 11$. La configurazione a tre server resta valida fino a $\lambda=9.5$, ma nello scenario più intenso risulta inconclusiva nella verifica di convergenza; per questo motivo, in presenza di workload persistentemente elevati, una soglia di \textit{Scale In} tra $1.5\text{ s}$ e $2.0\text{ s}$ rimarrebbe la scelta più conservativa, perché manterrebbe più facilmente tre o più server attivi e offrirebbe maggiore margine rispetto a burst improvvisi. Il valore $R^{min}=3.5\text{ s}$ va invece interpretato come una scelta coerente con un profilo di carico centrato su $\lambda \simeq 5$, non come soglia ottimale per workload persistentemente elevati.
 
-In conclusione, il dimensionamento dello scaling orizzontale dipende dal carico nominale atteso. Nel caso di studio principale, centrato su valori di $\lambda$ prossimi a 5 e con SLA pari a $6\text{ s}$, la scelta \textbf{$R^{min}=3.5\text{ s}$} è coerente con una politica orientata al contenimento dei costi: preserva il risparmio economico nei regimi sostenibili da un solo Web Server, ma conserva una banda rispetto a $R^{max}$ sufficiente a evitare rimozioni premature. Per workload persistentemente più aggressivi, invece, la soglia deve essere abbassata ulteriormente, indicativamente nell'intervallo $1.5$--$2.0\text{ s}$, accettando un costo infrastrutturale maggiore in cambio di una maggiore robustezza operativa. Le verifiche di convergenza hanno mostrato warm-up molto variabili: le configurazioni stabili convergono tipicamente tra $60000$ e $240000$ job, mentre i casi prossimi alla saturazione possono arrivare a $940000$ job senza classificazione conclusiva. Questo risultato conferma la necessità di usare il job di convergenza stimato come warm-up della successiva analisi Batch Means.
+In conclusione, il dimensionamento dello scaling orizzontale dipende dal carico nominale atteso. Nel caso di studio principale, centrato su valori di $\lambda$ prossimi a 5 e con SLA pari a $6\text{ s}$, la scelta \textbf{$R^{min}=3.5\text{ s}$} è coerente con una politica orientata al contenimento dei costi: preserva il risparmio economico nei regimi sostenibili da un solo Web Server, ma conserva un margine rispetto a $R^{max}$ sufficiente a evitare rimozioni premature. Per workload persistentemente più aggressivi, invece, la soglia deve essere abbassata ulteriormente, indicativamente nell'intervallo $1.5$--$2.0\text{ s}$, accettando un costo infrastrutturale maggiore in cambio di una maggiore robustezza operativa. Le verifiche di convergenza hanno mostrato warm-up molto variabili: le configurazioni stabili convergono tipicamente tra $60000$ e $240000$ job, mentre i casi prossimi alla saturazione possono arrivare a $940000$ job senza classificazione conclusiva. Questo risultato conferma la necessità di usare il job di convergenza stimato come warm-up della successiva analisi Batch Means.
 \subsection{Analisi}
 
 \paragraph{Analisi Economica e Trade-off dei Costi}
-L'analisi dei costi operativi è stata implementata nella classe \texttt{CostOptimizationObjective}, mantenendo fisso il limite superiore $R^{max}=6.0\text{ s}$ e valutando congiuntamente diverse soglie di \textit{Scale In} e diversi tempi di \textit{Cooldown}. La campagna è stata costruita sulla configurazione completa del sistema: politica \textit{Least Loaded}, $SI_{max}=40$, soglia inferiore di dirottamento coerente con la banda scelta, scaling orizzontale e verticale abilitati, \textit{Window Size} pari a $100\text{ s}$ e \textit{Cooldown} variabile tra $5$, $10$, $50$ e $100\text{ s}$.
+L'analisi dei costi operativi è stata implementata nella classe \texttt{CostOptimizationObjective}, mantenendo fisso il limite superiore $R^{max}=6.0\text{ s}$ e valutando congiuntamente diverse soglie di \textit{Scale In} e diversi tempi di \textit{Cooldown}. La campagna è stata costruita sulla configurazione completa del sistema: politica \textit{Least Loaded}, $SI_{max}=40$, routing verso lo Spike Server basato sulla sola soglia superiore, scaling orizzontale e verticale abilitati, \textit{Window Size} pari a $100\text{ s}$ e \textit{Cooldown} variabile tra $5$, $10$, $50$ e $100\text{ s}$.
 
 Per questa campagna sperimentale la calibrazione dei Batch Means è stata effettuata tramite l'approccio dinamico, poiché il metodo ACF richiedeva run molto lunghe e costose. La stima preliminare ha individuato un cutoff ACF pari a $1221$, con $409$ batch da $12210$ job e lag-1 ACF pari a $-0.0531$; il metodo dinamico ha invece raggiunto lag-1 ACF pari a $0.0050$ con $34$ batch da $4096$ job e precisione relativa pari a $0.0293$. L'esperimento finale usa quindi un arrotondamento superiore, pari a $64$ batch da $8192$ job, e un warm-up prudenziale pari a $350000$ job. La stima di convergenza a orizzonte finito aveva indicato stabilizzazione già a $60000$ job, con $R_0=3.3309\text{ s}$ e HW pari a $0.0343\text{ s}$; la scelta di amplificare il warm-up riduce ulteriormente il rischio di includere transitori residui.
 
-Il modello economico adottato considera un costo fisso per ogni Web Server attivo e un costo variabile per lo Spike Server proporzionale sia alla sua utilizzazione sia alla velocità media allocata:
+Il modello economico adottato considera un costo fisso per ogni Web Server attivo e un costo variabile per lo Spike Server proporzionale sia alla sua utilizzazione sia al fattore medio di capacità allocata:
 \[
     C_{tot} = \bar{N}\,C_{WS} + \bar{U}_{spike}\,\bar{S}_{spike}\,C_{CPU}.
 \]
@@ -1650,18 +2151,66 @@ La Tabella~\ref{tab:burstiness_results} evidenzia un risultato importante: l'inc
     \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_spike_avg_speed}
     \vspace{0.01\textheight}
     \includegraphics[width=0.76\textwidth]{../data/objective/burstiness/burstiness_robustness_spike_utilization}
-    \caption{Robustezza alla burstiness: velocità media e utilizzazione dello Spike Server.}
+    \caption{Robustezza alla burstiness: capacità elaborativa media e utilizzazione dello Spike Server.}
     \label{fig:burstiness_spike}
 \end{figure}
 
 Le figure confermano la natura adattiva dell'architettura. Il throughput segue correttamente il tasso di arrivo, segnalando assenza di perdita strutturale di capacità; il numero di job nel sistema cresce con $\lambda$, ma resta compatibile con tempi medi di risposta sotto soglia; le azioni di scaling aumentano nelle regioni più intense, ma non producono divergenze. La presenza delle barre di deviazione standard e del contorno dell'intervallo di confidenza permette inoltre di distinguere il rumore statistico dalle tendenze effettive: le curve restano separate soprattutto per le metriche operative, mentre il tempo di risposta mostra intervalli contenuti rispetto al margine disponibile sullo SLA.
 
-\subsection{Miglioramento}
+\section{Obiettivo di Miglioramento}
+L'ultimo obiettivo del progetto introduce una modifica al meccanismo di dirottamento verso lo Spike Server. A differenza delle analisi precedenti, che calibrano i parametri dell'architettura di base, questa sezione studia una variazione del modello: la sostituzione della soglia rigida su $SI$ con un \textbf{meccanismo a bande}. Per mantenere lo stesso percorso metodologico usato nel resto del lavoro, la sezione presenta prima la modifica concettuale, poi le specifiche operative, quindi l'implementazione computazionale e infine i risultati sperimentali. Le parti di verifica e validazione del meccanismo migliorativo sono lasciate come attività da completare.
 
-\paragraph{Ottimizzazione tramite Meccanismo a Bande}
-L'ultimo obiettivo analizza il possibile miglioramento del meccanismo di dirottamento verso lo Spike Server introducendo una banda sullo \textit{Spike Indicator}. La classe \texttt{VerticalScalerStabilityObjective} confronta quattro ampiezze di banda, pari a $0$, $5$, $10$ e $20$, mantenendo fisso $SI_{max}=40$ e variando $\lambda$ e il coefficiente di variazione degli interarrivi. Una banda nulla corrisponde alla soglia rigida: il traffico viene dirottato solo quando il server supera la soglia superiore e il rilascio avviene immediatamente appena il valore torna sotto soglia. Le bande positive introducono invece una soglia inferiore $SI_{low}$, stabilizzando la decisione del router. L'attesa progettuale è che bande più ampie riducano l'intermittenza del controllo, migliorando la regolarità del tempo di risposta, ma aumentando l'utilizzo medio dello Spike Server.
+\subsection{Modifica al Modello Concettuale}
+Nel modello base il router decide il dirottamento osservando il solo valore corrente dello \textit{Spike Indicator} del Web Server candidato. Se $SI_i(t)\ge SI_{max}$, il job viene inviato allo Spike Server; non appena un successivo arrivo osserva un valore inferiore alla soglia, il traffico può tornare immediatamente sul Web Server ordinario. Questa logica è semplice, ma può produrre instabilità decisionale quando $SI_i(t)$ oscilla vicino alla soglia.
 
-L'obiettivo non è ridurre indiscriminatamente l'uso dello Spike Server, ma rendere più regolare il suo impiego. Con una soglia rigida, infatti, il sistema tende ad alternare rapidamente fasi di dirottamento e fasi di ritorno al Web Server ordinario, specialmente quando il numero di job residenti oscilla vicino a $SI_{max}$. Questa dinamica può generare \textit{chattering}: molte decisioni ravvicinate, poco informative e potenzialmente costose. Una banda più ampia evita che il router cambi stato per oscillazioni marginali, accettando una maggiore permanenza del traffico sullo Spike Server in cambio di una risposta più stabile.
+Il miglioramento introduce una memoria locale dello stato di routing per ciascun Web Server. Ogni server può trovarsi in modalità ordinaria oppure in modalità spike. Il passaggio alla modalità spike avviene al superamento della soglia superiore $SI_{max}$; il ritorno alla modalità ordinaria non avviene però al primo valore sotto soglia, ma solo quando lo \textit{Spike Indicator} scende al di sotto di una soglia inferiore $SI_{low}$. Si definisce quindi una banda:
+\begin{equation}
+    B = SI_{max} - SI_{low}.
+\end{equation}
+
+Il caso $B=0$ coincide con il modello base, mentre valori positivi introducono una zona di transizione controllata. L'obiettivo non è ridurre indiscriminatamente l'uso dello Spike Server, ma rendere più regolare il suo impiego. Con una soglia rigida, infatti, il sistema tende ad alternare rapidamente fasi di dirottamento e fasi di ritorno al Web Server ordinario, specialmente quando il numero di job residenti oscilla vicino a $SI_{max}$. Questa dinamica può generare \textit{chattering}: molte decisioni ravvicinate, poco informative e potenzialmente costose. Una banda più ampia evita che il router cambi stato per oscillazioni marginali, accettando una maggiore permanenza del traffico sullo Spike Server in cambio di una risposta più stabile.
+
+\subsection{Modello delle Specifiche}
+La specifica del meccanismo a banda è formalizzata tramite una variabile di stato booleana $M_i(t)$ associata a ciascun Web Server $i$, dove $M_i(t)=0$ indica routing ordinario e $M_i(t)=1$ indica modalità spike attiva. La legge di transizione è:
+\begin{equation}
+    M_i(t^+) =
+    \begin{cases}
+        1 & \text{se } M_i(t^-)=0 \text{ e } SI_i(t)\ge SI_{max}, \\
+        0 & \text{se } M_i(t^-)=1 \text{ e } SI_i(t)\le SI_{low}, \\
+        M_i(t^-) & \text{altrimenti.}
+    \end{cases}
+\end{equation}
+
+Un job candidato per il server $i$ viene quindi instradato allo Spike Server se e solo se $M_i(t^+)=1$. In termini operazionali, l'introduzione della banda tende ad aumentare la probabilità di dirottamento $q_i$ rispetto al caso a soglia rigida, poiché il server resta più a lungo in modalità spike dopo l'attivazione. Il comportamento atteso è quindi duplice: da un lato una riduzione del tempo medio di risposta, poiché il Web Server ordinario viene protetto più a lungo; dall'altro un aumento dell'utilizzazione dello Spike Server e del relativo costo operativo.
+
+\subsection{Modello Computazionale}
+La modifica è implementata nella classe \texttt{ThresholdSpikeServerRoutingStrategy}. La classe mantiene una mappa \texttt{spikeModeMap}, indicizzata per identificativo del Web Server, che conserva lo stato corrente del routing. Il parametro \texttt{siLow} rappresenta la soglia inferiore; quando non è specificato, assume lo stesso valore di $SI_{max}$ e il comportamento coincide con il modello base.
+
+\begin{lstlisting}[language=Java]
+int currentSiLow = (siLow == -1) ? siMax : siLow;
+boolean currentlyInSpike =
+    spikeModeMap.getOrDefault(targetServer.getId(), false);
+
+boolean nextState;
+if (!currentlyInSpike) {
+    nextState = targetServer.getSpikeIndicator() >= siMax;
+} else {
+    nextState = targetServer.getSpikeIndicator() > currentSiLow;
+}
+
+if (nextState != currentlyInSpike) {
+    spikeModeMap.put(targetServer.getId(), nextState);
+    stateChanges++;
+}
+\end{lstlisting}
+
+La campagna sperimentale è realizzata dalla classe \texttt{VerticalScalerStabilityObjective}, che confronta quattro ampiezze di banda, pari a $0$, $5$, $10$ e $20$, mantenendo fisso $SI_{max}=40$ e variando $\lambda$ e coefficiente di variazione degli interarrivi. Le metriche osservate sono tempo medio di risposta, utilizzazione complessiva del sistema e utilizzazione dello Spike Server, riportate con deviazione standard e intervallo di confidenza.
+
+\subsection{Verifica e Validazione}
+\textbf{TODO.} La verifica funzionale del meccanismo a banda dovrà controllare esplicitamente le transizioni di stato del router, accertando che l'attivazione avvenga solo per $SI\ge SI_{max}$ e che il rilascio richieda il superamento verso il basso della soglia $SI_{low}$. La validazione dovrà invece confrontare il comportamento aggregato del meccanismo migliorativo con un modello indipendente o con casi limite controllati, verificando che il meccanismo a bande produca effettivamente una riduzione del \textit{chattering} senza alterare la conservazione del flusso.
+
+\subsection{Risultati e Considerazioni}
+La classe \texttt{VerticalScalerStabilityObjective} confronta quattro ampiezze di banda, pari a $0$, $5$, $10$ e $20$, mantenendo fisso $SI_{max}=40$ e variando $\lambda$ e il coefficiente di variazione degli interarrivi. Una banda nulla corrisponde alla soglia rigida: il traffico viene dirottato solo quando il server supera la soglia superiore e il rilascio avviene immediatamente appena il valore torna sotto soglia. Le bande positive introducono invece una soglia inferiore $SI_{low}$, stabilizzando la decisione del router. L'attesa progettuale è che bande più ampie riducano l'intermittenza del controllo, migliorando la regolarità del tempo di risposta, ma aumentando l'utilizzo medio dello Spike Server.
 
 \begin{table}[H]
     \centering
@@ -1716,7 +2265,7 @@ Il lavoro svolto ha permesso di costruire, verificare e utilizzare un simulatore
 
 Dal punto di vista del dimensionamento, il risultato più netto riguarda il ruolo della politica di routing. La strategia \textit{Least Loaded} è risultata la più efficace, con $R_0=0.2843\text{ s}$ nello scenario statico a quattro Web Server, superando sia \textit{Round Robin} sia \textit{Power of Two Choices}. Questo conferma che, anche con disciplina \textit{Processor Sharing}, la distribuzione istantanea dei job tra i server resta decisiva: ridurre la congestione locale significa migliorare simultaneamente media e dispersione dei tempi di risposta.
 
-La soglia di dirottamento $SI_{max}$ si è rivelata il parametro centrale per bilanciare protezione prestazionale e costo operativo della risorsa ausiliaria. La scelta $SI_{max}=40$ è risultata il miglior punto prima della violazione dello SLA: a tale valore il sistema mantiene $R_0=5.5279\text{ s}$ con intervallo di confidenza interamente sotto $6\text{ s}$, mentre a $SI_{max}=50$ la latenza supera già il vincolo. L'analisi dello speedup verticale ha invece mostrato che incrementi più aggressivi della velocità dello Spike Server non portano benefici apprezzabili; per questo motivo è stato scelto un incremento pari a $1.0$, cioè un raddoppio della capacità nel momento di attivazione.
+La soglia di dirottamento $SI_{max}$ si è rivelata il parametro centrale per bilanciare protezione prestazionale e costo operativo della risorsa ausiliaria. La scelta $SI_{max}=40$ è risultata il miglior punto prima della violazione dello SLA: a tale valore il sistema mantiene $R_0=5.5279\text{ s}$ con intervallo di confidenza interamente sotto $6\text{ s}$, mentre a $SI_{max}=50$ la latenza supera già il vincolo. L'analisi dell'incremento verticale di capacità ha invece mostrato che incrementi additivi più aggressivi non portano benefici apprezzabili; per questo motivo è stato scelto $\Delta v_s=1.0$, che, sommato al valore base $v_{base}=1.0$, porta la capacità a $2.0$ nel momento di attivazione.
 
 Lo scaling orizzontale completa il controllo sul lungo periodo. La soglia superiore $R^{max}=6.0\text{ s}$ è stata mantenuta coincidente con il vincolo SLA, mentre $R^{min}=3.5\text{ s}$ è risultata coerente con uno scenario nominale centrato su $\lambda\simeq 5$. Le analisi di frontiera mostrano però che questa scelta non è universale: in presenza di carichi persistentemente elevati, prossimi a $\lambda=9.5$ o $\lambda=11$, è preferibile abbassare la soglia di \textit{Scale In} nell'intervallo $1.5$--$2.0\text{ s}$, accettando un maggior costo infrastrutturale in cambio di più margine operativo.
 
@@ -1757,6 +2306,17 @@ Cambridge University Press, 2013.
 S. K. Park and K. W. Miller, 
 ``Random Number Generators: Good Ones Are Hard To Find'', 
 \textit{Communications of the ACM}, Vol. 31, No. 10, pp. 1192-1201, 1988.
+
+\bibitem{simulation-interval-estimation}
+Dispense del corso,
+\textit{Interval Estimation},
+materiale didattico di simulazione, 2025/2026.
+
+\bibitem{github-repository}
+F. Masci,
+\textit{Load Manager Simulator},
+repository GitHub,
+\url{https://github.com/F-masci/load-manager-simulator}.
 
 \end{thebibliography}
 
