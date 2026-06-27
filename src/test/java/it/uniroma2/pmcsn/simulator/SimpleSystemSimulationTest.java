@@ -113,4 +113,34 @@ public class SimpleSystemSimulationTest extends BaseSimulationTest {
         assertEquals(2.2749, results.jobsInSystem().mean(), results.jobsInSystem().halfWidth() * scalingFactor, "Mean Jobs in System mismatch");
         assertEquals(2.4953, results.throughput().mean(), results.throughput().halfWidth() * scalingFactor, "Mean Throughput mismatch");
     }
+
+    /**
+     * Validates simulation results for a simplified system with the band mechanism enabled,
+     * verifying that Little's Law holds.
+     */
+    @Test
+    public void testSimplifiedSystemWithBandSimulationMetrics() {
+        logTestStep("Validating system metrics with band mechanism: lambda=2.5, mu=4.0, siMax=10, siLow=6");
+
+        ApplicationConfig testConfig = new ApplicationConfig(
+                new ApplicationConfig.LoadConfig(0.40, 4.0, 0.25, 4.0, 10, 6, RoutingPolicy.DETERMINISTIC, WorkloadType.HYPEREXPONENTIAL, null),
+                ApplicationConfig.ClusterConfig.fixedServer(1, true),
+                ApplicationConfig.ScalingConfig.disabled(),
+                ApplicationConfig.ExecutionConfig.batchRun(4_096, 4_096, 0)
+        );
+
+        SimulationFacade facade = new SimulationFacade(testConfig);
+        SimulationFacade.AggregatedResults results = facade.runSimulation();
+
+        logDebug("Results - RT: {}, JIS: {}, Util: {}, Thr: {}",
+                results.responseTime().mean(), results.jobsInSystem().mean(),
+                results.utilization().mean(), results.throughput().mean());
+
+        double littleJis = results.throughput().mean() * results.responseTime().mean();
+        double realJis = results.jobsInSystem().mean();
+
+        logDebug("Little's Law Check - Real JIS: {}, Expected JIS: {}", realJis, littleJis);
+        // Assert Little's Law is satisfied within a reasonable confidence interval threshold
+        assertEquals(realJis, littleJis, results.jobsInSystem().halfWidth() * 3, "Little's Law does not hold for the band mechanism");
+    }
 }
