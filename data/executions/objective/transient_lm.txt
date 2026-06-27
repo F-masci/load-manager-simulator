@@ -64,7 +64,7 @@ Response Time            : Mean = 0,8102, StdDev = 0,0028, HW=0,0020, CI = [0,80
 Jobs in System           : Mean = 2,0241, StdDev = 0,0079, HW=0,0056, CI = [2,0185, 2,0297]
 System Utilization       : Mean = 0,3113, StdDev = 0,0007, HW=0,0005, CI = [0,3108, 0,3118]
 Throughput               : Mean = 2,4981, StdDev = 0,0018, HW=0,0013, CI = [2,4969, 2,4994]
-Diverted Jobs            : Mean = 0,2000, StdDev = 0,6325, HW=0,4524, CI = [-0,2524, 0,6524]
+Diverted Jobs            : Mean = 0,3000, StdDev = 0,9487, HW=0,6786, CI = [-0,3786, 0,9786]
 Avg Active Servers (N)   : Mean = 1,0055, StdDev = 0,0007, HW=0,0005, CI = [1,0050, 1,0060]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 125,3000, StdDev = 11,0559, HW=7,9089, CI = [117,3911, 133,2089]
@@ -105,15 +105,15 @@ INFO  SimulationFacade [SIM] -
 METHOD: INDEPENDENT REPLICATIONS
 SAMPLES (N): 10
 ==================================================================
-Response Time            : Mean = 1,1721, StdDev = 0,0068, HW=0,0049, CI = [1,1672, 1,1770]
-Jobs in System           : Mean = 2,9325, StdDev = 0,0236, HW=0,0169, CI = [2,9157, 2,9494]
+Response Time            : Mean = 1,1721, StdDev = 0,0068, HW=0,0049, CI = [1,1672, 1,1769]
+Jobs in System           : Mean = 2,9324, StdDev = 0,0236, HW=0,0168, CI = [2,9156, 2,9493]
 System Utilization       : Mean = 0,3091, StdDev = 0,0011, HW=0,0008, CI = [0,3084, 0,3099]
 Throughput               : Mean = 2,5019, StdDev = 0,0087, HW=0,0062, CI = [2,4957, 2,5082]
-Diverted Jobs            : Mean = 109,3000, StdDev = 56,7608, HW=40,6042, CI = [68,6958, 149,9042]
-Avg Active Servers (N)   : Mean = 1,0466, StdDev = 0,0042, HW=0,0030, CI = [1,0435, 1,0496]
+Diverted Jobs            : Mean = 120,3000, StdDev = 61,2718, HW=43,8312, CI = [76,4688, 164,1312]
+Avg Active Servers (N)   : Mean = 1,0464, StdDev = 0,0043, HW=0,0031, CI = [1,0434, 1,0495]
 ------------------------------------------------------------------
-Scale OUT Actions        : Mean = 840,7000, StdDev = 63,1999, HW=45,2105, CI = [795,4895, 885,9105]
-Scale IN  Actions        : Mean = 840,7000, StdDev = 63,1999, HW=45,2105, CI = [795,4895, 885,9105]
+Scale OUT Actions        : Mean = 839,7000, StdDev = 63,2667, HW=45,2583, CI = [794,4417, 884,9583]
+Scale IN  Actions        : Mean = 839,7000, StdDev = 63,2667, HW=45,2583, CI = [794,4417, 884,9583]
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
@@ -125,21 +125,21 @@ INFO  TransientAnalysisObjective [OBJ3.2] - Running Scenario: Medium_Load_CV4
 INFO  TransientAnalysisObjective [OBJ3.2] - Running Complete System: lambda=5.0, cv=4.0
 INFO  SimulationFacade [SIM] - Starting 10 independent replications...
 INFO  SimulationFacade [SIM] - Running replication 1/10 with seed 123456789...
-[==================================================] 100% | Jobs: 5033536 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5033535 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 2/10 with seed 96275848...
-[==================================================] 100% | Jobs: 5049169 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5049156 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 3/10 with seed 492923273...
-[==================================================] 100% | Jobs: 5049092 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5049091 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 4/10 with seed 1288915049...
 [==================================================] 100% | Jobs: 5045907 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 5/10 with seed 1516575750...
-[==================================================] 100% | Jobs: 5032995 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5033014 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 6/10 with seed 1504781563...
-[==================================================] 100% | Jobs: 5041385 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5041387 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 7/10 with seed 1569671781...
 [==================================================] 100% | Jobs: 5033641 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 8/10 with seed 174491386...
-[==================================================] 100% | Jobs: 5035394 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5035404 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 9/10 with seed 1140452127...
 [==================================================] 100% | Jobs: 5037001 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 10/10 with seed 253776700...
@@ -150,19 +150,19 @@ INFO  SimulationFacade [SIM] -
 METHOD: INDEPENDENT REPLICATIONS
 SAMPLES (N): 10
 ==================================================================
-Response Time            : Mean = 3,4218, StdDev = 0,0058, HW=0,0041, CI = [3,4176, 3,4259]
-Jobs in System           : Mean = 17,1123, StdDev = 0,0469, HW=0,0335, CI = [17,0787, 17,1458]
-System Utilization       : Mean = 0,5121, StdDev = 0,0003, HW=0,0002, CI = [0,5118, 0,5123]
+Response Time            : Mean = 3,4112, StdDev = 0,0045, HW=0,0033, CI = [3,4079, 3,4144]
+Jobs in System           : Mean = 17,0594, StdDev = 0,0453, HW=0,0324, CI = [17,0269, 17,0918]
+System Utilization       : Mean = 0,5140, StdDev = 0,0006, HW=0,0004, CI = [0,5136, 0,5144]
 Throughput               : Mean = 5,0009, StdDev = 0,0073, HW=0,0052, CI = [4,9957, 5,0061]
-Diverted Jobs            : Mean = 400008,3000, StdDev = 3499,7176, HW=2503,5472, CI = [397504,7528, 402511,8472]
-Avg Active Servers (N)   : Mean = 1,5707, StdDev = 0,0065, HW=0,0046, CI = [1,5660, 1,5753]
+Diverted Jobs            : Mean = 413950,4000, StdDev = 3742,3935, HW=2677,1471, CI = [411273,2529, 416627,5471]
+Avg Active Servers (N)   : Mean = 1,5579, StdDev = 0,0054, HW=0,0038, CI = [1,5540, 1,5617]
 ------------------------------------------------------------------
-Scale OUT Actions        : Mean = 14045,2000, StdDev = 94,6829, HW=67,7320, CI = [13977,4680, 14112,9320]
-Scale IN  Actions        : Mean = 14045,1000, StdDev = 94,7833, HW=67,8039, CI = [13977,2961, 14112,9039]
-Scale UP  Actions        : Mean = 414,4000, StdDev = 19,3172, HW=13,8187, CI = [400,5813, 428,2187]
-Scale DOWN Actions       : Mean = 414,4000, StdDev = 19,3172, HW=13,8187, CI = [400,5813, 428,2187]
-Spike Server Avg Speed   : Mean = 1,0042, StdDev = 0,0002, HW=0,0001, CI = [1,0040, 1,0043]
-Spike Server Utilization : Mean = 0,0968, StdDev = 0,0008, HW=0,0005, CI = [0,0962, 0,0973]
+Scale OUT Actions        : Mean = 13818,5000, StdDev = 89,9583, HW=64,3523, CI = [13754,1477, 13882,8523]
+Scale IN  Actions        : Mean = 13818,4000, StdDev = 89,9298, HW=64,3319, CI = [13754,0681, 13882,7319]
+Scale UP  Actions        : Mean = 486,4000, StdDev = 24,7036, HW=17,6719, CI = [468,7281, 504,0719]
+Scale DOWN Actions       : Mean = 486,4000, StdDev = 24,7036, HW=17,6719, CI = [468,7281, 504,0719]
+Spike Server Avg Speed   : Mean = 1,0049, StdDev = 0,0003, HW=0,0002, CI = [1,0047, 1,0051]
+Spike Server Utilization : Mean = 0,0997, StdDev = 0,0009, HW=0,0006, CI = [0,0991, 0,1004]
 ==================================================================
 INFO  ObjectiveUtils [OBJ_UTIL] - Data saved to data\objective\finite\transient_medium_load_cv4.csv
 INFO  BaseChartUtility [CHART] - Chart generated: data/objective/finite/transient_medium_load_cv4.png
@@ -170,44 +170,44 @@ INFO  TransientAnalysisObjective [OBJ3.2] - Running Scenario: Medium_Load_CV6
 INFO  TransientAnalysisObjective [OBJ3.2] - Running Complete System: lambda=5.0, cv=6.0
 INFO  SimulationFacade [SIM] - Starting 10 independent replications...
 INFO  SimulationFacade [SIM] - Running replication 1/10 with seed 123456789...
-[==================================================] 100% | Jobs: 5023844 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5023845 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 2/10 with seed 897531293...
 [==================================================] 100% | Jobs: 5032592 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 3/10 with seed 1760829831...
 [==================================================] 100% | Jobs: 5046575 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 4/10 with seed 873371884...
-[==================================================] 100% | Jobs: 5029853 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5029858 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 5/10 with seed 1023852521...
-[==================================================] 100% | Jobs: 5026117 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5026115 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 6/10 with seed 1157584678...
-[==================================================] 100% | Jobs: 5033089 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5033092 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 7/10 with seed 142520541...
-[==================================================] 100% | Jobs: 5027794 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5027791 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 8/10 with seed 1225374221...
 [==================================================] 100% | Jobs: 5057643 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 9/10 with seed 1644239310...
 [==================================================] 100% | Jobs: 5030505 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] - Running replication 10/10 with seed 861346765...
-[==================================================] 100% | Jobs: 5069785 | Clock: 1008000,00s
+[==================================================] 100% | Jobs: 5069778 | Clock: 1008000,00s
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: INDEPENDENT REPLICATIONS
 SAMPLES (N): 10
 ==================================================================
-Response Time            : Mean = 3,3204, StdDev = 0,0086, HW=0,0062, CI = [3,3142, 3,3265]
-Jobs in System           : Mean = 16,5948, StdDev = 0,0817, HW=0,0585, CI = [16,5363, 16,6532]
-System Utilization       : Mean = 0,5053, StdDev = 0,0012, HW=0,0009, CI = [0,5044, 0,5062]
+Response Time            : Mean = 3,3106, StdDev = 0,0046, HW=0,0033, CI = [3,3073, 3,3139]
+Jobs in System           : Mean = 16,5458, StdDev = 0,0615, HW=0,0440, CI = [16,5018, 16,5898]
+System Utilization       : Mean = 0,5077, StdDev = 0,0015, HW=0,0011, CI = [0,5066, 0,5087]
 Throughput               : Mean = 4,9978, StdDev = 0,0151, HW=0,0108, CI = [4,9870, 5,0086]
-Diverted Jobs            : Mean = 611970,7000, StdDev = 8218,2807, HW=5879,0039, CI = [606091,6961, 617849,7039]
-Avg Active Servers (N)   : Mean = 1,6710, StdDev = 0,0056, HW=0,0040, CI = [1,6670, 1,6750]
+Diverted Jobs            : Mean = 629447,3000, StdDev = 6618,2846, HW=4734,4356, CI = [624712,8644, 634181,7356]
+Avg Active Servers (N)   : Mean = 1,6538, StdDev = 0,0066, HW=0,0047, CI = [1,6491, 1,6586]
 ------------------------------------------------------------------
-Scale OUT Actions        : Mean = 15378,7000, StdDev = 111,6732, HW=79,8862, CI = [15298,8138, 15458,5862]
-Scale IN  Actions        : Mean = 15378,1000, StdDev = 111,7919, HW=79,9711, CI = [15298,1289, 15458,0711]
-Scale UP  Actions        : Mean = 1100,7000, StdDev = 43,1845, HW=30,8923, CI = [1069,8077, 1131,5923]
-Scale DOWN Actions       : Mean = 1100,7000, StdDev = 43,1845, HW=30,8923, CI = [1069,8077, 1131,5923]
-Spike Server Avg Speed   : Mean = 1,0112, StdDev = 0,0004, HW=0,0003, CI = [1,0109, 1,0115]
-Spike Server Utilization : Mean = 0,1434, StdDev = 0,0015, HW=0,0011, CI = [0,1423, 0,1445]
+Scale OUT Actions        : Mean = 15049,9000, StdDev = 67,3225, HW=48,1596, CI = [15001,7404, 15098,0596]
+Scale IN  Actions        : Mean = 15048,9000, StdDev = 67,4791, HW=48,2717, CI = [15000,6283, 15097,1717]
+Scale UP  Actions        : Mean = 1230,1000, StdDev = 42,1385, HW=30,1441, CI = [1199,9559, 1260,2441]
+Scale DOWN Actions       : Mean = 1230,1000, StdDev = 42,1385, HW=30,1441, CI = [1199,9559, 1260,2441]
+Spike Server Avg Speed   : Mean = 1,0125, StdDev = 0,0004, HW=0,0003, CI = [1,0122, 1,0128]
+Spike Server Utilization : Mean = 0,1472, StdDev = 0,0016, HW=0,0012, CI = [0,1460, 0,1483]
 ==================================================================
 INFO  ObjectiveUtils [OBJ_UTIL] - Data saved to data\objective\finite\transient_medium_load_cv6.csv
 INFO  BaseChartUtility [CHART] - Chart generated: data/objective/finite/transient_medium_load_cv6.png

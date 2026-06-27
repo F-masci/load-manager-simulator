@@ -94,7 +94,7 @@ public class SimpleSystemSimulationTest extends BaseSimulationTest {
         logTestStep("Validating system metrics: lambda=2.5, mu=4.0");
 
         ApplicationConfig testConfig = new ApplicationConfig(
-                new ApplicationConfig.LoadConfig(WorkloadType.HYPEREXPONENTIAL, 0.40,  0.25, RoutingPolicy.DETERMINISTIC, 10),
+                new ApplicationConfig.LoadConfig(WorkloadType.HYPEREXPONENTIAL, ARRIVAL_MEAN,  SERVICE_MEAN, RoutingPolicy.DETERMINISTIC, 10),
                 ApplicationConfig.ClusterConfig.fixedServer(1, true),
                 ApplicationConfig.ScalingConfig.disabled(),
                 ApplicationConfig.ExecutionConfig.batchRun(4_096, 4_096, 0)

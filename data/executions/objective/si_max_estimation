@@ -21,26 +21,26 @@ INFO  LoadManagerSimulator [SIM] -   Cooldown Period:       0.0
 INFO  LoadManagerSimulator [SIM] - [EXECUTION]
 INFO  LoadManagerSimulator [SIM] -   Method:                BATCH_MEANS
 INFO  LoadManagerSimulator [SIM] -   Seed:                  123456789
-INFO  LoadManagerSimulator [SIM] -   Batches:               16384
+INFO  LoadManagerSimulator [SIM] -   Batches:               8192
 INFO  LoadManagerSimulator [SIM] -   Batch Size:            1024
 INFO  LoadManagerSimulator [SIM] -   Warm-up Jobs:          5120
 INFO  LoadManagerSimulator [SIM] - ==================================================================
 
 INFO  SiMaxEstimationObjective [OBJ1.2] - Starting SI_max Estimation Objective...
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 1,4130, StdDev = 0,3318, HW=0,0051, CI = [1,4080, 1,4181]
-Jobs in System           : Mean = 7,2429, StdDev = 2,2381, HW=0,0343, CI = [7,2086, 7,2772]
-System Utilization       : Mean = 0,6327, StdDev = 0,1044, HW=0,0016, CI = [0,6311, 0,6343]
-Throughput               : Mean = 5,0788, StdDev = 0,6327, HW=0,0097, CI = [5,0692, 5,0885]
-Diverted Jobs            : Mean = 307,8403, StdDev = 77,4615, HW=1,1862, CI = [306,6541, 309,0265]
+Response Time            : Mean = 1,3609, StdDev = 0,3298, HW=0,0071, CI = [1,3537, 1,3680]
+Jobs in System           : Mean = 6,9688, StdDev = 2,2200, HW=0,0481, CI = [6,9207, 7,0168]
+System Utilization       : Mean = 0,6324, StdDev = 0,1053, HW=0,0023, CI = [0,6301, 0,6347]
+Throughput               : Mean = 5,0725, StdDev = 0,6353, HW=0,0138, CI = [5,0587, 5,0863]
+Diverted Jobs            : Mean = 314,7531, StdDev = 76,2599, HW=1,6516, CI = [313,1014, 316,4047]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -48,22 +48,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,3873, StdDev = 0,1526, HW=0,0023, CI = [0,3850, 0,3896]
+Spike Server Utilization : Mean = 0,3953, StdDev = 0,1526, HW=0,0033, CI = [0,3920, 0,3986]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 2,5786, StdDev = 0,5153, HW=0,0079, CI = [2,5707, 2,5865]
-Jobs in System           : Mean = 13,1865, StdDev = 3,3377, HW=0,0511, CI = [13,1353, 13,2376]
-System Utilization       : Mean = 0,6320, StdDev = 0,0978, HW=0,0015, CI = [0,6305, 0,6335]
-Throughput               : Mean = 5,0779, StdDev = 0,6290, HW=0,0096, CI = [5,0683, 5,0875]
-Diverted Jobs            : Mean = 242,1920, StdDev = 92,5994, HW=1,4180, CI = [240,7740, 243,6100]
+Response Time            : Mean = 2,5043, StdDev = 0,4955, HW=0,0107, CI = [2,4936, 2,5150]
+Jobs in System           : Mean = 12,7936, StdDev = 3,2533, HW=0,0705, CI = [12,7231, 12,8640]
+System Utilization       : Mean = 0,6317, StdDev = 0,0990, HW=0,0021, CI = [0,6295, 0,6338]
+Throughput               : Mean = 5,0716, StdDev = 0,6318, HW=0,0137, CI = [5,0579, 5,0853]
+Diverted Jobs            : Mean = 244,3115, StdDev = 92,6846, HW=2,0074, CI = [242,3042, 246,3189]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -71,22 +71,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,3080, StdDev = 0,1601, HW=0,0025, CI = [0,3056, 0,3105]
+Spike Server Utilization : Mean = 0,3106, StdDev = 0,1605, HW=0,0035, CI = [0,3071, 0,3140]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 3,9709, StdDev = 0,8114, HW=0,0124, CI = [3,9585, 3,9833]
-Jobs in System           : Mean = 20,2650, StdDev = 4,7499, HW=0,0727, CI = [20,1922, 20,3377]
-System Utilization       : Mean = 0,6311, StdDev = 0,0908, HW=0,0014, CI = [0,6297, 0,6325]
-Throughput               : Mean = 5,0770, StdDev = 0,6256, HW=0,0096, CI = [5,0674, 5,0866]
-Diverted Jobs            : Mean = 218,5242, StdDev = 98,7550, HW=1,5123, CI = [217,0119, 220,0364]
+Response Time            : Mean = 3,8831, StdDev = 0,7924, HW=0,0172, CI = [3,8659, 3,9002]
+Jobs in System           : Mean = 19,8015, StdDev = 4,7134, HW=0,1021, CI = [19,6994, 19,9036]
+System Utilization       : Mean = 0,6308, StdDev = 0,0916, HW=0,0020, CI = [0,6288, 0,6328]
+Throughput               : Mean = 5,0706, StdDev = 0,6280, HW=0,0136, CI = [5,0570, 5,0842]
+Diverted Jobs            : Mean = 219,5751, StdDev = 99,7026, HW=2,1594, CI = [217,4157, 221,7344]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -94,22 +94,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2790, StdDev = 0,1630, HW=0,0025, CI = [0,2765, 0,2815]
+Spike Server Utilization : Mean = 0,2799, StdDev = 0,1628, HW=0,0035, CI = [0,2763, 0,2834]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 5,5279, StdDev = 1,1212, HW=0,0172, CI = [5,5107, 5,5451]
-Jobs in System           : Mean = 28,1446, StdDev = 6,0183, HW=0,0922, CI = [28,0524, 28,2367]
-System Utilization       : Mean = 0,6306, StdDev = 0,0857, HW=0,0013, CI = [0,6293, 0,6319]
-Throughput               : Mean = 5,0762, StdDev = 0,6225, HW=0,0095, CI = [5,0666, 5,0857]
-Diverted Jobs            : Mean = 208,6551, StdDev = 99,8981, HW=1,5298, CI = [207,1253, 210,1849]
+Response Time            : Mean = 5,4209, StdDev = 1,1034, HW=0,0239, CI = [5,3970, 5,4448]
+Jobs in System           : Mean = 27,5806, StdDev = 6,0156, HW=0,1303, CI = [27,4503, 27,7109]
+System Utilization       : Mean = 0,6303, StdDev = 0,0871, HW=0,0019, CI = [0,6284, 0,6321]
+Throughput               : Mean = 5,0700, StdDev = 0,6255, HW=0,0135, CI = [5,0564, 5,0835]
+Diverted Jobs            : Mean = 208,2869, StdDev = 100,4943, HW=2,1765, CI = [206,1104, 210,4634]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -117,22 +117,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2674, StdDev = 0,1626, HW=0,0025, CI = [0,2649, 0,2699]
+Spike Server Utilization : Mean = 0,2677, StdDev = 0,1643, HW=0,0036, CI = [0,2641, 0,2712]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 7,2009, StdDev = 1,4117, HW=0,0216, CI = [7,1793, 7,2225]
-Jobs in System           : Mean = 36,5801, StdDev = 6,9756, HW=0,1068, CI = [36,4733, 36,6870]
-System Utilization       : Mean = 0,6303, StdDev = 0,0823, HW=0,0013, CI = [0,6290, 0,6316]
-Throughput               : Mean = 5,0757, StdDev = 0,6207, HW=0,0095, CI = [5,0662, 5,0852]
-Diverted Jobs            : Mean = 204,6011, StdDev = 98,9692, HW=1,5156, CI = [203,0855, 206,1166]
+Response Time            : Mean = 7,0903, StdDev = 1,4103, HW=0,0305, CI = [7,0597, 7,1208]
+Jobs in System           : Mean = 35,9908, StdDev = 7,0199, HW=0,1520, CI = [35,8388, 36,1429]
+System Utilization       : Mean = 0,6299, StdDev = 0,0836, HW=0,0018, CI = [0,6281, 0,6317]
+Throughput               : Mean = 5,0693, StdDev = 0,6230, HW=0,0135, CI = [5,0558, 5,0828]
+Diverted Jobs            : Mean = 204,6125, StdDev = 100,0699, HW=2,1673, CI = [202,4452, 206,7799]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -140,22 +140,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2629, StdDev = 0,1609, HW=0,0025, CI = [0,2604, 0,2654]
+Spike Server Utilization : Mean = 0,2626, StdDev = 0,1628, HW=0,0035, CI = [0,2591, 0,2661]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 8,9588, StdDev = 1,6917, HW=0,0259, CI = [8,9329, 8,9847]
-Jobs in System           : Mean = 45,4254, StdDev = 7,6719, HW=0,1175, CI = [45,3080, 45,5429]
-System Utilization       : Mean = 0,6302, StdDev = 0,0808, HW=0,0012, CI = [0,6290, 0,6314]
-Throughput               : Mean = 5,0753, StdDev = 0,6192, HW=0,0095, CI = [5,0659, 5,0848]
-Diverted Jobs            : Mean = 203,2427, StdDev = 97,4324, HW=1,4920, CI = [201,7507, 204,7348]
+Response Time            : Mean = 8,8401, StdDev = 1,6814, HW=0,0364, CI = [8,8037, 8,8765]
+Jobs in System           : Mean = 44,7818, StdDev = 7,7497, HW=0,1678, CI = [44,6140, 44,9497]
+System Utilization       : Mean = 0,6297, StdDev = 0,0816, HW=0,0018, CI = [0,6280, 0,6315]
+Throughput               : Mean = 5,0688, StdDev = 0,6212, HW=0,0135, CI = [5,0554, 5,0823]
+Diverted Jobs            : Mean = 203,1736, StdDev = 98,9237, HW=2,1425, CI = [201,0311, 205,3161]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -163,22 +163,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2613, StdDev = 0,1601, HW=0,0025, CI = [0,2588, 0,2637]
+Spike Server Utilization : Mean = 0,2605, StdDev = 0,1615, HW=0,0035, CI = [0,2570, 0,2640]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 10,7680, StdDev = 1,9748, HW=0,0302, CI = [10,7377, 10,7982]
-Jobs in System           : Mean = 54,5164, StdDev = 8,1836, HW=0,1253, CI = [54,3910, 54,6417]
-System Utilization       : Mean = 0,6302, StdDev = 0,0796, HW=0,0012, CI = [0,6290, 0,6314]
-Throughput               : Mean = 5,0753, StdDev = 0,6191, HW=0,0095, CI = [5,0658, 5,0848]
-Diverted Jobs            : Mean = 203,0275, StdDev = 95,9698, HW=1,4696, CI = [201,5579, 204,4971]
+Response Time            : Mean = 10,6414, StdDev = 1,9838, HW=0,0430, CI = [10,5985, 10,6844]
+Jobs in System           : Mean = 53,8244, StdDev = 8,2977, HW=0,1797, CI = [53,6447, 54,0041]
+System Utilization       : Mean = 0,6297, StdDev = 0,0800, HW=0,0017, CI = [0,6280, 0,6314]
+Throughput               : Mean = 5,0688, StdDev = 0,6212, HW=0,0135, CI = [5,0553, 5,0822]
+Diverted Jobs            : Mean = 202,2919, StdDev = 96,9041, HW=2,0987, CI = [200,1931, 204,3906]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -186,22 +186,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2606, StdDev = 0,1586, HW=0,0024, CI = [0,2582, 0,2631]
+Spike Server Utilization : Mean = 0,2598, StdDev = 0,1593, HW=0,0035, CI = [0,2563, 0,2632]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 12,6091, StdDev = 2,2603, HW=0,0346, CI = [12,5745, 12,6437]
-Jobs in System           : Mean = 63,7637, StdDev = 8,5815, HW=0,1314, CI = [63,6323, 63,8951]
-System Utilization       : Mean = 0,6302, StdDev = 0,0787, HW=0,0012, CI = [0,6290, 0,6314]
-Throughput               : Mean = 5,0753, StdDev = 0,6190, HW=0,0095, CI = [5,0658, 5,0847]
-Diverted Jobs            : Mean = 203,1071, StdDev = 94,8756, HW=1,4529, CI = [201,6543, 204,5600]
+Response Time            : Mean = 12,4835, StdDev = 2,2431, HW=0,0486, CI = [12,4349, 12,5320]
+Jobs in System           : Mean = 63,0575, StdDev = 8,6189, HW=0,1867, CI = [62,8709, 63,2442]
+System Utilization       : Mean = 0,6297, StdDev = 0,0794, HW=0,0017, CI = [0,6280, 0,6314]
+Throughput               : Mean = 5,0689, StdDev = 0,6215, HW=0,0135, CI = [5,0554, 5,0823]
+Diverted Jobs            : Mean = 201,9918, StdDev = 94,9966, HW=2,0574, CI = [199,9344, 204,0493]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -209,22 +209,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2605, StdDev = 0,1572, HW=0,0024, CI = [0,2581, 0,2629]
+Spike Server Utilization : Mean = 0,2596, StdDev = 0,1586, HW=0,0034, CI = [0,2561, 0,2630]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 14,4682, StdDev = 2,5461, HW=0,0390, CI = [14,4292, 14,5072]
-Jobs in System           : Mean = 73,0960, StdDev = 8,8515, HW=0,1355, CI = [72,9604, 73,2315]
-System Utilization       : Mean = 0,6302, StdDev = 0,0781, HW=0,0012, CI = [0,6290, 0,6314]
-Throughput               : Mean = 5,0751, StdDev = 0,6186, HW=0,0095, CI = [5,0657, 5,0846]
-Diverted Jobs            : Mean = 202,6617, StdDev = 93,5074, HW=1,4319, CI = [201,2298, 204,0936]
+Response Time            : Mean = 14,3402, StdDev = 2,5251, HW=0,0547, CI = [14,2856, 14,3949]
+Jobs in System           : Mean = 72,3736, StdDev = 8,9649, HW=0,1942, CI = [72,1795, 72,5678]
+System Utilization       : Mean = 0,6297, StdDev = 0,0788, HW=0,0017, CI = [0,6280, 0,6314]
+Throughput               : Mean = 5,0688, StdDev = 0,6213, HW=0,0135, CI = [5,0554, 5,0823]
+Diverted Jobs            : Mean = 201,7656, StdDev = 93,8442, HW=2,0325, CI = [199,7332, 203,7981]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -232,22 +232,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2604, StdDev = 0,1562, HW=0,0024, CI = [0,2581, 0,2628]
+Spike Server Utilization : Mean = 0,2595, StdDev = 0,1575, HW=0,0034, CI = [0,2561, 0,2629]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 16,3577, StdDev = 2,8387, HW=0,0435, CI = [16,3142, 16,4011]
-Jobs in System           : Mean = 82,5797, StdDev = 9,1376, HW=0,1399, CI = [82,4398, 82,7196]
-System Utilization       : Mean = 0,6303, StdDev = 0,0776, HW=0,0012, CI = [0,6291, 0,6315]
-Throughput               : Mean = 5,0750, StdDev = 0,6177, HW=0,0095, CI = [5,0655, 5,0844]
-Diverted Jobs            : Mean = 203,2454, StdDev = 92,2516, HW=1,4127, CI = [201,8327, 204,6580]
+Response Time            : Mean = 16,2316, StdDev = 2,8289, HW=0,0613, CI = [16,1703, 16,2928]
+Jobs in System           : Mean = 81,8533, StdDev = 9,1972, HW=0,1992, CI = [81,6541, 82,0525]
+System Utilization       : Mean = 0,6298, StdDev = 0,0782, HW=0,0017, CI = [0,6281, 0,6315]
+Throughput               : Mean = 5,0686, StdDev = 0,6205, HW=0,0134, CI = [5,0552, 5,0821]
+Diverted Jobs            : Mean = 202,4750, StdDev = 93,2830, HW=2,0203, CI = [200,4547, 204,4953]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -255,22 +255,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2605, StdDev = 0,1551, HW=0,0024, CI = [0,2582, 0,2629]
+Spike Server Utilization : Mean = 0,2595, StdDev = 0,1564, HW=0,0034, CI = [0,2561, 0,2629]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 18,2555, StdDev = 3,1560, HW=0,0483, CI = [18,2072, 18,3038]
-Jobs in System           : Mean = 92,1051, StdDev = 9,3430, HW=0,1431, CI = [91,9621, 92,2482]
-System Utilization       : Mean = 0,6303, StdDev = 0,0773, HW=0,0012, CI = [0,6291, 0,6315]
-Throughput               : Mean = 5,0748, StdDev = 0,6170, HW=0,0094, CI = [5,0654, 5,0843]
-Diverted Jobs            : Mean = 203,3427, StdDev = 91,2559, HW=1,3974, CI = [201,9453, 204,7401]
+Response Time            : Mean = 18,1158, StdDev = 3,1880, HW=0,0690, CI = [18,0467, 18,1848]
+Jobs in System           : Mean = 91,3019, StdDev = 9,5269, HW=0,2063, CI = [91,0956, 91,5083]
+System Utilization       : Mean = 0,6298, StdDev = 0,0777, HW=0,0017, CI = [0,6281, 0,6315]
+Throughput               : Mean = 5,0686, StdDev = 0,6201, HW=0,0134, CI = [5,0551, 5,0820]
+Diverted Jobs            : Mean = 202,1124, StdDev = 92,3627, HW=2,0004, CI = [200,1120, 204,1128]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -278,22 +278,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2605, StdDev = 0,1545, HW=0,0024, CI = [0,2582, 0,2629]
+Spike Server Utilization : Mean = 0,2596, StdDev = 0,1555, HW=0,0034, CI = [0,2562, 0,2629]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 20,1463, StdDev = 3,4654, HW=0,0531, CI = [20,0932, 20,1993]
-Jobs in System           : Mean = 101,5920, StdDev = 9,5961, HW=0,1469, CI = [101,4451, 101,7390]
-System Utilization       : Mean = 0,6303, StdDev = 0,0771, HW=0,0012, CI = [0,6292, 0,6315]
-Throughput               : Mean = 5,0747, StdDev = 0,6165, HW=0,0094, CI = [5,0653, 5,0842]
-Diverted Jobs            : Mean = 202,8594, StdDev = 90,5032, HW=1,3859, CI = [201,4735, 204,2453]
+Response Time            : Mean = 20,0288, StdDev = 3,4977, HW=0,0758, CI = [19,9530, 20,1045]
+Jobs in System           : Mean = 100,8822, StdDev = 9,7321, HW=0,2108, CI = [100,6714, 101,0930]
+System Utilization       : Mean = 0,6298, StdDev = 0,0772, HW=0,0017, CI = [0,6281, 0,6315]
+Throughput               : Mean = 5,0685, StdDev = 0,6199, HW=0,0134, CI = [5,0551, 5,0819]
+Diverted Jobs            : Mean = 202,5715, StdDev = 91,3843, HW=1,9792, CI = [200,5923, 204,5507]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -301,22 +301,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2607, StdDev = 0,1542, HW=0,0024, CI = [0,2583, 0,2630]
+Spike Server Utilization : Mean = 0,2596, StdDev = 0,1544, HW=0,0033, CI = [0,2563, 0,2630]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 22,0574, StdDev = 3,7711, HW=0,0577, CI = [21,9997, 22,1152]
-Jobs in System           : Mean = 111,1806, StdDev = 9,8480, HW=0,1508, CI = [111,0298, 111,3314]
-System Utilization       : Mean = 0,6304, StdDev = 0,0766, HW=0,0012, CI = [0,6292, 0,6315]
-Throughput               : Mean = 5,0746, StdDev = 0,6160, HW=0,0094, CI = [5,0652, 5,0840]
-Diverted Jobs            : Mean = 202,8919, StdDev = 89,9899, HW=1,3780, CI = [201,5139, 204,2700]
+Response Time            : Mean = 21,9442, StdDev = 3,7950, HW=0,0822, CI = [21,8620, 22,0264]
+Jobs in System           : Mean = 110,4763, StdDev = 9,8873, HW=0,2141, CI = [110,2622, 110,6904]
+System Utilization       : Mean = 0,6299, StdDev = 0,0771, HW=0,0017, CI = [0,6282, 0,6316]
+Throughput               : Mean = 5,0683, StdDev = 0,6191, HW=0,0134, CI = [5,0549, 5,0818]
+Diverted Jobs            : Mean = 202,3635, StdDev = 90,8720, HW=1,9681, CI = [200,3954, 204,3316]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -324,22 +324,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2607, StdDev = 0,1532, HW=0,0023, CI = [0,2584, 0,2631]
+Spike Server Utilization : Mean = 0,2598, StdDev = 0,1542, HW=0,0033, CI = [0,2564, 0,2631]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 23,9747, StdDev = 4,0970, HW=0,0627, CI = [23,9119, 24,0374]
-Jobs in System           : Mean = 120,7991, StdDev = 10,0074, HW=0,1532, CI = [120,6459, 120,9524]
-System Utilization       : Mean = 0,6305, StdDev = 0,0766, HW=0,0012, CI = [0,6293, 0,6316]
-Throughput               : Mean = 5,0746, StdDev = 0,6158, HW=0,0094, CI = [5,0651, 5,0840]
-Diverted Jobs            : Mean = 202,5897, StdDev = 89,2932, HW=1,3674, CI = [201,2223, 203,9571]
+Response Time            : Mean = 23,8606, StdDev = 4,1116, HW=0,0890, CI = [23,7716, 23,9497]
+Jobs in System           : Mean = 120,0788, StdDev = 10,1690, HW=0,2202, CI = [119,8585, 120,2990]
+System Utilization       : Mean = 0,6300, StdDev = 0,0772, HW=0,0017, CI = [0,6283, 0,6317]
+Throughput               : Mean = 5,0683, StdDev = 0,6191, HW=0,0134, CI = [5,0549, 5,0817]
+Diverted Jobs            : Mean = 202,5300, StdDev = 90,3380, HW=1,9565, CI = [200,5735, 204,4866]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -347,22 +347,22 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2609, StdDev = 0,1533, HW=0,0023, CI = [0,2586, 0,2633]
+Spike Server Utilization : Mean = 0,2600, StdDev = 0,1544, HW=0,0033, CI = [0,2566, 0,2633]
 ==================================================================
 INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5120 jobs
-INFO  SimulationFacade [SIM] - Warm-up completed. Running 16384 batches of 1024 jobs...
-[==================================================] 100% | Batch: 16384/16384
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 8192 batches of 1024 jobs...
+[==================================================] 100% | Batch: 8192/8192
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: BATCH MEANS (STEADY STATE)
-SAMPLES (N): 16384
+SAMPLES (N): 8192
 ==================================================================
-Response Time            : Mean = 25,9110, StdDev = 4,4155, HW=0,0676, CI = [25,8434, 25,9786]
-Jobs in System           : Mean = 130,5123, StdDev = 10,2292, HW=0,1566, CI = [130,3557, 130,6690]
-System Utilization       : Mean = 0,6305, StdDev = 0,0768, HW=0,0012, CI = [0,6293, 0,6317]
-Throughput               : Mean = 5,0745, StdDev = 0,6155, HW=0,0094, CI = [5,0651, 5,0839]
-Diverted Jobs            : Mean = 203,3174, StdDev = 89,2920, HW=1,3674, CI = [201,9500, 204,6847]
+Response Time            : Mean = 25,7840, StdDev = 4,3817, HW=0,0949, CI = [25,6891, 25,8789]
+Jobs in System           : Mean = 129,7265, StdDev = 10,3973, HW=0,2252, CI = [129,5013, 129,9517]
+System Utilization       : Mean = 0,6300, StdDev = 0,0772, HW=0,0017, CI = [0,6284, 0,6317]
+Throughput               : Mean = 5,0682, StdDev = 0,6185, HW=0,0134, CI = [5,0548, 5,0816]
+Diverted Jobs            : Mean = 202,3467, StdDev = 90,1906, HW=1,9533, CI = [200,3933, 204,3000]
 Avg Active Servers (N)   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -370,27 +370,27 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,2610, StdDev = 0,1536, HW=0,0024, CI = [0,2587, 0,2634]
+Spike Server Utilization : Mean = 0,2601, StdDev = 0,1543, HW=0,0033, CI = [0,2567, 0,2634]
 ==================================================================
 INFO  SiMaxEstimationObjective [OBJ1.2] -
 SI_max Estimation Report
 siMax      | R0 Mean    | SLA Status | Diverted Count  | Diverted %      | Spike Util
 --------------------------------------------------------------------------------------------------------------
-10         | 1,4130     | OK         | 307,8           | 30,06          % | 38,73          %
-20         | 2,5786     | OK         | 242,2           | 23,65          % | 30,80          %
-30         | 3,9709     | OK         | 218,5           | 21,34          % | 27,90          %
-40         | 5,5279     | OK         | 208,7           | 20,38          % | 26,74          %
-50         | 7,2009     | VIOLATED   | 204,6           | 19,98          % | 26,29          %
-60         | 8,9588     | VIOLATED   | 203,2           | 19,85          % | 26,13          %
-70         | 10,7680    | VIOLATED   | 203,0           | 19,83          % | 26,06          %
-80         | 12,6091    | VIOLATED   | 203,1           | 19,83          % | 26,05          %
-90         | 14,4682    | VIOLATED   | 202,7           | 19,79          % | 26,04          %
-100        | 16,3577    | VIOLATED   | 203,2           | 19,85          % | 26,05          %
-110        | 18,2555    | VIOLATED   | 203,3           | 19,86          % | 26,05          %
-120        | 20,1463    | VIOLATED   | 202,9           | 19,81          % | 26,07          %
-130        | 22,0574    | VIOLATED   | 202,9           | 19,81          % | 26,07          %
-140        | 23,9747    | VIOLATED   | 202,6           | 19,78          % | 26,09          %
-150        | 25,9110    | VIOLATED   | 203,3           | 19,86          % | 26,10          %
+10         | 1,3609     | OK         | 314,8           | 30,74          % | 39,53          %
+20         | 2,5043     | OK         | 244,3           | 23,86          % | 31,06          %
+30         | 3,8831     | OK         | 219,6           | 21,44          % | 27,99          %
+40         | 5,4209     | OK         | 208,3           | 20,34          % | 26,77          %
+50         | 7,0903     | VIOLATED   | 204,6           | 19,98          % | 26,26          %
+60         | 8,8401     | VIOLATED   | 203,2           | 19,84          % | 26,05          %
+70         | 10,6414    | VIOLATED   | 202,3           | 19,76          % | 25,98          %
+80         | 12,4835    | VIOLATED   | 202,0           | 19,73          % | 25,96          %
+90         | 14,3402    | VIOLATED   | 201,8           | 19,70          % | 25,95          %
+100        | 16,2316    | VIOLATED   | 202,5           | 19,77          % | 25,95          %
+110        | 18,1158    | VIOLATED   | 202,1           | 19,74          % | 25,96          %
+120        | 20,0288    | VIOLATED   | 202,6           | 19,78          % | 25,96          %
+130        | 21,9442    | VIOLATED   | 202,4           | 19,76          % | 25,98          %
+140        | 23,8606    | VIOLATED   | 202,5           | 19,78          % | 26,00          %
+150        | 25,7840    | VIOLATED   | 202,3           | 19,76          % | 26,01          %
 
 INFO  ObjectiveUtils [OBJ_UTIL] - Data saved to data\objective\simax_estimation.csv
 INFO  BaseChartUtility [CHART] - Chart generated: data/objective/simax_estimation.png

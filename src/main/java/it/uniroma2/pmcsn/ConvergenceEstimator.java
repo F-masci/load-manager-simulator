@@ -114,7 +114,20 @@ public class ConvergenceEstimator {
     }
 
     public static void main(String[] args) {
-        ApplicationConfig config = new ApplicationConfig();
+        ApplicationConfig config = new ApplicationConfig(
+                new ApplicationConfig.LoadConfig(),
+                new ApplicationConfig.ClusterConfig(1, 1, 25, true),
+                new ApplicationConfig.ScalingConfig(
+                        ApplicationConfig.SCALE_OUT_LIMIT, 3.5,
+                        ApplicationConfig.WINDOW_SIZE, 50.0,
+                        ApplicationConfig.SPIKE_UPPER_THRESHOLD,
+                        ApplicationConfig.SPIKE_LOWER_THRESHOLD,
+                        ApplicationConfig.SPIKE_CPU_PERCENTAGE,
+                        ApplicationConfig.VERTICAL_INCREMENT,
+                        true, true
+                ),
+                new ApplicationConfig.ExecutionConfig()
+        );
         run(config);
     }
 

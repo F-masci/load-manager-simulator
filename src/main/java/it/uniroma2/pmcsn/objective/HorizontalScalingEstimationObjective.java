@@ -75,7 +75,7 @@ public class HorizontalScalingEstimationObjective extends BaseObjective {
         Map<Integer, XYSeries> wsSeriesMap = new LinkedHashMap<>();
         cvResults.put(ApplicationConfig.CV_INTERARRIVAL, wsSeriesMap);
 
-        final int[] tunedBatchSize = {8_192, 16_384, 4_096, 2_048, 512};
+        final int[] tunedBatchSize = {16_384, 16_384, 4_096, 2_048, 512};
         final int[] tunedBatchNums = {1_024, 512, 4_096, 8_192, 16_384};
 
         for (int n = 1; n <= 5; n++) {

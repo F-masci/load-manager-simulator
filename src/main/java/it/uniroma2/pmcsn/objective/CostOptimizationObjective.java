@@ -41,7 +41,7 @@ public class CostOptimizationObjective extends BaseObjective {
     public static void main(String[] args) {
 
         final int tunedBatchSize  = 4_096;
-        final int tunedBatchNums  = 1_024;
+        final int tunedBatchNums  = 2_048;
         final int tunedWarmupJobs = 5 * 100000;
 
         LoadConfig baseLoad = new LoadConfig(

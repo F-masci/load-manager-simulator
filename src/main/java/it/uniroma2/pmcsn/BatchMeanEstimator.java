@@ -2,6 +2,7 @@ package it.uniroma2.pmcsn;
 
 import it.uniroma2.pmcsn.builder.SimulationBuilder;
 import it.uniroma2.pmcsn.configs.ApplicationConfig;
+import it.uniroma2.pmcsn.configs.WorkloadType;
 import it.uniroma2.pmcsn.controller.SimulationController;
 import it.uniroma2.pmcsn.controller.Simulator;
 import it.uniroma2.pmcsn.controller.decorator.data.TimeSerieCollector;
@@ -63,7 +64,14 @@ public class BatchMeanEstimator {
     public final static ApplicationConfig[] APPLICATION_CONFIGS = new ApplicationConfig[]{
             // 0: Default
             new ApplicationConfig(),
-            // 1: Routing policy
+            // 1: Simple System
+            new ApplicationConfig(
+                    new ApplicationConfig.LoadConfig(WorkloadType.HYPEREXPONENTIAL, 0.40, 0.25, RoutingPolicy.DETERMINISTIC, 10),
+                    ApplicationConfig.ClusterConfig.fixedServer(1, true),
+                    ApplicationConfig.ScalingConfig.disabled(),
+                    new ApplicationConfig.ExecutionConfig()
+            ),
+            // 2: Routing policy
             new ApplicationConfig(
                     new ApplicationConfig.LoadConfig(
                             ApplicationConfig.WORKLOAD_TYPE,
@@ -75,7 +83,7 @@ public class BatchMeanEstimator {
                 ApplicationConfig.ScalingConfig.disabled(),
                 new ApplicationConfig.ExecutionConfig()
             ),
-            // 2: SI_max estimator
+            // 3: SI_max estimator
             new ApplicationConfig(
                     new ApplicationConfig.LoadConfig(
                             ApplicationConfig.MEAN_INTERARRIVAL, ApplicationConfig.CV_SERVICE,
@@ -87,7 +95,7 @@ public class BatchMeanEstimator {
                     ApplicationConfig.ScalingConfig.disabled(),
                     new ApplicationConfig.ExecutionConfig()
             ),
-            // 3: Vertical Step Sizing
+            // 4: Vertical Step Sizing
             new ApplicationConfig(
                     new ApplicationConfig.LoadConfig(),
                     ApplicationConfig.ClusterConfig.fixedServer(1, true),
@@ -100,14 +108,14 @@ public class BatchMeanEstimator {
                     ),
                     new ApplicationConfig.ExecutionConfig()
             ),
-            // 4: Horizontal Scaling
+            // 5: Horizontal Scaling
             new ApplicationConfig(
                     new ApplicationConfig.LoadConfig(),
                     ApplicationConfig.ClusterConfig.fixedServer(5, true),
                     ApplicationConfig.ScalingConfig.disabled(),
                     new ApplicationConfig.ExecutionConfig()
             ),
-            // 5: Cost analysis
+            // 6: Cost analysis
             new ApplicationConfig(
                     new ApplicationConfig.LoadConfig(),
                     new ApplicationConfig.ClusterConfig(1, 1, 25, true),
@@ -287,6 +295,17 @@ public class BatchMeanEstimator {
         // Gracefully finalize decorators, close streams, and flush records
         collector.finalizeSimulation();
         return finalReport;
+    }
+
+    /**
+     * Logs the final standardized block.
+     */
+    private static void printReport(EstimationReport report) {
+        logger.info("=======================================================================================================================");
+        logger.info("                                                    FINAL ANALYSIS REPORT                                              ");
+        logger.info("=======================================================================================================================");
+        logger.info("{}", report);
+        logger.info("=======================================================================================================================");
     }
 
     /**

@@ -36,7 +36,7 @@ public class SiMaxEstimationObjective extends BaseObjective {
     public static void main(String[] args) {
 
         final int tunedBatchSize  = 1_024;
-        final int tunedBatchNums  = 16_384;
+        final int tunedBatchNums  = 8_192;
         final int tunedWarmupJobs = 5 * tunedBatchSize;
 
         LoadConfig baseLoad = new LoadConfig(
