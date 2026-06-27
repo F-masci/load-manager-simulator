@@ -25,7 +25,7 @@ public class LoadThresholdVerticalScaler extends ThresholdVerticalScaler {
      * @param scalingConfig the scaling configuration
      */
     public LoadThresholdVerticalScaler(ScalingConfig scalingConfig) {
-        this(scalingConfig, 0.5); // Default increment of 50%
+        this(scalingConfig, ApplicationConfig.VERTICAL_INCREMENT);
     }
 
     /**
