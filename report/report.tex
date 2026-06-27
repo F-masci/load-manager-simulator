@@ -1548,7 +1548,7 @@ L'analisi dell'andamento temporale documentato nella Figura~\ref{fig:horizontal_
 \end{figure}
 
 \paragraph{Scaling Verticale:}
-La validazione delle logiche di allocazione delle risorse hardware si è concentrata sulla riconfigurazione dinamica della capacità di calcolo dello Spike Server. In questo scenario, il sistema opera su un singolo server di linea e dirotta i job in eccesso sull'unità di picco ausiliaria. Le soglie di reazione per la modulazione della frequenza core sono state configurate a un valore limite superiore di 3 job concorrenti in coda e a una soglia inferiore di 1 job per il ripristino ordinario. Il timer di \textit{Cooldown} interno del regolatore è stato ridotto a $0.3$ secondi per garantire reattività immediata. La traccia di stress-test iniettata nel sistema prevede due flussi programmati distinti (mostrati in Figura~\ref{fig:vertical_scaling_trace_timeline}).
+Le soglie di reazione per la modulazione della frequenza core sono state configurate a un valore limite superiore di 3 job concorrenti in coda e a una soglia inferiore di 1 job per il ripristino ordinario. Il timer di \textit{Cooldown} interno del regolatore è stato configurato a $4.0$ secondi. La traccia di stress-test iniettata nel sistema prevede due flussi programmati distinti (mostrati in Figura~\ref{fig:vertical_scaling_trace_timeline}).
 
 % =========================================================================
 % LINEA DEL TEMPO DEL CARICO DI LAVORO
@@ -1615,9 +1615,9 @@ La validazione delle logiche di allocazione delle risorse hardware si è concent
     \label{fig:vertical_scaling_trace_timeline}
 \end{figure}
 
-I risultati della simulazione, illustrati graficamente nella Figura~\ref{fig:vertical_scaling_dynamics}, dimostrano una perfetta coincidenza tra il comportamento atteso e le transizioni osservate. Al secondo $t = 2.0$, il cumulo di task all'interno dello Spike Server supera la soglia critica di 3 job attivi. Il controllore verticale interviene senza ritardi temporali registrando 1 azione di \textit{Speed Up}, la quale innalza istantaneamente il fattore di capacità elaborativa dell'infrastruttura dal valore base di 4.0 a un livello di picco pari a 8.0. Grazie a questa accelerazione controllata, la coda viene smaltita rapidamente: al secondo $t = 4.4$, il numero di job residenti scende sotto la soglia minima di 1. Il software applica quindi l'esatta transizione duale di \textit{Speed Down}, riportando il fattore di capacità al valore nominale di 4.0. 
+I risultati della simulazione, illustrati graficamente nella Figura~\ref{fig:vertical_scaling_dynamics}, dimostrano una perfetta coincidenza tra il comportamento atteso e le transizioni osservate. All'istante $t = 1.9\text{ s}$, il cumulo di task all'interno dello Spike Server supera la soglia critica di 3 job attivi (toccando quota 4). Il controllore verticale interviene istantaneamente registrando 1 azione di \textit{Speed Up}, la quale innalza il fattore di capacità elaborativa dal valore base di 4.0 a un livello di picco pari a 8.0. A causa del timer di \textit{Cooldown} di 4.0 secondi, la configurazione di picco viene mantenuta in modo conservativo fino a $t = 7.7\text{ s}$, istante in cui la coda scende sotto la soglia minima di 1. Il software applica quindi l'azione di \textit{Speed Down}, riportando il fattore di capacità al valore nominale di 4.0.
 
-Il perfetto confinamento di queste transizioni all'interno della finestra di massimo carico giustifica il valore medio complessivo del fattore di capacità elaborativa registrato nel report finale, attestatosi a 4.3840. Il bilancio di fine simulazione conferma l'esecuzione di esattamente 1 azione di Speed Up e 1 azione di Speed Down, validando la totale assenza di fenomeni di instabilità o derive computazionali nelle routine di controllo verticale.
+L'evoluzione temporale di questa transizione giustifica il valore medio complessivo del moltiplicatore di velocità dello Spike Server registrato nei log di simulazione, attestatosi a \textbf{4.9280} (a fronte del valore teorico descrittivo di 4.3840 calcolato con cooldown nullo). Il bilancio conferma l'esecuzione di esattamente 1 azione di Speed Up e 1 azione di Speed Down, escludendo fenomeni di instabilità.
 
 \begin{figure}[H]
     \centering
@@ -1913,7 +1913,7 @@ La stima dei parametri per lo scaling orizzontale è stata condotta tramite la c
 
 L'obiettivo dell'esperimento non è stato quello di osservare direttamente la dinamica del controller, bensì di ricostruire la frontiera prestazionale delle configurazioni statiche da 1 a 5 Web Server al variare del tasso di arrivo $\lambda$. Per ogni coppia $(\lambda, N)$ è stata preliminarmente eseguita una verifica di convergenza a orizzonte finito tramite repliche indipendenti; solo le configurazioni classificate come convergenti sono state poi analizzate a regime con Batch Means, usando il numero di job di convergenza come \textit{warm-up}. Le configurazioni non convergenti o inconclusive sono state escluse dalla stima steady-state e riportate esplicitamente nel CSV e nel grafico.
 
-I risultati, sintetizzati nella Tabella~\ref{tab:horizontal_scaling_results}, evidenziano che con SLA pari a $6\text{ s}$ la regione ammissibile rimane coerente con il carico nominale del progetto, ma diventa più selettiva nei regimi ad alta intensità. Il comportamento atteso è quello tipico di una frontiera di capacità: a parità di $\lambda$, l'aumento del numero di Web Server deve ridurre il tempo di risposta, mentre a parità di server l'incremento del carico deve avvicinare progressivamente il sistema alla saturazione. I risultati seguono questa struttura. Per carichi prossimi a $\lambda = 5$, che rappresentano il centro dello scenario di riferimento, un singolo Web Server è ancora sostenibile, con $R_0 = 5.5212\text{ s}$ e intervallo di confidenza $[5.4926, 5.5498]\text{ s}$ interamente sotto soglia. Anche a $\lambda = 6.5$ la configurazione a un solo server resta formalmente ammissibile, con $R_0 = 5.8807\text{ s}$, ma il margine rispetto allo SLA diventa molto ridotto. L'aggiunta di un secondo server riduce drasticamente la latenza, portandola a $0.7296\text{ s}$ per $\lambda = 5$ e a $1.5517\text{ s}$ per $\lambda = 6.5$, mostrando che in questa regione due nodi sono prestazionalmente conservativi.
+I risultati, sintetizzati nella Tabella~\ref{tab:horizontal_scaling_results}, evidenziano che con SLA pari a $6\text{ s}$ la regione ammissibile rimane coerente con il carico nominale del progetto, ma diventa più selettiva nei regimi ad alta intensità. Il comportamento atteso è quello tipico di una frontiera di capacità: a parità di $\lambda$, l'aumento del numero di Web Server deve ridurre il tempo di risposta, mentre a parità di server l'incremento del carico deve avvicinare progressivamente il sistema alla saturazione. I risultati seguono questa struttura. Per carichi prossimi a $\lambda = 5$, che rappresentano il centro dello scenario di riferimento, un singolo Web Server è ancora sostenibile, con $R_0 = 5.5130\text{ s}$ e intervallo di confidenza $[5.4847, 5.5413]\text{ s}$ interamente sotto soglia. Anche a $\lambda = 6.5$ la configurazione a un solo server resta formalmente ammissibile, con $R_0 = 5.8808\text{ s}$, ma il margine rispetto allo SLA diventa molto ridotto. L'aggiunta di un secondo server riduce drasticamente la latenza, portandola a $0.7316\text{ s}$ per $\lambda = 5$ e a $1.5519\text{ s}$ per $\lambda = 6.5$, mostrando che in questa regione due nodi sono prestazionalmente conservativi.
 
 \begin{table}[H]
     \centering
@@ -1947,7 +1947,7 @@ In conclusione, il dimensionamento dello scaling orizzontale dipende dal carico 
 \subsection{Analisi}
 
 \paragraph{Analisi Economica e Trade-off dei Costi}
-L'analisi dei costi operativi è stata implementata nella classe \texttt{CostOptimizationObjective}, mantenendo fisso il limite superiore $R^{max}=6.0\text{ s}$ e valutando congiuntamente diverse soglie di \textit{Scale In} e diversi tempi di \textit{Cooldown}. La campagna è stata costruita sulla configurazione completa del sistema: politica \textit{Least Loaded}, $SI_{max}=40$, routing verso lo Spike Server basato sulla sola soglia superiore, scaling orizzontale e verticale abilitati, \textit{Window Size} pari a $100\text{ s}$ e \textit{Cooldown} variabile tra $5$, $10$, $50$ e $100\text{ s}$.
+L'analisi dei costi operativi è stata implementata nella classe \texttt{CostOptimizationObjective}, mantenendo fisso il limite superiore $R^{max}=6.0\text{ s}$ e valutando congiuntamente diverse soglie di \textit{Scale In} e diversi tempi di \textit{Cooldown}. La campagna è stata costruita sulla configurazione completa del sistema: politica \textit{Least Loaded}, $SI_{max}=40$, routing verso lo Spike Server basato sulla sola soglia superiore, scaling orizzontale e verticale abilitati, \textit{Window Size} pari a $100$ completamenti e \textit{Cooldown} variabile tra $5$, $10$, $50$ e $100\text{ s}$.
 
 Per questa campagna sperimentale la calibrazione dei Batch Means è stata effettuata tramite l'approccio dinamico, poiché il metodo ACF richiedeva run molto lunghe e costose. La stima preliminare ha individuato un cutoff ACF pari a $1221$, con $409$ batch da $12210$ job e lag-1 ACF pari a $-0.0531$; il metodo dinamico ha invece raggiunto lag-1 ACF pari a $0.0050$ con $34$ batch da $4096$ job e precisione relativa pari a $0.0293$. L'esperimento finale usa quindi un arrotondamento superiore, pari a $64$ batch da $8192$ job, e un warm-up prudenziale pari a $350000$ job. La stima di convergenza a orizzonte finito aveva indicato stabilizzazione già a $60000$ job, con $R_0=3.3309\text{ s}$ e HW pari a $0.0343\text{ s}$; la scelta di amplificare il warm-up riduce ulteriormente il rischio di includere transitori residui.
 
@@ -2158,7 +2158,7 @@ La Tabella~\ref{tab:burstiness_results} evidenzia un risultato importante: l'inc
 Le figure confermano la natura adattiva dell'architettura. Il throughput segue correttamente il tasso di arrivo, segnalando assenza di perdita strutturale di capacità; il numero di job nel sistema cresce con $\lambda$, ma resta compatibile con tempi medi di risposta sotto soglia; le azioni di scaling aumentano nelle regioni più intense, ma non producono divergenze. La presenza delle barre di deviazione standard e del contorno dell'intervallo di confidenza permette inoltre di distinguere il rumore statistico dalle tendenze effettive: le curve restano separate soprattutto per le metriche operative, mentre il tempo di risposta mostra intervalli contenuti rispetto al margine disponibile sullo SLA.
 
 \section{Obiettivo di Miglioramento}
-L'ultimo obiettivo del progetto introduce una modifica al meccanismo di dirottamento verso lo Spike Server. A differenza delle analisi precedenti, che calibrano i parametri dell'architettura di base, questa sezione studia una variazione del modello: la sostituzione della soglia rigida su $SI$ con un \textbf{meccanismo a bande}. Per mantenere lo stesso percorso metodologico usato nel resto del lavoro, la sezione presenta prima la modifica concettuale, poi le specifiche operative, quindi l'implementazione computazionale e infine i risultati sperimentali. Le parti di verifica e validazione del meccanismo migliorativo sono lasciate come attività da completare.
+L'ultimo obiettivo del progetto introduce una modifica al meccanismo di dirottamento verso lo Spike Server. A differenza delle analisi precedenti, che calibrano i parametri dell'architettura di base, questa sezione studia una variazione del modello: la sostituzione della soglia rigida su $SI$ con un \textbf{meccanismo a bande}. Per mantenere lo stesso percorso metodologico usato nel resto del lavoro, la sezione presenta la modifica concettuale del modello, la specifica formale delle regole di transizione, l'implementazione computazionale nell'infrastruttura Java, e infine le relative fasi di verifica funzionale e validazione stazionaria tramite campagne sperimentali.
 
 \subsection{Modifica al Modello Concettuale}
 Nel modello base il router decide il dirottamento osservando il solo valore corrente dello \textit{Spike Indicator} del Web Server candidato. Se $SI_i(t)\ge SI_{max}$, il job viene inviato allo Spike Server; non appena un successivo arrivo osserva un valore inferiore alla soglia, il traffico può tornare immediatamente sul Web Server ordinario. Questa logica è semplice, ma può produrre instabilità decisionale quando $SI_i(t)$ oscilla vicino alla soglia.
@@ -2184,33 +2184,50 @@ La specifica del meccanismo a banda è formalizzata tramite una variabile di sta
 Un job candidato per il server $i$ viene quindi instradato allo Spike Server se e solo se $M_i(t^+)=1$. In termini operazionali, l'introduzione della banda tende ad aumentare la probabilità di dirottamento $q_i$ rispetto al caso a soglia rigida, poiché il server resta più a lungo in modalità spike dopo l'attivazione. Il comportamento atteso è quindi duplice: da un lato una riduzione del tempo medio di risposta, poiché il Web Server ordinario viene protetto più a lungo; dall'altro un aumento dell'utilizzazione dello Spike Server e del relativo costo operativo.
 
 \subsection{Modello Computazionale}
-La modifica è implementata nella classe \texttt{ThresholdSpikeServerRoutingStrategy}. La classe mantiene una mappa \texttt{spikeModeMap}, indicizzata per identificativo del Web Server, che conserva lo stato corrente del routing. Il parametro \texttt{siLow} rappresenta la soglia inferiore; quando non è specificato, assume lo stesso valore di $SI_{max}$ e il comportamento coincide con il modello base.
+La modifica è implementata nella classe \texttt{ThresholdSpikeServerRoutingStrategy}. Al fine di garantire la massima pulizia architetturale, le decisioni di routing sono state separate in due percorsi logici distinti a seconda che il meccanismo a bande sia attivo o disattivato:
 
 \begin{lstlisting}[language=Java]
-int currentSiLow = (siLow == -1) ? siMax : siLow;
-boolean currentlyInSpike =
-    spikeModeMap.getOrDefault(targetServer.getId(), false);
-
-boolean nextState;
-if (!currentlyInSpike) {
-    nextState = targetServer.getSpikeIndicator() >= siMax;
-} else {
-    nextState = targetServer.getSpikeIndicator() > currentSiLow;
+@Override
+public boolean shouldRouteToSpike(WebServer targetServer, int siMax) {
+    if (siLow == -1 || siLow == siMax) {
+        return shouldRouteWithoutBand(targetServer, siMax);
+    } else {
+        return shouldRouteWithBand(targetServer, siMax, siLow);
+    }
 }
 
-if (nextState != currentlyInSpike) {
-    spikeModeMap.put(targetServer.getId(), nextState);
-    stateChanges++;
+private boolean shouldRouteWithoutBand(WebServer targetServer, int siMax) {
+    return targetServer.getSpikeIndicator() >= siMax;
+}
+
+private boolean shouldRouteWithBand(WebServer targetServer, int siMax, int siLow) {
+    boolean currentlyInSpike = spikeModeMap.getOrDefault(targetServer.getId(), false);
+
+    boolean nextState;
+    if (!currentlyInSpike) {
+        nextState = targetServer.getSpikeIndicator() >= siMax;
+    } else {
+        nextState = targetServer.getSpikeIndicator() > siLow;
+    }
+
+    if (nextState != currentlyInSpike) {
+        spikeModeMap.put(targetServer.getId(), nextState);
+        stateChanges++;
+    }
+
+    return nextState;
 }
 \end{lstlisting}
-
-La campagna sperimentale è realizzata dalla classe \texttt{VerticalScalerStabilityObjective}, che confronta quattro ampiezze di banda, pari a $0$, $5$, $10$ e $20$, mantenendo fisso $SI_{max}=40$ e variando $\lambda$ e coefficiente di variazione degli interarrivi. Le metriche osservate sono tempo medio di risposta, utilizzazione complessiva del sistema e utilizzazione dello Spike Server, riportate con deviazione standard e intervallo di confidenza.
 
 \subsection{Verifica e Validazione}
 \textbf{TODO.} La verifica funzionale del meccanismo a banda dovrà controllare esplicitamente le transizioni di stato del router, accertando che l'attivazione avvenga solo per $SI\ge SI_{max}$ e che il rilascio richieda il superamento verso il basso della soglia $SI_{low}$. La validazione dovrà invece confrontare il comportamento aggregato del meccanismo migliorativo con un modello indipendente o con casi limite controllati, verificando che il meccanismo a bande produca effettivamente una riduzione del \textit{chattering} senza alterare la conservazione del flusso.
 
 \subsection{Risultati e Considerazioni}
-La classe \texttt{VerticalScalerStabilityObjective} confronta quattro ampiezze di banda, pari a $0$, $5$, $10$ e $20$, mantenendo fisso $SI_{max}=40$ e variando $\lambda$ e il coefficiente di variazione degli interarrivi. Una banda nulla corrisponde alla soglia rigida: il traffico viene dirottato solo quando il server supera la soglia superiore e il rilascio avviene immediatamente appena il valore torna sotto soglia. Le bande positive introducono invece una soglia inferiore $SI_{low}$, stabilizzando la decisione del router. L'attesa progettuale è che bande più ampie riducano l'intermittenza del controllo, migliorando la regolarità del tempo di risposta, ma aumentando l'utilizzo medio dello Spike Server.
+La campagna sperimentale è realizzata dalla classe \texttt{VerticalScalerStabilityObjective}, che confronta quattro ampiezze di banda, pari a $0$, $5$, $10$ e $20$, mantenendo fisso $SI_{max}=40$ e variando $\lambda$ e coefficiente di variazione degli interarrivi. Le metriche osservate sono tempo medio di risposta, utilizzazione complessiva del sistema e utilizzazione dello Spike Server, riportate con deviazione standard e intervallo di confidenza.
+
+Una banda nulla corrisponde alla soglia rigida: il traffico viene dirottato solo quando il server supera la soglia superiore e il rilascio avviene immediatamente appena il valore torna sotto soglia. Le bande positive introducono invece una soglia inferiore $SI_{low}$, stabilizzando la decisione del router.
+
+L'attesa progettuale è che bande più ampie riducano l'intermittenza del controllo, migliorando la regolarità del tempo di risposta, ma aumentando l'utilizzo medio dello Spike Server.
 
 \begin{table}[H]
     \centering
