@@ -2366,9 +2366,9 @@ La validazione è stata condotta in orizzonte infinito, con misure stazionarie e
 \subsection{Validazione della Stazione Singola Iperesponenziale}
 Il primo scenario di validazione isola una singola stazione \textit{Processor Sharing}, eliminando ogni effetto dovuto al routing, allo Spike Server e agli algoritmi di scaling. La rete JMT di riferimento è composta da una sorgente aperta, una coda a capacità illimitata e un sink finale. Sia gli interarrivi sia i tempi di servizio seguono una distribuzione iperesponenziale a due rami, con tasso medio di arrivo $\lambda = 2.5\text{ job/s}$, tasso medio di servizio $\mu = 4.0\text{ job/s}$ e coefficiente di variazione $C_V = 4.0$.
 
-La parametrizzazione JMT della distribuzione $H_2$ è stata impostata con probabilità di ramo $p = 0.030776$; per gli interarrivi sono stati usati $\lambda_1 = 0.15388$ e $\lambda_2 = 4.84612$, mentre per i servizi $\lambda_1 = 0.24621$ e $\lambda_2 = 7.75379$. Il modello JMT è stato eseguito con seed $123456789$, stop statistico disabilitato, $100000000$ campioni massimi e intervalli di confidenza al $99\%$ con errore relativo massimo pari a $0.03$. Nel simulatore Java è stata usata una run a Batch Means da $512$ batch di $16384$ job, con warm-up nullo, coerentemente con la configurazione già impiegata nella verifica statistica.
+Il modello JMT è stato eseguito con seed $123456789$, stop statistico disabilitato, $100000000$ campioni massimi e intervalli di confidenza al $99\%$ con errore relativo massimo pari a $0.03$.
 
-Prima del confronto diretto, la dimensione dei batch è stata stimata tramite l'algoritmo di \textit{Batch Means Estimator}. L'output, riportato in Tabella~\ref{tab:validation_hyperexp_batch}, mostra che il metodo dinamico raggiunge simultaneamente indipendenza e precisione relativa, mentre il metodo basato su ACF produce una struttura più ampia e conservativa.
+Prima del confronto diretto, la dimensione dei batch è stata stimata tramite l'algoritmo di \textit{Batch Means Estimator}. È stata usata una run da $512$ batch di $16384$ job, con warm-up nullo, coerentemente con la configurazione già impiegata nella verifica funzionale (l'output viene riportato in Tabella~\ref{tab:validation_hyperexp_batch}).
 
 \begin{table}[htbp]
     \centering
@@ -2446,9 +2446,9 @@ Per isolare il solo comportamento del routing, entrambi gli autoscaler sono stat
 
 Questa costruzione rappresenta una semplificazione esplicita rispetto alla \textit{ThresholdSpikeServerRoutingStrategy} implementata nel simulatore Java: JMT non esegue lo stesso controllo oggetto-per-oggetto sul valore istantaneo di $SI$ del Web Server, ma ne riproduce l'effetto macroscopico mediante abilitazione e inibizione delle transizioni. Il confronto va quindi interpretato come validazione delle metriche globali del sistema a due livelli, non come equivalenza perfetta delle singole decisioni di routing.
 
-Anche per questo scenario è stata eseguita una stima preliminare dei Batch Means sul tempo di risposta globale. La nuova stima, riportata in Tabella~\ref{tab:validation_system_batch}, ha individuato un cutoff pari a $234$ e ha quindi suggerito batch da $2340$ job. La traccia disponibile per questa campagna contiene il risultato del metodo ACF; non viene pertanto attribuito un esito al metodo dinamico.
+Anche per questo scenario è stata eseguita una stima preliminare dei Batch Means sul tempo di risposta globale. La nuova stima, riportata in Tabella~\ref{tab:validation_system_batch}, ha individuato un cutoff pari a $234$ e ha quindi suggerito batch da $2340$ job.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \small
     \renewcommand{\arraystretch}{1.3}
@@ -2492,7 +2492,7 @@ Anche per questo scenario è stata eseguita una stima preliminare dei Batch Mean
 
 La campagna Java definitiva è stata configurata con $4096$ batch da $4096$ job, coerentemente con l'arrotondamento superiore della struttura suggerita dalla stima ACF. I risultati in Tabella~\ref{tab:validation_system_comparison} mostrano una buona aderenza tra le due implementazioni indipendenti. Il throughput, indice particolarmente sensibile alla corretta conservazione del flusso, differisce dello $0.34\%$ e gli intervalli di confidenza si sovrappongono. Anche il numero medio di job nel sistema presenta uno scarto contenuto, pari a circa $0.46\%$, con sovrapposizione tra gli intervalli. Il tempo di risposta medio del simulatore Java risulta leggermente inferiore a quello JMT ($0.8998\text{ s}$ contro $0.9043\text{ s}$), con uno scostamento relativo di circa $0.50\%$ e intervalli ancora sovrapposti. Il nuovo risultato rafforza quindi la validazione: le differenze residue sono compatibili sia con l'incertezza statistica sia con la semplificazione adottata in JMT per approssimare il router a soglia.
 
-\begin{table}[t]
+\begin{table}[h]
     \centering
     \small
     \renewcommand{\arraystretch}{1.3}
