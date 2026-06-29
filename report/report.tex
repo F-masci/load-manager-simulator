@@ -1851,7 +1851,7 @@ I parametri $p$, $m_1$ e $m_2$ sono calcolati con la parametrizzazione bilanciat
 % VERIFICA
 % =========================================================================
 \section{Verifica del Simulatore}
-La fase di verifica del simulatore rappresenta il passaggio metodologico fondamentale per certificare la correttezza intrinseca del software sviluppato, garantendo che la traduzione del modello a reti di code all'interno dell'architettura a oggetti dell'applicativo Java sia rigorosa e priva di difetti di programmazione o di interpretazione logica. Il processo di verifica si concentra sull'analisi di coerenza strutturale, accertando che il motore di simulazione a eventi discreti esegua le transizioni del vettore di stato $S(t)$ e la rischedulazione della \textit{Event List} in esatta conformità con le specifiche matematiche e algoritmiche formalizzate nei capitoli precedenti.
+La fase di verifica del simulatore rappresenta il passaggio metodologico fondamentale per certificare la correttezza intrinseca del software sviluppato, garantendo che la traduzione del modello a reti di code all'interno dell'architettura a oggetti dell'applicativo Java sia rigorosa e priva di difetti di programmazione o di interpretazione logica.
 
 A tale scopo, l'intera codebase è stata dotata di una suite sistematica di test automatizzati, ingegnerizzata per operare in regime di integrazione continua, tramite l'utilizzo di strumenti di continuous integration, in modo da isolare precocemente eventuali regressioni funzionali. Il piano di test adotta un approccio modulare e rigidamente strutturato, sottoponendo i singoli componenti core a \textit{corner cases} e scenari limite deterministici per verificarne la stabilità e l'accuratezza numerica. 
 
@@ -1947,15 +1947,13 @@ Lo scostamento relativo risultante tra l'aspettativa teorica di conservazione, d
 \subsection{Verifica delle Logiche di Routing}
 La correttezza del modulo di \textit{Load Balancing} e della commutazione dinamica delle rotte è stata sottoposta a un processo di verifica operato tramite simulazioni \textit{Trace-Driven}. Questo approccio consente di analizzare puntualmente le transizioni di stato del router in corrispondenza di sequenze d'ingresso note, confrontando i vettori di carico istantanei con i flussi attesi e accertando la totale assenza di derive logiche nelle politiche di ripartizione.
 
-L'obiettivo di questa verifica non è misurare una prestazione media, ma controllare che ciascuna decisione locale del router coincida con la regola algoritmica implementata. Per questo motivo sono state usate tracce deterministiche, nelle quali istanti di arrivo e tempi di servizio sono noti a priori: ci si attende una rotazione esatta per il Round Robin, una scelta del nodo meno occupato per il Least Loaded, una dispersione non deterministica per il Random e un comportamento intermedio per il Power of Two Choices.
-
 \paragraph{Verifica Funzionale delle Politiche di Distribuzione dei Job:}
 La verifica della correttezza del modulo di routing si è concentrata esclusivamente sull'analisi del comportamento atteso nella ripartizione spaziale e temporale dei job all'interno del pool dei quattro server. A tale scopo, il simulatore è stato alimentato con una traccia d'ingresso deterministica composta da 10 job complessivi, esplicitati dalle rispettive coppie di valori $(\text{istante di arrivo}, \text{tempo di servizio})$:
 
 % =========================================================================
 % LINEA DEL TEMPO DEL CARICO DI LAVORO
 % =========================================================================
-\begin{figure}[!h]
+\begin{figure}[H]
     \centering
     \begin{tikzpicture}[x=0.28cm, y=0.45cm, >=stealth, line width=0.7pt]
         
@@ -2022,40 +2020,40 @@ Questo preciso pattern di input consente di verificare la reattività della logi
 L'ispezione microscopica dei grafici temporali conferma che il pattern di assegnazione e accodamento dei job risponde fedelmente alle specifiche logiche di ciascuna politica:
 \begin{itemize}
     \item \textbf{Round Robin:} Il diagramma in Figura~\ref{fig:rr_chart} mostra una distribuzione dei job perfettamente ciclica e simmetrica. Ogni nuovo arrivo viene indirizzato sequenzialmente ruotando l'indice dei nodi , verificando l'esatta implementazione del contatore circolare interno del router.
-    \item \textbf{Least Loaded:} Al contrario del Round Robin, il grafico in Figura~\ref{fig:ll_chart} mostra come questa politica non utilizzi l'intero pool in modo circolare, lasciando il Server 4 completamente scarico. Questo comportamento evidenzia l'esatta esecuzione della logica di stato istantanea del controllore: al secondo 15, all'arrivo del Job 4 (caratterizzato da una sosta prolungata di 15 secondi), l'intero pool si trova in stato di quiete e il meccanismo di risoluzione dei pareggi seleziona il primo nodo disponibile a parità di carico minimo, ovvero il Server 1. Nei passi successivi (secondi 20-21), l'algoritmo rileva la saturazione del Server 1 e dirotta i Job 5 e 6 sui Server 2 e 3. Al secondo 22, l'immissione del Job 7 coincide esattamente con il completamento del Job 5 sul Server 2; trovando quest'ultimo nuovamente libero, il Load Controller lo seleziona per via della gerarchia degli indici, escludendo di fatto l'attivazione del Server 4. Ciò convalida la corretta e tempestiva lettura dei contatori di occupazione prima di ogni decisione di routing.
-    \item \textbf{Random:} Il grafico in Figura~\ref{fig:rand_chart} evidenzia la natura totalmente cieca della politica, caratterizzata da un'allocazione asimmetrica e disomogenea. La mancanza di memoria sullo stato delle code provoca collisioni strutturali in cui più job vengono indirizzati contemporaneamente sullo stesso nodo, generando sovrapposizioni temporali con un livello di concorrenza pari a 2 job, mentre altre stazioni del pool permangono temporaneamente inutilizzate.
+    \item \textbf{Least Loaded:} Al contrario del Round Robin, il grafico in Figura~\ref{fig:ll_chart} mostra come questa politica non utilizzi l'intero pool in modo circolare, lasciando il Server 4 completamente scarico. Questo comportamento evidenzia l'esatta esecuzione della logica di stato istantanea del controllore: al secondo 15, all'arrivo del Job 4, l'intero pool si trova in stato di quiete e il meccanismo di risoluzione dei pareggi seleziona il primo nodo disponibile a parità di carico minimo, ovvero il Server 1. Nei passi successivi (secondi 20-21), l'algoritmo rileva la saturazione del Server 1 e dirotta i Job 5 e 6 sui Server 2 e 3. Al secondo 22, l'immissione del Job 7 coincide esattamente con il completamento del Job 5 sul Server 2; trovando quest'ultimo nuovamente libero, il Load Controller lo seleziona per via della gerarchia degli indici, escludendo di fatto l'attivazione del Server 4. Ciò convalida la corretta e tempestiva lettura dei contatori di occupazione prima di ogni decisione di routing.
+    \item \textbf{Random:} Il grafico in Figura~\ref{fig:rand_chart} evidenzia la natura totalmente cieca della politica, caratterizzata da un'allocazione asimmetrica e disomogenea.
     \item \textbf{Power of Two Choices:} Il pattern osservato in Figura~\ref{fig:po2_chart} mostra un comportamento intermedio coerente con le specifiche della tecnica. Pur mantenendo una componente stocastica nell'assegnazione dei job, la parziale conoscenza dello stato, ottenuta campionando due server casuali, attenua la gravità delle collisioni rispetto al Random puro, confermando che il codice esegue correttamente la comparazione algebrica delle code della coppia selezionata prima di procedere al dirottamento del task.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.64\textwidth]{../data/vv/chart/routing/round_robin.png}
+    \includegraphics[width=0.75\textwidth]{../data/vv/chart/routing/round_robin.png}
     \caption{Distribuzione temporale dei job sotto politica Round Robin.}
     \label{fig:rr_chart}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.64\textwidth]{../data/vv/chart/routing/least_loaded.png}
+    \includegraphics[width=0.75\textwidth]{../data/vv/chart/routing/least_loaded.png}
     \caption{Saturazione dei server sotto politica Least Loaded.}
     \label{fig:ll_chart}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.64\textwidth]{../data/vv/chart/routing/random.png}
+    \includegraphics[width=0.75\textwidth]{../data/vv/chart/routing/random.png}
     \caption{Assegnazione stocastica dei task tramite politica Random.}
     \label{fig:rand_chart}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.64\textwidth]{../data/vv/chart/routing/power_of_two.png}
+    \includegraphics[width=0.75\textwidth]{../data/vv/chart/routing/power_of_two.png}
     \caption{Bilanciamento del carico con tecnica Power of Two Choices.}
     \label{fig:po2_chart}
 \end{figure}
 
-\paragraph{Verifica del Meccanismo di Dirottamento verso lo Spike Server:}
+\paragraph{Verifica del Dirottamento verso lo Spike Server:}
 Per convalidare la logica di commutazione d'emergenza del router, il modulo è stato sottoposto a uno stress-test deterministico basato su una traccia d'ingresso ad andamento alternato. L'ambiente di verifica viene isolato configurando un cluster minimale composto da un singolo Web Server di linea assistito dallo Spike Server. I parametri operativi del controllore di instradamento sono stati configurati impostando rigidamente la soglia critica a $SI_{max} = 5$ job concorrenti.
 
 % =========================================================================
@@ -2149,11 +2147,18 @@ Per convalidare la logica di commutazione d'emergenza del router, il modulo è s
         \node[right, font=\tiny\sffamily, text=cyan!90!black] at (25.2, 25.35) {Job 21 (24.2-25.2s)};
 
     \end{tikzpicture}
-    \caption{Rappresentazione temporale della traccia stocastica a dente di sega per la verifica del dirottamento sullo Spike Server.}
+    \caption{Rappresentazione temporale della traccia stocastica per la verifica del dirottamento sullo Spike Server.}
     \label{fig:spike_trace_timeline}
 \end{figure}
 
 L'andamento della dinamica dei flussi, catturato dettagliatamente nella Figura~\ref{fig:spike_load_dynamics}, evidenzia la correttezza matematica delle transizioni di stato del controllore:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../data/vv/chart/spike_diversion_chart.png}
+    \caption{Evoluzione dinamica del carico e attivazione dello Spike Server al superamento della soglia SI Max.}
+    \label{fig:spike_load_dynamics}
+\end{figure}
 
 \begin{itemize}
     \item \textbf{Fase Ordinaria:} Nella finestra temporale iniziale con $t \in [0, 1.6]\text{ s}$, l'intera massa dei job in ingresso viene assorbita dal Web Server di linea, il cui contatore interno cresce linearmente ad ogni arrivo.
@@ -2161,20 +2166,13 @@ L'andamento della dinamica dei flussi, catturato dettagliatamente nella Figura~\
     \item \textbf{Rilascio e Svuotamento:} Al cessare del transitorio di picco, lo Spike Server smaltisce i job dirottati operando al massimo delle proprie capacità stazionarie.
 \end{itemize}
 
-I report analitici estratti a completamento della run documentano che, a fronte di un tempo di risposta medio globale di 6.9368 secondi e un carico di sistema pari a 5.3953 job, il modulo ha deviato con precisione chirurgica un totale di esattamente 8.0000 job verso l'unità ausiliaria. Questo sversamento controllato ha determinato un'utilizzazione finale dello Spike Server pari esattamente a 0.5000, confermando la perfetta implementazione del ciclo di dirottamento e l'immunità del codice da blocchi o perdite di task durante le transizioni di instradamento. Il risultato è conforme al comportamento atteso: il percorso ausiliario resta inattivo finché il Web Server non raggiunge la soglia, entra in funzione solo per il traffico eccedente e si svuota senza interrompere i job già assegnati.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.9\textwidth]{../data/vv/chart/spike_diversion_chart.png}
-    \caption{Evoluzione dinamica del carico e attivazione della Dedicated Spike Unit al superamento della soglia SI Max.}
-    \label{fig:spike_load_dynamics}
-\end{figure}
+I report analitici estratti a completamento della run documentano che il modulo ha deviato esattamente $8$ job verso l'unità ausiliaria. Questo sversamento controllato ha determinato un'utilizzazione dello Spike Server pari a $0.5556$, confermando la corretta implementazione del ciclo di dirottamento e l'assenza di blocchi o perdite di task durante le transizioni di instradamento. Il risultato è conforme al comportamento atteso: il percorso ausiliario resta inattivo finché il Web Server non raggiunge la soglia, entra in funzione solo per il traffico eccedente e si svuota senza interrompere i job già assegnati.
 
 
 \subsection{Verifica dei Meccanismi di Scaling}
 L'ultima fase del processo di verifica ha riguardato la verifica funzionale delle logiche di autoscaling cooperativo, accertando la capacità del sistema di espandere o contrarre dinamicamente la propria capacità elaborativa al variare del carico di lavoro imposto.
 
-Anche in questo caso l'esperimento è stato costruito in forma deterministica: l'obiettivo è verificare che le azioni di \textit{Scale Out}, \textit{Scale In}, \textit{Speed Up} e \textit{Speed Down} vengano generate solo quando le metriche finestrate attraversano le rispettive soglie e nel rispetto del \textit{Cooldown}. Il risultato atteso è quindi una corrispondenza puntuale tra istanti di superamento soglia, azioni registrate nei log e andamento dei grafici temporali.
+Anche in questo caso l'esperimento è stato costruito in forma deterministica: l'obiettivo è verificare che le azioni di \textit{Scale Out}, \textit{Scale In}, \textit{Speed Up} e \textit{Speed Down} vengano generate solo quando le metriche attraversano le rispettive soglie e nel rispetto del \textit{Cooldown}. Il risultato atteso è quindi una corrispondenza puntuale tra istanti di superamento soglia, azioni registrate nei log e andamento dei grafici temporali.
 
 \paragraph{Scaling Orizzontale:}
 Per verificare l'adattamento del numero di server attivi guidato dal tempo di risposta, il simulatore è stato configurato con una capacità minima di 1 nodo, un tetto massimo di 4 nodi e un tempo di \textit{Cooldown} di 4.0 secondi. La suite ha eseguito una sottomissione alimentata dalla seguente traccia deterministica programmata di 14 job complessivi (Figura~\ref{fig:horizontal_scaling_trace_timeline}).
@@ -2263,14 +2261,14 @@ Le soglie di attuazione dell'algoritmo di controllo sono state impostate a $T_{o
 
 L'analisi dell'andamento temporale documentato nella Figura~\ref{fig:horizontal_scaling_dynamics} convalida formalmente l'esattezza algoritmica del modulo:
 \begin{itemize}
-    \item \textbf{Dinamica di Scale Out:} Al secondo $t = 4.0$, l'accumulo di job porta il tempo medio di risposta nella Moving Window a superare la soglia critica di $2.0\text{ s}$ (toccando quota $2.15\text{ s}$). Il sistema reagisce istantaneamente incrementando i server attivi da 1 a 2 e avviando il timer di \textit{Cooldown} di $4.0\text{ s}$. Poiché il carico permane elevato, alla scadenza di ciascun ciclo di blocco si osservano i successivi scatti incrementali a quota 3 server (al secondo $t = 8.0$) e a quota 4 server (al secondo $t = 13.5$), azzerando la saturazione. Un'ultima azione isolata di espansione a 3 server si ripresenta correttamente al secondo $t = 39.0$ per mitigare l'ultimo burst, totalizzando l'esatto valore nominale di 4 azioni di \textit{Scale Out} registrato nei log di report.
+    \item \textbf{Dinamica di Scale Out:} Al secondo $t = 4.0$, l'accumulo di job porta il tempo medio di risposta nella Moving Window a superare la soglia critica di $2.0\text{ s}$. Il sistema reagisce istantaneamente incrementando i server attivi da 1 a 2 e avviando il timer di \textit{Cooldown} di $4.0\text{ s}$. Poiché il carico permane elevato, alla scadenza di ciascun ciclo di blocco si osservano i successivi scatti incrementali a quota 3 server (al secondo $t = 8.0$) e a quota 4 server (al secondo $t = 13.5$), azzerando la saturazione. Un'ultima azione isolata di espansione a 3 server si ripresenta correttamente al secondo $t = 39.0$ per mitigare l'ultimo burst, totalizzando l'esatto valore nominale di 4 azioni di \textit{Scale Out} registrato nei log di report.
     \item \textbf{Dinamica di Scale In e Draining:} Al secondo $t = 15.0$, l'immissione di job molto rapidi abbatte drasticamente il tempo medio di risposta sotto la soglia di $0.5\text{ s}$. Non appena il \textit{Cooldown} residuo si azzera, l'analizzatore comanda una contrazione della flotta, riducendo i server da 4 a 3 (all'istante $t = 25.5$) e successivamente da 3 a 2 (all'istante $t = 29.5$), quantificando le 2 azioni di \textit{Scale In} complessive presenti nel riepilogo statistico. La correttezza del meccanismo di \textit{draining} trova riscontro diretto nell'andamento dei completamenti: il server rimosso cessa l'accettazione di nuovi task ma non interrompe le elaborazioni in corso, azzerando la sua coda interna in modo conservativo senza alcuna perdita di eventi.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{../data/vv/chart/scaling/horizontal_scaling_chart.png}
-    \caption{Evoluzione temporale dello Scaling Orizzontale: correlazione tra tempo di risposta finestrato, azioni di allocazione e vincolo di Cooldown.}
+    \caption{Evoluzione temporale del tempo di risposta nella moving window, azioni di allocazione e vincolo di Cooldown nello Scaling Orizzontale.}
     \label{fig:horizontal_scaling_dynamics}
 \end{figure}
 
@@ -2280,7 +2278,7 @@ Le soglie di reazione per la modulazione della frequenza core sono state configu
 % =========================================================================
 % LINEA DEL TEMPO DEL CARICO DI LAVORO
 % =========================================================================
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \begin{tikzpicture}[x=0.55cm, y=0.45cm, >=stealth, line width=0.7pt]
         
@@ -2342,14 +2340,14 @@ Le soglie di reazione per la modulazione della frequenza core sono state configu
     \label{fig:vertical_scaling_trace_timeline}
 \end{figure}
 
-I risultati della simulazione, illustrati graficamente nella Figura~\ref{fig:vertical_scaling_dynamics}, dimostrano una perfetta coincidenza tra il comportamento atteso e le transizioni osservate. All'istante $t = 1.9\text{ s}$, il cumulo di task all'interno dello Spike Server supera la soglia critica di 3 job attivi (toccando quota 4). Il controllore verticale interviene istantaneamente registrando 1 azione di \textit{Speed Up}, la quale innalza il fattore di capacità elaborativa dal valore base di 4.0 a un livello di picco pari a 8.0. A causa del timer di \textit{Cooldown} di 4.0 secondi, la configurazione di picco viene mantenuta in modo conservativo fino a $t = 7.7\text{ s}$, istante in cui la coda scende sotto la soglia minima di 1. Il software applica quindi l'azione di \textit{Speed Down}, riportando il fattore di capacità al valore nominale di 4.0.
+I risultati della simulazione, illustrati graficamente nella Figura~\ref{fig:vertical_scaling_dynamics}, dimostrano una perfetta coincidenza tra il comportamento atteso e le transizioni osservate. All'istante $t = 1.6\text{ s}$, il cumulo di task all'interno dello Spike Server raggiunge la soglia critica di 3 job attivi. Il controllore verticale interviene istantaneamente registrando 1 azione di \textit{Speed Up}, la quale innalza il fattore di capacità elaborativa dal valore base di 4.0 a un livello di picco pari a 8.0. A causa del timer di \textit{Cooldown} di 4.0 secondi, la configurazione di picco viene mantenuta fino a $t = 5.6\text{ s}$; a tale istante il cooldown è scaduto e il carico dello Spike Server è sceso a zero, al di sotto della soglia inferiore pari a 1. Il software applica quindi l'azione di \textit{Speed Down}, riportando il fattore di capacità al valore nominale di 4.0.
 
-L'evoluzione temporale di questa transizione giustifica il valore medio complessivo del fattore di capacità elaborativa dello Spike Server registrato nei log di simulazione, attestatosi a \textbf{4.9760}. Il bilancio conferma l'esecuzione di esattamente 1 azione di Speed Up e 1 azione di Speed Down, escludendo fenomeni di instabilità.
+L'evoluzione temporale di questa transizione giustifica il valore medio complessivo del fattore di capacità elaborativa dello Spike Server registrato nei log di simulazione, attestatosi a 4.9760. Il bilancio conferma l'esecuzione di esattamente 1 azione di Speed Up e 1 azione di Speed Down, escludendo fenomeni di instabilità.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{../data/vv/chart/scaling/vertical_scaling_chart.png}
-    \caption{Dinamica dello Scaling Verticale: modulazione istantanea del fattore di capacità elaborativa in funzione del numero di job residenti nella coda dello Spike Server.}
+    \caption{Modulazione istantanea del fattore di capacità elaborativa in funzione del numero di job residenti nella coda dello Spike Server per lo Scaling Verticale.}
     \label{fig:vertical_scaling_dynamics}
 \end{figure}
 
@@ -2637,7 +2635,7 @@ Questa evidenza porta a una conclusione progettuale precisa: aumentare ulteriorm
 \paragraph{Scaling Orizzontale e Identificazione delle Soglie}
 La stima dei parametri per lo scaling orizzontale è stata condotta tramite la classe \texttt{HorizontalScalingEstimationObjective}. Il parametro superiore di intervento, cioè la soglia di \textit{Scale Out}, è stato fissato direttamente al valore del vincolo SLA, pari a $R^{max}=6.0\text{ s}$. Questa scelta è coerente con una politica di controllo parsimoniosa: l'aumento del numero di Web Server viene attivato solo quando il tempo medio di risposta supera effettivamente il limite prestazionale concordato, evitando espansioni inutili quando il sistema si trova ancora all'interno dello SLA. Qualora si desiderasse un comportamento più reattivo e prudenziale, lo stesso parametro potrebbe essere abbassato leggermente, anticipando lo \textit{Scale Out} prima del raggiungimento formale della soglia critica e aumentando così il margine di sicurezza rispetto a variazioni improvvise del carico.
 
-L'obiettivo dell'esperimento non è stato quello di osservare direttamente la dinamica del controller, bensì di ricostruire la frontiera prestazionale delle configurazioni statiche da 1 a 5 Web Server al variare del tasso di arrivo $\lambda$. Per ogni coppia $(\lambda, N)$ è stata preliminarmente eseguita una verifica di convergenza a orizzonte finito tramite repliche indipendenti; solo le configurazioni classificate come convergenti sono state poi analizzate a regime con Batch Means. La run steady-state usa come \textit{warm-up} cinque volte il numero di job di convergenza, come confermato dalla colonna \texttt{Batch\_Warmup\_Jobs} del CSV: ad esempio, una convergenza a $60000$ job produce un warm-up di $300000$ job. Le configurazioni non convergenti o inconclusive sono state escluse dalla stima steady-state e riportate esplicitamente nel CSV e nel grafico.
+L'obiettivo dell'esperimento non è stato quello di osservare direttamente la dinamica del controller, bensì di ricostruire la frontiera prestazionale delle configurazioni statiche da 1 a 5 Web Server al variare del tasso di arrivo $\lambda$. Per ogni coppia $(\lambda, N)$ è stata preliminarmente eseguita una verifica di convergenza a orizzonte finito tramite repliche indipendenti; solo le configurazioni classificate come convergenti sono state poi analizzate a regime con $64$ batch da $8192$ job. La run steady-state usa come \textit{warm-up} cinque volte il numero di job di convergenza, come confermato dalla colonna \texttt{Batch\_Warmup\_Jobs} del CSV: ad esempio, una convergenza a $60000$ job produce un warm-up di $300000$ job. Le configurazioni non convergenti o inconclusive sono state escluse dalla stima steady-state e riportate esplicitamente nel CSV e nel grafico.
 
 I risultati, sintetizzati nella Tabella~\ref{tab:horizontal_scaling_results}, evidenziano che con SLA pari a $6\text{ s}$ la regione ammissibile rimane coerente con il carico nominale del progetto, ma diventa più selettiva nei regimi ad alta intensità. Il comportamento atteso è quello tipico di una frontiera di capacità: a parità di $\lambda$, l'aumento del numero di Web Server deve ridurre il tempo di risposta, mentre a parità di server l'incremento del carico deve avvicinare progressivamente il sistema alla saturazione. I risultati seguono questa struttura. Per carichi prossimi a $\lambda = 5$, che rappresentano il centro dello scenario di riferimento, un singolo Web Server è ancora sostenibile, con $R_0 = 5.4271\text{ s}$ e intervallo di confidenza $[5.4080, 5.4462]\text{ s}$ interamente sotto soglia. Anche a $\lambda = 6.5$ la configurazione a un solo server resta formalmente ammissibile, con $R_0 = 5.7799\text{ s}$, ma il margine rispetto allo SLA diventa ridotto. L'aggiunta di un secondo server riduce drasticamente la latenza, portandola a $0.7316\text{ s}$ per $\lambda = 5$ e a $1.5522\text{ s}$ per $\lambda = 6.5$, mostrando che in questa regione due nodi sono prestazionalmente conservativi.
 
@@ -2683,7 +2681,7 @@ Il modello economico adottato considera un costo fisso per ogni Web Server attiv
 \]
 In questo modo il costo della capacità orizzontale viene pagato ogni volta che un Web Server resta mediamente acceso, mentre il costo della risorsa di picco cresce solo quando lo Spike Server viene effettivamente utilizzato e accelerato.
 
-I risultati, sintetizzati nella Tabella~\ref{tab:cost_tradeoff_results} e nelle Figure~\ref{fig:cost_analysis_cd5}--\ref{fig:cost_analysis_cd100}, confermano il trade-off atteso. Soglie di \textit{Scale In} basse, come $R^{min}=1.5\text{ s}$ o $R^{min}=2.0\text{ s}$, mantengono più a lungo server aggiuntivi nel cluster: questo abbassa il tempo medio di risposta, soprattutto ad alto carico, ma aumenta sensibilmente il costo medio a causa del maggior numero di Web Server attivi. Al contrario, soglie più permissive, come $R^{min}=3.5\text{ s}$ o $R^{min}=5.0\text{ s}$, riducono il costo operativo perché favoriscono una contrazione più rapida del cluster; il prezzo pagato è un tempo di risposta più elevato, pur rimanendo entro il vincolo SLA in tutti gli scenari simulati.
+I risultati, sintetizzati nella Tabella~\ref{tab:cost_tradeoff_results} e nelle Figure~\ref{fig:cost_analysis_cd5}--\ref{fig:cost_analysis_cd100}, confermano il trade-off atteso. Soglie di \textit{Scale In} basse, come $R^{min}=1.5\text{ s}$ o $R^{min}=2.0\text{ s}$, mantengono più a lungo server aggiuntivi nel cluster: questo abbassa il tempo medio di risposta, soprattutto ad alto carico, ma aumenta sensibilmente il costo medio a causa del maggior numero di Web Server attivi. Al contrario, soglie più permissive, come $R^{min}=3.5\text{ s}$ o $R^{min}=5.0\text{ s}$, riducono il costo operativo perché favoriscono una contrazione più rapida del cluster; il prezzo pagato è un tempo di risposta più elevato. Il vincolo SLA resta rispettato per tutti i punti con cooldown fino a $50\text{ s}$, mentre la combinazione più lenta e permissiva, $R^{min}=5.0\text{ s}$ con cooldown di $100\text{ s}$, raggiunge $R_0=6.3678\text{ s}$ nello scenario di carico massimo e viola il limite.
 
 L'esito è quindi in linea con il comportamento atteso del controller: abbassare la soglia di \textit{Scale In} rende il sistema più prudente e prestazionalmente robusto, ma più costoso; alzarla spinge invece verso configurazioni più economiche, accettando una latenza media maggiore. La campagna serve proprio a quantificare questo compromesso, non a individuare un minimo assoluto valido per qualunque profilo di traffico.
 
