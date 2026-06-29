@@ -211,7 +211,7 @@ Il funzionamento del sistema si fonda sulla separazione tra la gestione dei flus
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=1\textwidth]{system}
-    \caption{Rappresentazione schematica dell'architettura ad alto livello dell'autoscaler gerarchico \cite[Fig.~6.8]{serazzi-jmt-book}.}
+    \caption{Rappresentazione schematica dell'architettura ad alto livello dell'autoscaler gerarchico \cite[Fig.~6.8]{serazzi-book}.}
     \label{fig:system_architecture}
 \end{figure}
 
@@ -1408,7 +1408,7 @@ public double getMean() {
     return mean;
 }
 \end{lstlisting}
-La varianza campionaria viene poi stimata come $s^2=M_2/(n-1)$. La scelta di dividere per $n-1$ anziché per $n$ rappresenta la correzione di Bessel per la varianza campionaria \cite{leemis-park}. Quando la vera media della popolazione $\mu$ è ignota, essa viene stimata nel simulatore tramite la media campionaria $\bar{x}$. Poiché i dati estratti tendono intrinsecamente a essere più vicini alla propria media campionaria $\bar{x}$ rispetto a quanto lo siano dalla vera media teorica $\mu$, il calcolo degli scarti quadratici riferito a $\bar{x}$ produce una sottostima sistematica della reale variabilità del sistema. Dividendo la somma dei quadrati per $n$ si otterrebbe uno stimatore \textit{biased}. La rimozione di un grado di libertà al denominatore compensa esattamente questa distorsione statistica, rendendo lo stimatore della varianza campionaria \textit{unbiased}.
+La varianza campionaria viene poi stimata come $s^2=M_2/(n-1)$. La scelta di dividere per $n-1$ anziché per $n$ rappresenta la correzione di Bessel per la varianza campionaria \cite{leemis-park-book}. Quando la vera media della popolazione $\mu$ è ignota, essa viene stimata nel simulatore tramite la media campionaria $\bar{x}$. Poiché i dati estratti tendono intrinsecamente a essere più vicini alla propria media campionaria $\bar{x}$ rispetto a quanto lo siano dalla vera media teorica $\mu$, il calcolo degli scarti quadratici riferito a $\bar{x}$ produce una sottostima sistematica della reale variabilità del sistema. Dividendo la somma dei quadrati per $n$ si otterrebbe uno stimatore \textit{biased}. La rimozione di un grado di libertà al denominatore compensa esattamente questa distorsione statistica, rendendo lo stimatore della varianza campionaria \textit{unbiased}.
 \begin{lstlisting}[language=Java]
 /**
  * Gets the running sample variance (divided by count - 1).
@@ -1529,7 +1529,7 @@ public static double estimateHalfWidth(long count, double stdDev, double confide
     return t * standardError;
 }
 \end{lstlisting}
-La presenza del termine $\sqrt{n}$ al denominatore della Half-Width è la diretta conseguenza algebrica dell'aver adottato la varianza campionaria corretta $s^2$ \cite{leemis-park}. La varianza campionaria $s^2_{\text{conv}}$ viene definita dividendo convenzionalmente per il numero totale di campioni $n$:
+La presenza del termine $\sqrt{n}$ al denominatore della Half-Width è la diretta conseguenza algebrica dell'aver adottato la varianza campionaria corretta $s^2$ \cite{leemis-park-book}. La varianza campionaria $s^2_{\text{conv}}$ viene definita dividendo convenzionalmente per il numero totale di campioni $n$:
 $$s^2_{\text{conv}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \bar{x})^2$$
 Di conseguenza, per preservare la correzione statistica, la formulazione dell'intervallo di confidenza inserisce il termine $\sqrt{n-1}$ sotto il radicale dell'errore standard:
 $$HW = t_{n-1, 1-\alpha/2} \frac{s_{\text{conv}}}{\sqrt{n-1}}$$
@@ -1540,7 +1540,7 @@ $$HW = t_{n-1, 1-\alpha/2} \frac{s \cdot \sqrt{\frac{n-1}{n}}}{\sqrt{n-1}} = t_{
 L'approccio implementato nella classe \texttt{IntervalEstimator} è quindi matematicamente equivalente a quello convenzionale, ma formalizzato secondo gli standard della varianza campionaria \textit{unbiased}.
 
 \subsection{Autocorrelazione, Cutoff e Scelta dei Batch}
-Nelle simulazioni a orizzonte infinito, le osservazioni consecutive prodotte da una singola run lunga presentano una forte dipendenza seriale, rendendo invalida l'ipotesi di campionamento indipendente \cite{leemis-park}.
+Nelle simulazioni a orizzonte infinito, le osservazioni consecutive prodotte da una singola run lunga presentano una forte dipendenza seriale, rendendo invalida l'ipotesi di campionamento indipendente \cite{leemis-park-book}.
 
 \paragraph{Stima Analitica.}
 Per quantificare matematicamente questa relazione stocastica, indicando con $x_1, x_2, \dots, x_n$ le $n$ osservazioni consecutive della serie temporale, il formalismo teorico definisce l'autocovarianza campionaria per un lag $j$ generico. Secondo la definizione classica \textit{two-pass}, l'autocovarianza $c_j$ si basa unicamente sugli $n-j$ valori sovrapposti della serie rispetto alla media campionaria globale $\bar{x} = \frac{1}{n}\sum_{i=1}^{n}x_i$, assumendo la forma:
@@ -1552,11 +1552,11 @@ Il coefficiente di autocorrelazione campionaria per il lag $j$ viene quindi rica
     r_j = \frac{c_j}{c_0}, \qquad \text{dove } c_0 = s^2 = \frac{1}{n}\sum_{i=1}^{n}(x_i-\bar{x})^2
 \end{equation}
 
-Per ragioni di efficienza, l'implementazione software rigetta l'approccio a due passaggi in favore di una formulazione algebricamente alternativa di tipo \textit{one-pass}, come descritto in \cite{leemis-park}. L'autocovarianza per il lag $j$ viene determinata isolando la sommatoria dei co-prodotti sfasati direttamente dalla media quadratica:
+Per ragioni di efficienza, l'implementazione software rigetta l'approccio a due passaggi in favore di una formulazione algebricamente alternativa di tipo \textit{one-pass}, come descritto in \cite{leemis-park-book}. L'autocovarianza per il lag $j$ viene determinata isolando la sommatoria dei co-prodotti sfasati direttamente dalla media quadratica:
 \begin{equation}
     c_j = \left( \frac{1}{n-j}\sum_{i=1}^{n-j}x_i x_{i+j} \right) - \bar{x}^2
 \end{equation}
-Il valore di $r_j$ risultante viene valutato per identificare il cutoff statistico di indipendenza basato sulla regola di Chatfield, la quale stabilisce che per una serie non correlata il coefficiente fluttuerà oltre i limiti critici $\pm 2/\sqrt{n}$ solo con una probabilità residua dello $0.05$ \cite{leemis-park}.
+Il valore di $r_j$ risultante viene valutato per identificare il cutoff statistico di indipendenza basato sulla regola di Chatfield, la quale stabilisce che per una serie non correlata il coefficiente fluttuerà oltre i limiti critici $\pm 2/\sqrt{n}$ solo con una probabilità residua dello $0.05$ \cite{leemis-park-book}.
 Il cutoff di autocorrelazione (indicato nel codice come \texttt{cutoffLag}, corrispondente al parametro teorico $L$) è definito come il più piccolo indice di lag a partire dal quale la funzione di autocorrelazione decade stabilmente e si confina permanentemente all'interno della fascia di variabilità casuale. Al fine di irrobustire l'algoritmo contro falsi positivi generati da fluttuazioni stocastiche isolate della serie pilota, il simulatore adotta una finestra di verifica richiedendo la persistenza della condizione per un numero minimo di lag successivi, calcolato dinamicamente su base logaritmica:
 \begin{lstlisting}[language=Java]
 /**
@@ -1635,7 +1635,7 @@ Il flusso continuo originario viene così mappato in una sequenza discreta di $k
 In virtù del Teorema del Limite Centrale e della dimensione conservativa di $b$, la nuova serie delle medie dei batch $Y_j$ perde la dipendenza seriale originaria e può essere trattata come un campione di osservazioni indipendenti e identicamente distribuite secondo una Normale, abilitando l'uso della distribuzione $t$ di Student per la stima degli intervalli.
 
 \paragraph{Stima Dinamica.}
-Per gli scenari in cui la lunghezza ottimale della traiettoria stocastica non è stimabile \textit{a priori}, il simulatore estende l'analisi tramite un algoritmo iterativo basato sulla regola di arresto dinamica \cite{serazzi-jmt-book, jmt-software}. La procedura incrementa asincronamente la simulazione con blocchi di ampiezza fissa e verifica la validità dell'ipotesi di indipendenza calcolando la lag-1 ACF esclusivamente sulla serie trasformata delle medie dei batch, applicando una tolleranza rigida di $0.05$. Qualora il controllo fallisse a causa di una persistente memoria residua tra i blocchi, l'algoritmo espande la dimensione della finestra temporale dei batch eseguendo un raddoppio geometrico del parametro $b$, ripetendo il controllo fino alla convergenza simultanea dei requisiti di precisione e incorrelazione:
+Per gli scenari in cui la lunghezza ottimale della traiettoria stocastica non è stimabile \textit{a priori}, il simulatore estende l'analisi tramite un algoritmo iterativo basato sulla regola di arresto dinamica \cite{serazzi-book, jmt-software}. La procedura incrementa asincronamente la simulazione con blocchi di ampiezza fissa e verifica la validità dell'ipotesi di indipendenza calcolando la lag-1 ACF esclusivamente sulla serie trasformata delle medie dei batch, applicando una tolleranza rigida di $0.05$. Qualora il controllo fallisse a causa di una persistente memoria residua tra i blocchi, l'algoritmo espande la dimensione della finestra temporale dei batch eseguendo un raddoppio geometrico del parametro $b$, ripetendo il controllo fino alla convergenza simultanea dei requisiti di precisione e incorrelazione:
 \begin{lstlisting}[language=Java]
 /**
  * Dynamic Estimation.
@@ -1800,7 +1800,7 @@ public static ConvergenceReport run(ApplicationConfig config) {
 \end{lstlisting}
 
 \subsection{Generatori Pseudo-Casuali e Variate Aleatorie}
-La libreria \texttt{lib.rng} deriva dalle classi \texttt{Rngs}, \texttt{Rvgs} e \texttt{Rvms} di Park, Miller e collaboratori, adottate nei testi di simulazione per la generazione di numeri pseudo-casuali e variate aleatorie \cite{park-miller,leemis-park}. Il generatore di base è un Lehmer multiplicative congruential generator:
+La libreria \texttt{lib.rng} deriva dalle classi \texttt{Rngs}, \texttt{Rvgs} e \texttt{Rvms} di Park, Miller e collaboratori, adottate nei testi di simulazione per la generazione di numeri pseudo-casuali e variate aleatorie \cite{park-miller,leemis-park-book}. Il generatore di base è un Lehmer multiplicative congruential generator:
 \begin{equation}
     X_{n+1} = 48271 X_n \bmod (2^{31}-1),
     \qquad
@@ -2358,16 +2358,15 @@ L'evoluzione temporale di questa transizione giustifica il valore medio compless
 % VALIDAZIONE
 % =========================================================================
 \section{Validazione del Sistema}
-La validazione rappresenta il passaggio successivo alla verifica: non si limita ad accertare che il codice implementi correttamente le transizioni previste dal modello, ma controlla che le misure prodotte dal simulatore siano compatibili con quelle ottenute da un ambiente di riferimento indipendente. Per questo motivo i risultati principali sono stati confrontati con il simulatore fornito dal libro di testo, ovvero \textit{Java Modelling Tools - JSIM} \cite{jmt-software}, riproducendo gli stessi scenari di carico, la stessa disciplina di servizio e le stesse ipotesi di assenza di autoscaling.
+La validazione rappresenta il passaggio successivo alla verifica: non si limita ad accertare che il codice implementi correttamente le transizioni previste dal modello, ma controlla che le misure prodotte dal simulatore siano compatibili con quelle ottenute da un ambiente di riferimento indipendente. Per questo motivo i risultati principali sono stati confrontati con il simulatore fornito dal libro di testo, ovvero \textit{Java Modelling Tools - JMT} \cite{jmt-software}, riproducendo gli stessi scenari di carico, la stessa disciplina di servizio e le stesse ipotesi di assenza di autoscaling.
 
-La validazione è stata condotta in orizzonte infinito, con misure stazionarie e intervalli di confidenza sulle metriche aggregate. Nel simulatore sviluppato, le stime sono state ottenute con il metodo dei \textit{Batch Means}; in JSIM sono state invece usate le misure statistiche native del tool, configurate con seed fisso e criterio di arresto basato sul numero massimo di campioni analizzati. L'obiettivo del confronto non è dunque riprodurre la stessa sequenza di eventi elementari, ma verificare che due implementazioni indipendenti dello stesso sistema convergano agli stessi indici prestazionali entro la variabilità statistica attesa.
+La validazione è stata condotta in orizzonte infinito, con misure stazionarie e intervalli di confidenza sulle metriche aggregate. Nel simulatore sviluppato, le stime sono state ottenute con il metodo dei \textit{Batch Means}; in JMT sono state invece usate le misure statistiche native del tool, configurate con seed fisso e criterio di arresto basato sul numero massimo di campioni analizzati. L'obiettivo del confronto non è dunque riprodurre la stessa sequenza di eventi elementari, ma verificare che due implementazioni indipendenti dello stesso sistema convergano agli stessi indici prestazionali entro la variabilità statistica attesa.
 
-Per ciascun caso di validazione è stato quindi definito un comportamento atteso prima dell'esecuzione: sovrapposizione degli intervalli di confidenza per la stazione singola, e scarti contenuti per l'architettura completa, dove JSIM richiede una rappresentazione semplificata del router a soglia. Eventuali differenze residue non vengono interpretate come errore se restano coerenti con le diverse astrazioni modellistiche e con l'ampiezza degli intervalli statistici.
 
 \subsection{Validazione della Stazione Singola Iperesponenziale}
-Il primo scenario di validazione isola una singola stazione \textit{Processor Sharing}, eliminando ogni effetto dovuto al routing, allo Spike Server e agli algoritmi di scaling. La rete JSIM di riferimento è composta da una sorgente aperta, una coda a capacità illimitata e un sink finale. Sia gli interarrivi sia i tempi di servizio seguono una distribuzione iperesponenziale a due rami, con tasso medio di arrivo $\lambda = 2.5\text{ job/s}$, tasso medio di servizio $\mu = 4.0\text{ job/s}$ e coefficiente di variazione $C_V = 4.0$.
+Il primo scenario di validazione isola una singola stazione \textit{Processor Sharing}, eliminando ogni effetto dovuto al routing, allo Spike Server e agli algoritmi di scaling. La rete JMT di riferimento è composta da una sorgente aperta, una coda a capacità illimitata e un sink finale. Sia gli interarrivi sia i tempi di servizio seguono una distribuzione iperesponenziale a due rami, con tasso medio di arrivo $\lambda = 2.5\text{ job/s}$, tasso medio di servizio $\mu = 4.0\text{ job/s}$ e coefficiente di variazione $C_V = 4.0$.
 
-La parametrizzazione JSIM della distribuzione $H_2$ è stata impostata con probabilità di ramo $p = 0.030776$; per gli interarrivi sono stati usati $\lambda_1 = 0.15388$ e $\lambda_2 = 4.84612$, mentre per i servizi $\lambda_1 = 0.24621$ e $\lambda_2 = 7.75379$. Il modello JSIM è stato eseguito con seed $123456789$, stop statistico disabilitato, $100000000$ campioni massimi e intervalli di confidenza al $99\%$ con errore relativo massimo pari a $0.03$. Nel simulatore Java è stata usata una run a Batch Means da $512$ batch di $16384$ job, con warm-up nullo, coerentemente con la configurazione già impiegata nella verifica statistica.
+La parametrizzazione JMT della distribuzione $H_2$ è stata impostata con probabilità di ramo $p = 0.030776$; per gli interarrivi sono stati usati $\lambda_1 = 0.15388$ e $\lambda_2 = 4.84612$, mentre per i servizi $\lambda_1 = 0.24621$ e $\lambda_2 = 7.75379$. Il modello JMT è stato eseguito con seed $123456789$, stop statistico disabilitato, $100000000$ campioni massimi e intervalli di confidenza al $99\%$ con errore relativo massimo pari a $0.03$. Nel simulatore Java è stata usata una run a Batch Means da $512$ batch di $16384$ job, con warm-up nullo, coerentemente con la configurazione già impiegata nella verifica statistica.
 
 Prima del confronto diretto, la dimensione dei batch è stata stimata tramite l'algoritmo di \textit{Batch Means Estimator}. L'output, riportato in Tabella~\ref{tab:validation_hyperexp_batch}, mostra che il metodo dinamico raggiunge simultaneamente indipendenza e precisione relativa, mentre il metodo basato su ACF produce una struttura più ampia e conservativa.
 
@@ -2418,8 +2417,8 @@ Prima del confronto diretto, la dimensione dei batch è stata stimata tramite l'
         clip
     ]{../data/simulation/simple_hyperexp/utilization}
 
-    \caption{Risultati JSIM per la validazione della stazione singola iperesponenziale.}
-    \label{fig:jsim_hyperexp_validation}
+    \caption{Risultati JMT per la validazione della stazione singola iperesponenziale.}
+    \label{fig:JMT_hyperexp_validation}
 \end{figure}
 
 Il confronto numerico è riassunto nella Tabella~\ref{tab:validation_hyperexp_comparison}. Il valore atteso, in questo scenario, è una coincidenza quasi diretta delle metriche, poiché entrambi i simulatori rappresentano la stessa singola stazione senza logiche di controllo aggiuntive. Le metriche ottenute dai due simulatori risultano infatti sostanzialmente coincidenti: il tempo medio di risposta differisce dello $0.80\%$, il numero medio di job dello $0.67\%$, il throughput dello $0.02\%$ e l'utilizzazione dello $0.11\%$. Inoltre, gli intervalli di confidenza delle due campagne si sovrappongono per tutte le metriche osservate, confermando che la dinamica di servizio, l'integrazione temporale delle aree e il calcolo degli indici a regime sono coerenti con il simulatore di riferimento.
@@ -2430,22 +2429,22 @@ Il confronto numerico è riassunto nella Tabella~\ref{tab:validation_hyperexp_co
     \renewcommand{\arraystretch}{1.3}
     \begin{tabular}{lcccc}
         \hline
-        \textbf{Metrica} & \textbf{Simulatore Java} & \textbf{CI Java 95\%} & \textbf{JSIM} & \textbf{CI JSIM 99\%} \\ \hline
+        \textbf{Metrica} & \textbf{Simulatore Java} & \textbf{CI Java 95\%} & \textbf{JMT} & \textbf{CI JMT 99\%} \\ \hline
         $E[T_s]$         & $1.1975\text{ s}$        & $[1.1826, 1.2123]$    & $1.2071\text{ s}$ & $[1.2004, 1.2137]$ \\
         $E[N_s]$         & $2.9979$                 & $[2.9561, 3.0398]$    & $3.0182$          & $[2.9956, 3.0408]$ \\
         $X$              & $2.4991\text{ job/s}$    & $[2.4921, 2.5062]$    & $2.4997\text{ job/s}$ & $[2.4966, 2.5028]$ \\
         $\rho$           & $0.6240$                 & $[0.6215, 0.6265]$    & $0.6247$          & $[0.6232, 0.6262]$ \\ \hline
     \end{tabular}
-    \caption{Confronto di validazione tra simulatore Java e JSIM sul modello $H_2/H_2/1$.}
+    \caption{Confronto di validazione tra simulatore Java e JMT sul modello $H_2/H_2/1$.}
     \label{tab:validation_hyperexp_comparison}
 \end{table}
 
 \subsection{Validazione dell'Architettura Web Server e Spike Server}
-Il secondo scenario estende la validazione alla struttura architetturale composta da un Web Server ordinario e da uno Spike Server di supporto. In questo caso l'obiettivo non è verificare una singola stazione, ma accertare che il meccanismo aggregato di instradamento verso il livello ausiliario produca lo stesso ordine di grandezza prestazionale del modello JSIM di riferimento.
+Il secondo scenario estende la validazione alla struttura architetturale composta da un Web Server ordinario e da uno Spike Server di supporto. In questo caso l'obiettivo non è verificare una singola stazione, ma accertare che il meccanismo aggregato di instradamento verso il livello ausiliario produca lo stesso ordine di grandezza prestazionale del modello JMT di riferimento.
 
-Per isolare il solo comportamento del routing, entrambi gli autoscaler sono stati disabilitati: il numero di Web Server resta costante, il fattore di capacità elaborativa dello Spike Server non varia nel tempo e non vengono eseguite azioni di \textit{Scale Out}, \textit{Scale In}, \textit{Scale Up} o \textit{Scale Down}. Il traffico in ingresso rimane iperesponenziale, con $\lambda = 2.5\text{ job/s}$ e $C_V = 4.0$; i servizi delle stazioni sono modellati con lo stesso schema $H_2$ e tasso medio $\mu = 4.0\text{ job/s}$. In JSIM il comportamento a soglia del router è stato emulato tramite una rete ausiliaria di token e transizioni: la classe chiusa \textit{maxReq\_Link}, inizializzata con $10$ token nella place \textit{P\_Tokens}, permette di riprodurre il vincolo di capacità del percorso ordinario e di inviare il traffico eccedente verso lo Spike Server.
+Per isolare il solo comportamento del routing, entrambi gli autoscaler sono stati disabilitati: il numero di Web Server resta costante, il fattore di capacità elaborativa dello Spike Server non varia nel tempo e non vengono eseguite azioni di \textit{Scale Out}, \textit{Scale In}, \textit{Scale Up} o \textit{Scale Down}. Il traffico in ingresso rimane iperesponenziale, con $\lambda = 2.5\text{ job/s}$ e $C_V = 4.0$; i servizi delle stazioni sono modellati con lo stesso schema $H_2$ e tasso medio $\mu = 4.0\text{ job/s}$. In JMT il comportamento a soglia del router è stato emulato tramite una rete ausiliaria di token e transizioni: la classe chiusa \textit{maxReq\_Link}, inizializzata con $10$ token nella place \textit{P\_Tokens}, permette di riprodurre il vincolo di capacità del percorso ordinario e di inviare il traffico eccedente verso lo Spike Server.
 
-Questa costruzione rappresenta una semplificazione esplicita rispetto alla \textit{ThresholdSpikeServerRoutingStrategy} implementata nel simulatore Java: JSIM non esegue lo stesso controllo oggetto-per-oggetto sul valore istantaneo di $SI$ del Web Server, ma ne riproduce l'effetto macroscopico mediante abilitazione e inibizione delle transizioni. Il confronto va quindi interpretato come validazione delle metriche globali del sistema a due livelli, non come equivalenza perfetta delle singole decisioni di routing.
+Questa costruzione rappresenta una semplificazione esplicita rispetto alla \textit{ThresholdSpikeServerRoutingStrategy} implementata nel simulatore Java: JMT non esegue lo stesso controllo oggetto-per-oggetto sul valore istantaneo di $SI$ del Web Server, ma ne riproduce l'effetto macroscopico mediante abilitazione e inibizione delle transizioni. Il confronto va quindi interpretato come validazione delle metriche globali del sistema a due livelli, non come equivalenza perfetta delle singole decisioni di routing.
 
 Anche per questo scenario è stata eseguita una stima preliminare dei Batch Means sul tempo di risposta globale. La nuova stima, riportata in Tabella~\ref{tab:validation_system_batch}, ha individuato un cutoff pari a $234$ e ha quindi suggerito batch da $2340$ job. La traccia disponibile per questa campagna contiene il risultato del metodo ACF; non viene pertanto attribuito un esito al metodo dinamico.
 
@@ -2487,11 +2486,11 @@ Anche per questo scenario è stata eseguita una stima preliminare dei Batch Mean
         clip
     ]{../data/simulation/simple_system/throughput}
 
-    \caption{Risultati JSIM per la validazione dell'architettura Web Server e Spike Server.}
-    \label{fig:jsim_system_validation}
+    \caption{Risultati JMT per la validazione dell'architettura Web Server e Spike Server.}
+    \label{fig:JMT_system_validation}
 \end{figure}
 
-La campagna Java definitiva è stata configurata con $4096$ batch da $4096$ job, coerentemente con l'arrotondamento superiore della struttura suggerita dalla stima ACF. I risultati in Tabella~\ref{tab:validation_system_comparison} mostrano una buona aderenza tra le due implementazioni indipendenti. Il throughput, indice particolarmente sensibile alla corretta conservazione del flusso, differisce dello $0.34\%$ e gli intervalli di confidenza si sovrappongono. Anche il numero medio di job nel sistema presenta uno scarto contenuto, pari a circa $0.46\%$, con sovrapposizione tra gli intervalli. Il tempo di risposta medio del simulatore Java risulta leggermente inferiore a quello JSIM ($0.8998\text{ s}$ contro $0.9043\text{ s}$), con uno scostamento relativo di circa $0.50\%$ e intervalli ancora sovrapposti. Il nuovo risultato rafforza quindi la validazione: le differenze residue sono compatibili sia con l'incertezza statistica sia con la semplificazione adottata in JSIM per approssimare il router a soglia.
+La campagna Java definitiva è stata configurata con $4096$ batch da $4096$ job, coerentemente con l'arrotondamento superiore della struttura suggerita dalla stima ACF. I risultati in Tabella~\ref{tab:validation_system_comparison} mostrano una buona aderenza tra le due implementazioni indipendenti. Il throughput, indice particolarmente sensibile alla corretta conservazione del flusso, differisce dello $0.34\%$ e gli intervalli di confidenza si sovrappongono. Anche il numero medio di job nel sistema presenta uno scarto contenuto, pari a circa $0.46\%$, con sovrapposizione tra gli intervalli. Il tempo di risposta medio del simulatore Java risulta leggermente inferiore a quello JMT ($0.8998\text{ s}$ contro $0.9043\text{ s}$), con uno scostamento relativo di circa $0.50\%$ e intervalli ancora sovrapposti. Il nuovo risultato rafforza quindi la validazione: le differenze residue sono compatibili sia con l'incertezza statistica sia con la semplificazione adottata in JMT per approssimare il router a soglia.
 
 \begin{table}[t]
     \centering
@@ -2499,18 +2498,18 @@ La campagna Java definitiva è stata configurata con $4096$ batch da $4096$ job,
     \renewcommand{\arraystretch}{1.3}
     \begin{tabular}{lcccc}
         \hline
-        \textbf{Metrica} & \textbf{Simulatore Java} & \textbf{CI Java 95\%} & \textbf{JSIM} & \textbf{CI JSIM 95\%} \\ \hline
+        \textbf{Metrica} & \textbf{Simulatore Java} & \textbf{CI Java 95\%} & \textbf{JMT} & \textbf{CI JMT 95\%} \\ \hline
         $E[T_s]$         & $0.8998\text{ s}$        & $[0.8963, 0.9032]$    & $0.9043\text{ s}$ & $[0.8996, 0.9089]$ \\
         $E[N_s]$         & $2.2644$                 & $[2.2535, 2.2753]$    & $2.2749$          & $[2.2531, 2.2968]$ \\
         $X$              & $2.5106\text{ job/s}$    & $[2.5057, 2.5156]$    & $2.5021\text{ job/s}$ & $[2.4955, 2.5087]$ \\ \hline
     \end{tabular}
-    \caption{Confronto di validazione tra simulatore Java e JSIM sull'architettura Web Server e Spike Server.}
+    \caption{Confronto di validazione tra simulatore Java e JMT sull'architettura Web Server e Spike Server.}
     \label{tab:validation_system_comparison}
 \end{table}
 
-Il report Java conferma inoltre che lo scenario è rimasto effettivamente statico rispetto agli autoscaler: tutte le azioni di \textit{Scale Out}, \textit{Scale In}, \textit{Scale Up} e \textit{Scale Down} hanno media nulla, mentre il numero medio di server attivi è pari a $1.0000$. L'utilizzazione media dello Spike Server risulta pari a $0.0243$, con intervallo di confidenza $[0.0239,0.0247]$, segnale che la risorsa ausiliaria viene attivata solo durante gli episodi di congestione locale. Questa evidenza è coerente con la finalità della validazione: il livello di picco non deve alterare il carico ordinario, ma deve intervenire come percorso di sfogo quando la soglia del Web Server viene raggiunta. Il leggero scostamento sul tempo di risposta non è quindi un risultato imprevisto, ma resta compatibile con la modellazione approssimata della soglia in JSIM rispetto alla decisione evento-per-evento implementata nel simulatore Java.
+Il report Java conferma inoltre che lo scenario è rimasto effettivamente statico rispetto agli autoscaler: tutte le azioni di \textit{Scale Out}, \textit{Scale In}, \textit{Scale Up} e \textit{Scale Down} hanno media nulla, mentre il numero medio di server attivi è pari a $1.0000$. L'utilizzazione media dello Spike Server risulta pari a $0.0243$, con intervallo di confidenza $[0.0239,0.0247]$, segnale che la risorsa ausiliaria viene attivata solo durante gli episodi di congestione locale. Questa evidenza è coerente con la finalità della validazione: il livello di picco non deve alterare il carico ordinario, ma deve intervenire come percorso di sfogo quando la soglia del Web Server viene raggiunta. Il leggero scostamento sul tempo di risposta non è quindi un risultato imprevisto, ma resta compatibile con la modellazione approssimata della soglia in JMT rispetto alla decisione evento-per-evento implementata nel simulatore Java.
 
-Nel complesso, la validazione esterna mostra che il simulatore implementato replica correttamente sia il comportamento di una stazione singola ad alta variabilità, sia l'effetto prestazionale aggregato dell'architettura a due livelli. Le differenze residue sono contenute e spiegabili dalle diverse astrazioni richieste per rappresentare in JSIM la strategia di routing a soglia; pertanto il modello sviluppato può essere considerato adeguato per le successive campagne di analisi e dimensionamento.
+Nel complesso, la validazione esterna mostra che il simulatore implementato replica correttamente sia il comportamento di una stazione singola ad alta variabilità, sia l'effetto prestazionale aggregato dell'architettura a due livelli. Le differenze residue sono contenute e spiegabili dalle diverse astrazioni richieste per rappresentare in JMT la strategia di routing a soglia; pertanto il modello sviluppato può essere considerato adeguato per le successive campagne di analisi e dimensionamento.
 
 \clearpage
 
@@ -3099,7 +3098,7 @@ Le Figure~\ref{fig:band_0}--\ref{fig:band_20} completano l'analisi mostrando tre
 % CONCLUSIONI
 % =========================================================================
 \section{Conclusioni}
-Il lavoro svolto ha permesso di costruire, verificare e utilizzare un simulatore a eventi discreti per lo studio di un'infrastruttura cloud con autoscaling gerarchico. La verifica interna ha mostrato la coerenza del simulatore rispetto ai casi analitici noti, mentre la validazione esterna con JSIM ha confermato che il modello implementato riproduce correttamente sia il comportamento di una singola stazione ad alta variabilità sia l'effetto aggregato dell'architettura Web Server--Spike Server. Nel sistema completo il tempo medio di risposta Java è pari a $0.8998\text{ s}$ contro $0.9043\text{ s}$ in JSIM, con scarto relativo di circa lo $0.50\%$ e intervalli di confidenza sovrapposti. Le differenze residue sono quindi contenute e spiegabili dalle diverse astrazioni necessarie per rappresentare il routing a soglia nel simulatore del libro.
+Il lavoro svolto ha permesso di costruire, verificare e utilizzare un simulatore a eventi discreti per lo studio di un'infrastruttura cloud con autoscaling gerarchico. La verifica interna ha mostrato la coerenza del simulatore rispetto ai casi analitici noti, mentre la validazione esterna con JMT ha confermato che il modello implementato riproduce correttamente sia il comportamento di una singola stazione ad alta variabilità sia l'effetto aggregato dell'architettura Web Server--Spike Server. Nel sistema completo il tempo medio di risposta Java è pari a $0.8998\text{ s}$ contro $0.9043\text{ s}$ in JMT, con scarto relativo di circa lo $0.50\%$ e intervalli di confidenza sovrapposti. Le differenze residue sono quindi contenute e spiegabili dalle diverse astrazioni necessarie per rappresentare il routing a soglia nel simulatore del libro.
 
 Dal punto di vista del dimensionamento, il risultato più netto riguarda il ruolo della politica di routing. La strategia \textit{Least Loaded} è risultata la più efficace, con $R_0=0.2843\text{ s}$ nello scenario statico a quattro Web Server, superando sia \textit{Round Robin} sia \textit{Power of Two Choices}. Questo conferma che, anche con disciplina \textit{Processor Sharing}, la distribuzione istantanea dei job tra i server resta decisiva: ridurre la congestione locale significa migliorare simultaneamente media e dispersione dei tempi di risposta.
 
@@ -3120,12 +3119,18 @@ In sintesi, l'architettura gerarchica proposta risulta efficace perché separa c
 
 \begin{thebibliography}{9}
 
-\bibitem{leemis-park}
+\bibitem{github-repository}
+F. Masci,
+\textit{Load Manager Simulator},
+repository GitHub,
+\url{https://github.com/F-masci/load-manager-simulator}.
+
+\bibitem{leemis-park-book}
 L. M. Leemis and S. K. Park, 
 \textit{Discrete-Event Simulation: A First Course}, 
 Pearson Prentice Hall, 2006.
 
-\bibitem{serazzi-jmt-book}
+\bibitem{serazzi-book}
 G. Serazzi, 
 \textit{Performance Engineering: Learning Through Applications Using JMT}, 
 Springer Nature Switzerland AG, 2024.
@@ -3135,26 +3140,16 @@ G. Serazzi, M. Gribaudo, G. Casale, et al.,
 ``Java Modelling Tools - JMT'', open-source suite, 
 \url{http://jmt.sourceforge.net/}.
 
-\bibitem{harchol-balter}
+\bibitem{harchol-balter-book}
 M. Harchol-Balter, 
 \textit{Performance Modeling and Design of Computer Systems: Queueing Theory in Action}, 
 Cambridge University Press, 2013.
 
-\bibitem{park-miller}
-S. K. Park and K. W. Miller, 
-``Random Number Generators: Good Ones Are Hard To Find'', 
-\textit{Communications of the ACM}, Vol. 31, No. 10, pp. 1192-1201, 1988.
-
-\bibitem{simulation-interval-estimation}
-Dispense del corso,
-\textit{Interval Estimation},
-materiale didattico di simulazione, 2025/2026.
-
-\bibitem{github-repository}
-F. Masci,
-\textit{Load Manager Simulator},
-repository GitHub,
-\url{https://github.com/F-masci/load-manager-simulator}.
+\bibitem{course-slides}
+V. de Nitto Personè,
+\textit{Performance Modeling of Computer Systems and Networks},
+Dispense del corso, Università degli Studi di Roma Tor Vergata, 
+A.A. 2025/2026, \url{https://didatticaweb.uniroma2.it/informazioni/index/insegnamento/217547-Performance-Modeling-Of-Computer-Systems-And-Networks/0}.
 
 \end{thebibliography}
 
