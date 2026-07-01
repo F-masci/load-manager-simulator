@@ -747,12 +747,6 @@ La decisione sul singolo job può essere rappresentata dalla funzione indicatric
     \end{cases}
 \end{equation}
 Questa percentuale non indica che tutto il traffico globale venga deviato, ma che il job candidato per quel server viene inviato integralmente allo Spike Server oppure integralmente al Web Server ordinario. 
-% TODO: verificarla bene
-% A regime, la probabilità $q_i$ corrisponde al valore atteso della funzione indicatrice condizionato agli istanti di arrivo dei job candidati, ovvero:
-% \begin{equation}
-% q_i = \mathbb{E}[d_i(t^-)] = P(SI_i(t^-) \ge SI_{max}),
-% \end{equation}
-% dove $t^-$ indica l'istante immediatamente precedente un arrivo. È importante sottolineare che, a causa della natura iperesponenziale del processo degli % arrivi (caratterizzato da un coefficiente di variazione $C_V > 1$), non si applica la proprietà PASTA. Pertanto, la probabilità di dirottamento $q_i$ % differisce dalla mera media temporale dell'indicatore, riflettendo l'effetto di "bunching" tipico dei flussi di traffico a varianza elevata.
 
 La percentuale aggregata di traffico deviato a regime viene invece stimata tramite throughput:
 \begin{equation}
@@ -761,6 +755,16 @@ La percentuale aggregata di traffico deviato a regime viene invece stimata trami
     \frac{\lambda_s}{\lambda},
 \end{equation}
 dove $X_{spike}$ è il throughput dei job completati dallo Spike Server e $X_0$ è il throughput complessivo del sistema. In questo modo il dirottamento viene letto come quota percentuale effettiva del lavoro servito dalla risorsa ausiliaria. La formulazione rende esplicito che il routing verso lo Spike Server non modifica il carico esterno complessivo, ma ne ridistribuisce una frazione quando il singolo nodo ordinario entra in una regione di congestione locale.
+
+\subsection{Parametri Fissati dei Moduli di Scaling}
+La dimensione della finestra mobile e le soglie di carico dello scaling verticale sono fissate a priori in funzione di $SI_{max}$, così da mantenerle proporzionate alla capacità di accumulo ammessa sul percorso ordinario:
+\begin{equation}
+    W = 2.5 \cdot SI_{max}, \quad L^{max}_{sv}=\frac{SI_{max}}{2.5}, \quad L^{min}_{sv}=0.7 \cdot L^{max}_{sv}
+\end{equation}
+Ad esempio, con $SI_{max}=40$ si ottiene:
+\begin{equation}
+    W = 100, \quad L^{max}_{sv} = 16, \quad L^{min}_{sv}= 11.2
+\end{equation}
 
 \clearpage
 
@@ -1458,7 +1462,7 @@ public static ConvergenceReport run(ApplicationConfig config) {
 \end{lstlisting}
 
 \subsection{Generatori Pseudo-Casuali e Variate Aleatorie}
-La libreria \texttt{lib.rng} deriva dalle classi \texttt{Rngs}, \texttt{Rvgs} e \texttt{Rvms} di Park, Miller e collaboratori, adottate nei testi di simulazione per la generazione di numeri pseudo-casuali e variate aleatorie \cite{leemis-park-book}. Il generatore di base è un Lehmer multiplicative congruential generator:
+La libreria \texttt{lib.rng} deriva dalle classi \texttt{Rngs}, \texttt{Rvgs} e \texttt{Rvms} di Park e collaboratori, adottate nei testi di simulazione per la generazione di numeri pseudo-casuali e variate aleatorie \cite{leemis-park-book}. Il generatore di base è un Lehmer multiplicative congruential generator:
 \begin{equation}
     X_{n+1} = 48271 X_n \bmod (2^{31}-1),
     \qquad
@@ -1475,6 +1479,23 @@ return ((double) seed[stream] / MODULUS);
 \end{lstlisting}
 
 La classe \texttt{Rngs} espone 256 stream indipendenti. Questa caratteristica è importante per la riproducibilità degli esperimenti: arrivi, servizi e selezioni interne delle distribuzioni usano stream separati, così da evitare che una modifica locale, ad esempio l'aggiunta di una scelta casuale nel routing, alteri l'intera sequenza di servizi o arrivi. Il metodo \texttt{plantSeeds} inizializza tutti gli stream a partire da un unico seed, mantenendo quindi sia riproducibilità sia separazione delle sorgenti casuali.
+
+Tutte le campagne di simulazione adottano come seed iniziale il valore \texttt{123456789}, indicato come valore di riferimento dalla stessa libreria. La scelta di fissare il seed rende ogni esperimento esattamente replicabile: a parità di configurazione viene ricostruita la stessa successione di sequenze pseudo-casuali.
+
+Nelle analisi a repliche indipendenti, \texttt{123456789} viene usato soltanto per inizializzare la prima run. La facade mantiene una variabile \texttt{currentSeed} e costruisce ciascuna replica con un nuovo simulatore inizializzato mediante tale valore. Al termine della run recupera lo stato raggiunto dal generatore tramite \texttt{getSeed()} e lo usa come seed iniziale della replica successiva:
+\begin{lstlisting}[language=Java]
+long currentSeed = config.execution().seed();
+
+for (int i = 0; i < config.execution().numReplications(); i++) {
+    Simulator controller = new SimulationBuilder()
+        .config(config.withSeed(currentSeed))
+        .build();
+
+    controller.run(stopCondition);
+    currentSeed = controller.getSeed();
+}
+\end{lstlisting}
+Le repliche non ripartono quindi tutte da \texttt{123456789}: ciascuna prosegue la generazione a partire dall'ultimo stato prodotto dalla precedente, utilizzando porzioni successive della sequenza pseudo-casuale. Questa concatenazione evita di ripetere la stessa traiettoria in ogni run indipendente e, poiché il primo seed e la durata delle repliche sono deterministici, conserva la riproducibilità dell'intera campagna.
 
 Le variate esponenziali sono generate dalla classe \texttt{Rvgs} tramite trasformata inversa. Se $U$ è uniforme in $(0,1)$ e $m$ è la media desiderata, allora:
 \begin{equation}
