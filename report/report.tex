@@ -800,16 +800,8 @@ public class Job {
 \end{lstlisting}
 La presenza della domanda residua è fondamentale per implementare correttamente il Processor Sharing, poiché il servizio non viene prelevato in un'unica soluzione ma consumato progressivamente tra due eventi consecutivi.
 \begin{lstlisting}[language=Java]
-/**
- * Decreases the remaining service demand by a given amount, clamped to zero.
- *
- * @param amount the amount to decrease
- */
 public void decreaseRemainingDemand(double amount) {
     this.remainingServiceDemand -= amount;
-    if (this.remainingServiceDemand < 0.0) {
-        this.remainingServiceDemand = 0.0;
-    }
 }
 \end{lstlisting}
 Il tempo di risposta $R_j$ viene quindi ottenuto direttamente come:
@@ -818,15 +810,7 @@ Il tempo di risposta $R_j$ viene quindi ottenuto direttamente come:
 \end{equation}
 dove $A_j$ è il tempo di arrivo e $C_j$ il tempo di completamento del job.
 \begin{lstlisting}[language=Java]
-/**
- * Calculates the total time spent in the system.
- *
- * @return the response time
- */
-public double getResponseTime() {
-    if (completionTime < 0) return 0.0;
-    return completionTime - arrivalTime;
-}
+public double getResponseTime() { return completionTime - arrivalTime; }
 \end{lstlisting}
 
 \paragraph{\texttt{Event}.}
@@ -836,7 +820,7 @@ public class Event implements Comparable<Event> {
     private final double time;
     private final EventType type;
     private final Job job;
-    private final Server server; // The server where a completion occurs, or null for arrival
+    private final Server server;
     // ...
 }
 
@@ -858,21 +842,11 @@ Il nucleo computazionale del Processor Sharing è il metodo \texttt{processJobs}
 \end{equation}
 Nel codice questa regola è implementata in modo diretto:
 \begin{lstlisting}[language=Java]
-/**
- * Simulates the execution of jobs in Processor Sharing for a given time interval.
- * Consumes the remaining service demand of all active jobs.
- *
- * @param elapsed time interval elapsed
- */
 public void processJobs(double elapsed) {
-    if (elapsed <= 0.0 || activeJobs.isEmpty()) {
-        return;
-    }
-    // Under PS, the total CPU speed is shared equally among all active jobs
+    if (elapsed <= 0.0 || activeJobs.isEmpty()) return;
+
     double workPerJob = (elapsed * speedMultiplier) / activeJobs.size();
-    for (Job job : activeJobs) {
-        job.decreaseRemainingDemand(workPerJob);
-    }
+    for (Job job : activeJobs) { job.decreaseRemainingDemand(workPerJob); }
 }
 \end{lstlisting}
 
@@ -882,14 +856,7 @@ public void processJobs(double elapsed) {
 \end{equation}
 
 \begin{lstlisting}[language=Java]
-/**
- * Returns the Spike Indicator (SI), defined as the number of requests currently in execution.
- *
- * @return the number of active jobs
- */
-public int getSpikeIndicator() {
-    return activeJobs.size();
-}
+public int getSpikeIndicator() { return activeJobs.size(); }
 \end{lstlisting}
 
 \paragraph{SpikeServer:}  rappresenta il nodo speciale usato per assorbire richieste di picco. Anch'esso eredita la disciplina Processor Sharing da \texttt{Server}, ma aggiunge un accumulatore time-weighted per il fattore di capacità elaborativa. In questo modo il simulatore può stimare non solo l'utilizzazione dello Spike Server, ma anche la capacità elaborativa media impiegata durante la run. Questa informazione è usata negli obiettivi di costo, nei quali il costo computazionale dipende sia dal tempo di permanenza nello stato scalato sia dal livello medio di capacità allocata.
@@ -898,66 +865,29 @@ public int getSpikeIndicator() {
 Il cluster dei Web Server è gestito dalla classe \texttt{WebServerCluster}. Essa mantiene tre insiemi distinti: server attivi, server in \textit{draining} e server complessivamente creati.
 \begin{lstlisting}[language=Java]
 public class WebServerCluster {
-    private static final ModuleLogger logger = LogFactory.getLogger(WebServerCluster.class, "SERVER");
-
     private final List<WebServer> activeServers;
     private final List<WebServer> drainingServers;
-    private final List<WebServer> allServers; // Tracks all servers ever created for reporting
-
-    private final int minServers;
-    private final int maxServers;
-
-    private int scaleOutCount = 0;
-    private int scaleInCount = 0;
+    private final List<WebServer> allServers;
     // ...
 
 }
 \end{lstlisting}
 La distinzione è necessaria per modellare correttamente lo scale-in: quando un server viene rimosso dal pool attivo non riceve più nuovi job, ma i job già presenti continuano ad essere serviti fino al completamento.
 \begin{lstlisting}
-/**
- * Decreases the number of active Web Servers by 1, if above minServers.
- * The removed server enters a draining state if it has active jobs.
- *
- * @param clock current simulation time
- * @return true if a server was removed from active pool, false otherwise
- */
 public boolean scaleIn(double clock) {
     if (activeServers.size() > minServers) {
         WebServer ws = activeServers.remove(activeServers.size() - 1);
-        ws.updateStatistics(clock);
-        scaleInCount++;
-        activeServersStat.updateToTime(clock, activeServers.size());
-        if (!ws.getActiveJobs().isEmpty()) {
-            drainingServers.add(ws);
-            logger.debug("Scale In: WebServer #{} entered draining state at clock={} (Active servers={})", ws.getId(), clock, activeServers.size());
-        } else {
-            logger.debug("Scale In: Deallocated idle WebServer #{} at clock={} (Active servers={})", ws.getId(), clock, activeServers.size());
-        }
+        if (!ws.getActiveJobs().isEmpty()) drainingServers.add(ws);
         return true;
     }
-    logger.debug("Scale In: Ignored (already at minimum servers={}) at clock={}", minServers, clock);
     return false;
 }
 \end{lstlisting}
 Solo quando la lista dei job attivi diventa vuota il server può essere eliminato dalla parte operativa del sistema.
 \begin{lstlisting}
-/**
- * Updates statistics and processes jobs for all active and draining servers.
- *
- * @param elapsed time interval elapsed
- * @param nextTime simulation time at the end of the interval
- */
 public void processActiveJobs(double elapsed, double nextTime) {
-    for (WebServer ws : activeServers) {
-        ws.updateStatistics(nextTime);
-        ws.processJobs(elapsed);
-    }
-    for (WebServer ws : drainingServers) {
-        ws.updateStatistics(nextTime);
-        ws.processJobs(elapsed);
-    }
-    // Clean up empty draining servers
+    for (WebServer ws : activeServers) { ws.processJobs(elapsed); }
+    for (WebServer ws : drainingServers) { ws.processJobs(elapsed); }
     drainingServers.removeIf(ws -> ws.getActiveJobs().isEmpty());
 }
 \end{lstlisting}
@@ -969,41 +899,27 @@ Il cluster aggiorna inoltre il numero medio di server attivi tramite un accumula
 Il simulatore adotta un avanzamento temporale \textit{next-event}: l'orologio non procede con passo fisso, ma salta direttamente al tempo del prossimo evento presente nella \textit{Future Event List}.
 L'interfaccia \texttt{Simulator} definisce il contratto comune del motore, mentre \\ \texttt{SimulationController} ne implementa la logica concreta. La coda degli eventi futuri è una \texttt{PriorityQueue<Event>}; il ciclo di esecuzione prosegue fino al raggiungimento della condizione di arresto richiesta, che può essere un numero di completamenti, un orizzonte temporale o l'esaurimento della coda eventi:
 \begin{lstlisting}[language=Java]
-/**
- * Runs the simulation loop until a stop condition is met, optionally showing progress.
- *
- * @param condition criteria to stop the simulation
- * @param progress true to show a progress bar in console
- */
 default void run(SimulationController.StopCondition condition, boolean progress) {
     scheduleInitialEvents();
 
     int targetJobs = Integer.MAX_VALUE;
     double targetTime = Double.MAX_VALUE;
 
-    // Get the stop condition
     switch (condition.criteria()) {
-        case JOBS_COMPLETED -> targetJobs = getTotalJobsCompleted() + (int) condition.targetValue();
+        case JOBS_COMPLETED -> targetJobs = getTotalJobsCompleted() + condition.targetValue();
         case TIME_ELAPSED -> targetTime = getClock() + condition.targetValue();
         case QUEUE_EMPTY -> { /* Use default infinite value */ }
     }
 
-    // Simulation loop - calls processNextEvent() which might be decorated
-    int lastPrintedPercentage = -1;
-    while (getTotalJobsCompleted() < targetJobs && getClock() < targetTime && processNextEvent()) {
+    while (getTotalJobsCompleted() < targetJobs && getClock() < targetTime
+            && processNextEvent()) {
         // optional progress printer
     }
-    finalizeSimulation();
 }
 \end{lstlisting}
 
 L'elaborazione di un singolo evento segue sempre la stessa sequenza: estrazione dell'evento più vicino, avanzamento del lavoro accumulato nell'intervallo trascorso, aggiornamento dell'orologio e dispatch verso il gestore specifico:
 \begin{lstlisting}[language=Java]
-/**
- * Processes the next event in the queue.
- *
- * @return true if an event was processed, false if the queue is empty
- */
 @Override
 public boolean processNextEvent() {
     if (eventQueue.isEmpty()) return false;
@@ -1031,31 +947,18 @@ I tempi di uscita dal sistema non dipendono unicamente dalla domanda di servizio
 \end{equation}
 Questa formula è coerente con il fatto che, a parità di domanda residua, il completamento si allontana al crescere del numero di job concorrenti e si avvicina al crescere del fattore di capacità elaborativa del server.
 \begin{lstlisting}[language=Java]
-/**
- * Clears and reschedules all completion events for all active servers.
- */
 private void rescheduleAllCompletions() {
     eventQueue.removeIf(e -> e.getType() == EventType.COMPLETION);
-    webServerCluster.getActiveServers().forEach(this::scheduleCompletionsForServer);
-    webServerCluster.getDrainingServers().forEach(this::scheduleCompletionsForServer);
+    webServerCluster.getActiveServers().forEach(scheduleCompletionsForServer);
+    webServerCluster.getDrainingServers().forEach(scheduleCompletionsForServer);
     scheduleCompletionsForServer(spikeServer);
 }
 
-/**
- * Reschedules completion events for a specific server.
- *
- * @param server server to update
- */
 private void rescheduleCompletions(Server server) {
     eventQueue.removeIf(e -> e.getType() == EventType.COMPLETION && server.equals(e.getServer()));
     scheduleCompletionsForServer(server);
 }
 
-/**
- * Calculates completion times for all active jobs on a server and adds them to the queue.
- *
- * @param server server to schedule completions for
- */
 private void scheduleCompletionsForServer(Server server) {
     int n = server.getActiveJobs().size();
     if (n == 0) return;
@@ -1068,14 +971,7 @@ private void scheduleCompletionsForServer(Server server) {
 
 Nel caso di un arrivo, il controller genera il job successivo, invoca il \texttt{LoadManager} per la scelta del server, accetta il job nella stazione selezionata, rischedula i completamenti della stazione e aggiorna le statistiche globali.
 \begin{lstlisting}[language=Java]
-/**
- * Handles a job arrival by routing it to a server and scheduling the next completion.
- *
- * @param job arriving job
- */
 private void handleArrival(Job job) {
-    totalJobsArrived++;
-
     Server server = loadController.routeJob(job, webServerCluster, spikeServer);
     if (server == spikeServer) totalJobsDiverted++;
     server.acceptJob(job, clock);
@@ -1083,28 +979,19 @@ private void handleArrival(Job job) {
     rescheduleCompletions(server);
     scheduleNextArrival();
 
-    updateSystemStats(clock);
     checkAndApplyScaling();
 }
 \end{lstlisting}
 Nel caso di un completamento, il job viene rimosso dal server, il tempo di risposta viene sommato alle statistiche globali, il completamento viene passato allo scaler orizzontale e gli eventi di completamento del server vengono ricalcolati.
 \begin{lstlisting}[language=Java]
-/**
- * Handles a job completion by releasing resources and updating statistics.
- *
- * @param job completed job
- * @param server server that processed the job
- */
 private void handleCompletion(Job job, Server server) {
     server.completeJob(job, clock);
 
-    totalJobsCompleted++;
     totalSystemResponseTime += job.getResponseTime();
     loadController.getHorizontalScaler().recordCompletion(clock, job.getResponseTime());
 
     rescheduleCompletions(server);
 
-    updateSystemStats(clock);
     checkAndApplyScaling();
 }
 \end{lstlisting}
@@ -1118,14 +1005,6 @@ La logica di controllo del carico è raccolta nella classe \texttt{LoadManager}.
 \paragraph{Routing.}
 Il routing è diviso in due passaggi. Prima viene selezionato un Web Server candidato tramite una strategia fra quelle implementate nel package di routing: Round Robin, Least Loaded, Random, Power of Two Choices e varianti deterministiche. Successivamente la strategia di routing verso lo Spike Server decide se mantenere il job sul Web Server candidato o deviarlo. La classe \texttt{Router} rende esplicita questa composizione:
 \begin{lstlisting}[language=Java]
-/**
- * Routes a job to either a web server or the spike server based on the active strategies.
- *
- * @param job the job to route
- * @param cluster the web server cluster
- * @param spikeServer the spike server
- * @return the selected server for the job
- */
 public final Server route(Job job, WebServerCluster cluster, SpikeServer spikeServer) {
     WebServer targetServer = webServerRoutingStrategy.selectWebServer(job, cluster);
     if (spikeServerRoutingStrategy.shouldRouteToSpike(targetServer, siMax)) {
@@ -1144,18 +1023,9 @@ Lo scaling orizzontale è implementato dalla classe \\ \texttt{MovingWindowHoriz
 \end{equation}
 Se tale valore supera la soglia di \textit{Scale Out}, il cluster prova ad aggiungere un Web Server; se scende sotto la soglia di \textit{Scale In}, il cluster prova a rimuoverne uno. Entrambe le decisioni rispettano il cooldown, così da evitare oscillazioni troppo frequenti:
 \begin{lstlisting}[language=Java]
-/**
- * Evaluates whether to scale the cluster based on the moving window average.
- *
- * @param clock The current simulation clock
- * @param cluster The WebServerCluster to evaluate
- * @return true if a scaling action occurred, false otherwise
- */
 @Override
 public boolean evaluateScaling(double clock, WebServerCluster cluster) {
-    if (!hasNewDataSinceLastEvaluation) {
-        return false;
-    }
+    if (!hasNewDataSinceLastEvaluation) return false;
 
     final double remainingCooldown = getRemainingCooldown(clock);
     if (remainingCooldown >= 0.01) return false;
@@ -1163,11 +1033,7 @@ public boolean evaluateScaling(double clock, WebServerCluster cluster) {
     hasNewDataSinceLastEvaluation = false;
 
     double avgResponse = getCurrentMetric(clock);
-    if (window.isEmpty()) {
-        return false;
-    }
-
-    logger.debug("Horizontal scaling evaluation: avgResponseTime = {}, activeWindowSize = {}", avgResponse, window.size());
+    if (window.isEmpty()) return false;
 
     if (avgResponse >= scaleOutThreshold) {
         boolean scaled = cluster.scaleOut(clock);
@@ -1191,13 +1057,6 @@ La finestra è espressa in numero di completamenti, non in secondi. Questa scelt
 \paragraph{Scaling verticale.}
 Lo scaling verticale è implementato da \texttt{LoadThresholdVerticalScaler}, che specializza \texttt{ThresholdVerticalScaler}. Il componente osserva il numero di job attivi sullo Spike Server e modifica il fattore di capacità elaborativa quando la metrica supera la soglia alta o scende sotto la soglia bassa. In particolare, lo stato scalato è ottenuto sommando l'incremento configurato al valore di base:
 \begin{lstlisting}[language=Java]
-/**
- * Evaluates whether to vertically scale SpikeServer capacity based on thresholds.
- *
- * @param clock current simulation time
- * @param spikeServer the server to potentially scale
- * @return true if a scaling action occurred, false otherwise
- */
 @Override
 public boolean evaluateScaling(double clock, SpikeServer spikeServer) {
     final double remainingCooldown = getRemainingCooldown(clock);
@@ -1208,13 +1067,11 @@ public boolean evaluateScaling(double clock, SpikeServer spikeServer) {
         spikeServer.setSpeedMultiplier(scaledSpeed, clock);
         isScaled = true;
         lastScalingTime = clock;
-        this.scaleUpCount++;
         return true;
     } else if (isScaled && currentMetric <= lowerThreshold) {
         spikeServer.setSpeedMultiplier(baseSpeed, clock);
         isScaled = false;
         lastScalingTime = clock;
-        this.scaleDownCount++;
         return true;
     }
     return false;
@@ -1226,46 +1083,8 @@ Anche in questo caso la decisione è vincolata dal cooldown. Dopo una variazione
 
 \paragraph{\texttt{SimulationBuilder}.} La classe \texttt{SimulationBuilder} centralizza la costruzione del simulatore. A partire da \texttt{ApplicationConfig}, essa crea la sorgente del workload, il cluster di Web Server, lo Spike Server, le strategie di routing, gli scaler e il controller. L'estratto seguente mostra il punto in cui la configurazione viene trasformata in componenti eseguibili:
 \begin{lstlisting}[language=Java]
-// Event Source
-EventSource eventSource;
-try {
-    eventSource = switch (config.load().workloadType()) {
-        case TRACE -> {
-            if (config.load().tracePath() == null) throw new IOException("Trace path missing for TRACE workload");
-            yield new TraceEventSource(config.load().tracePath());
-        }
-        case HYPEREXPONENTIAL -> new HyperexponentialEventSource(
-            seed, 
-            config.load().meanInterarrival(), config.load().cvInterarrival(),
-            config.load().meanService(), config.load().cvService()
-        );
-        case EXPONENTIAL -> new ExponentialEventSource(seed, config.load().meanInterarrival(), config.load().meanService());
-    };
-} catch (IOException e) {
-    throw new RuntimeException("Failed to initialize EventSource", e);
-}
-
-// WebServerCluster
-WebServerCluster cluster = new WebServerCluster(config.cluster().minServers(), config.cluster().maxServers());
-
-WebServerRoutingStrategy wsStrategy = switch (config.load().routingPolicy()) {
-    case RoutingPolicy.ROUND_ROBIN -> new RoundRobinRoutingStrategy();
-    case RoutingPolicy.LEAST_LOADED -> new LeastLoadedRoutingStrategy();
-    case RoutingPolicy.DETERMINISTIC -> new DeterministicRoutingStrategy();
-    case RoutingPolicy.RANDOM -> new RandomRoutingStrategy(seed);
-    case RoutingPolicy.POWER_OF_TWO -> new PowerOfTwoChoicesRoutingStrategy(seed);
-};
-
-// SpikeServer
-SpikeServer spikeServer = new SpikeServer(0, config.scaling().spikeCpuPercentage());
-SpikeServerRoutingStrategy spikeStrategy = config.cluster().spikeEnabled()
-        ? new ThresholdSpikeServerRoutingStrategy(config.load().siLow())
-        : new NoSpikeServerRoutingStrategy();
-
-// Router
 Router router = new Router(config.load().siMax(), wsStrategy, spikeStrategy);
 
-// Scalers
 HorizontalScaler hScaler = config.scaling().horizontalEnabled()
     ? new MovingWindowHorizontalScaler(config)
     : new NoHorizontalScaler();
@@ -1274,7 +1093,6 @@ VerticalScaler vScaler = config.scaling().verticalEnabled()
     ? new LoadThresholdVerticalScaler(config.scaling(), config.scaling().verticalIncrement())
     : new NoVerticalScaler();
 
-// LoadManager
 LoadManager loadManager = new LoadManager(hScaler, vScaler, router);
 
 Simulator controller = new SimulationController(
@@ -1292,17 +1110,9 @@ Simulator controller = new SimulationController(
 
 Nel caso Batch Means, la Facade esegue prima un warm-up, azzera le statistiche e poi raccoglie un campione per ciascun batch:
 \begin{lstlisting}[language=Java]
-/**
- * Runs a steady-state simulation using the Batch Means method with a custom builder.
- * @param builder The configured builder.
- * @return Aggregated results over all batches.
- */
 public AggregatedResults runBatchMeansSimulation(SimulationBuilder builder) {
-    
-    // Infinite horizon simulation
     Simulator controller = builder.build();
 
-    logger.info("Starting BATCH MEANS simulation... Warm-up: {} jobs", config.execution().warmUpJobs());
     if (config.execution().warmUpJobs() > 0) {
         controller.run(SimulationController.StopCondition
                         .untilJobsCompleted(config.execution().warmUpJobs()));
@@ -1318,36 +1128,24 @@ public AggregatedResults runBatchMeansSimulation(SimulationBuilder builder) {
         int currentBatch = i + 1;
         int totalBatches = config.execution().numBatches();
 
-        printBatchProgressBar(currentBatch, totalBatches);
         controller.resetStatistics();
     }
 
-    return createResults("BATCH MEANS (STEADY STATE)", config.execution().numBatches());
+    return createResults("BATCH MEANS", config.execution().numBatches());
 }
 \end{lstlisting}
 
 Nel caso delle repliche indipendenti, invece, la Facade ricostruisce un nuovo controller per ogni replica, inizializzando il generatore con il seed previsto per quella run.
 \begin{lstlisting}[language=Java]
-/**
- * Runs a terminating simulation using the Independent Replications method with a custom builder.
- *
- * @return Aggregated results over all replications.
- */
 public AggregatedResults runIndependentReplicationsSimulation() {
 
-    // Setting starting seed
     long currentSeed = config.execution().seed();
-    runningMeans.clear();
-    customDecorators.clear(); // Ensure clean state for new runs
 
     for (int i = 0; i < config.execution().numReplications(); i++) {
 
-        // Ensure independence by creating a fresh controller with a specific seed for each replication
         Simulator controller = new SimulationBuilder()
             .config(config.withSeed(currentSeed))
             .build();
-
-        controller = applyCustomDecorator(controller);
 
         if (config.execution().maxJobs() > 0) {
             controller.run(SimulationController.StopCondition
@@ -1358,9 +1156,7 @@ public AggregatedResults runIndependentReplicationsSimulation() {
         }
 
         updateAggregators(controller);
-        runningMeans.add(rt.getMean());
 
-        // Get seed from old run
         currentSeed = controller.getSeed();
     }
 
@@ -1386,11 +1182,6 @@ L'algoritmo di Welford aggiorna media e varianza in modo incrementale, evitando 
 \end{align}
 Nel codice:
 \begin{lstlisting}[language=Java]
-/**
- * Adds a new observation to the running statistics.
- *
- * @param x the observed value
- */
 public void update(double x) {
     count++;
     double delta = x - mean;
@@ -1399,28 +1190,11 @@ public void update(double x) {
     m2 += delta * delta2;
 }
 
-/**
- * Gets the running mean of the observations.
- *
- * @return the running mean, or 0.0 if no observations have been added
- */
-public double getMean() {
-    return mean;
-}
+public double getMean() { return mean; }
 \end{lstlisting}
 La varianza campionaria viene poi stimata come $s^2=M_2/(n-1)$. La scelta di dividere per $n-1$ anziché per $n$ rappresenta la correzione di Bessel per la varianza campionaria \cite{leemis-park-book}. Quando la vera media della popolazione $\mu$ è ignota, essa viene stimata nel simulatore tramite la media campionaria $\bar{x}$. Poiché i dati estratti tendono intrinsecamente a essere più vicini alla propria media campionaria $\bar{x}$ rispetto a quanto lo siano dalla vera media teorica $\mu$, il calcolo degli scarti quadratici riferito a $\bar{x}$ produce una sottostima sistematica della reale variabilità del sistema. Dividendo la somma dei quadrati per $n$ si otterrebbe uno stimatore \textit{biased}. La rimozione di un grado di libertà al denominatore compensa esattamente questa distorsione statistica, rendendo lo stimatore della varianza campionaria \textit{unbiased}.
 \begin{lstlisting}[language=Java]
-/**
- * Gets the running sample variance (divided by count - 1).
- *
- * @return the sample variance, or 0.0 if count < 2
- */
-public double getVariance() {
-    if (count < 2) {
-        return 0.0;
-    }
-    return m2 / (count - 1);
-}
+public double getVariance() { return m2 / (count - 1); }
 \end{lstlisting}
 Questo approccio è particolarmente adatto alle simulazioni lunghe, perché consente di elaborare milioni di osservazioni mantenendo memoria costante.
 
@@ -1433,16 +1207,7 @@ Per le grandezze a tempo continuo non è corretto calcolare la media aritmetica 
 \end{equation}
 \texttt{TimedWelford} implementa proprio questa integrazione a tratti costanti: quando il valore cambia al tempo corrente, il valore precedente viene accumulato con peso pari alla durata per cui è rimasto valido.
 \begin{lstlisting}[language=Java]
-/**
- * Updates the statistic with a value and the duration it persisted.
- *
- * @param value    the value of the statistic
- * @param duration the duration for which the value persisted
- */
 public void update(double value, double duration) {
-    if (duration <= 0.0) {
-        return;
-    }
     count++;
     double delta = value - mean;
     totalDuration += duration;
@@ -1450,13 +1215,6 @@ public void update(double value, double duration) {
     sumOfSquares += duration * delta * (value - mean);
 }
 
-/**
- * Updates the statistic by transitioning to a new value at the current simulation time.
- * This automatically calculates the duration since the last update using the previous value.
- *
- * @param currentTime the current simulation clock time
- * @param newValue    the new value of the statistic starting from this time
- */
 public void updateToTime(double currentTime, double newValue) {
     if (!initialized) {
         lastTime = currentTime;
@@ -1465,34 +1223,14 @@ public void updateToTime(double currentTime, double newValue) {
         return;
     }
     double duration = currentTime - lastTime;
-    if (duration > 0.0) {
-        update(currentValue, duration);
-    }
+    if (duration > 0.0) update(currentValue, duration);
     currentValue = newValue;
     lastTime = currentTime;
 }
 
-/**
- * Gets the running time-weighted mean.
- *
- * @return the running mean, or 0.0 if total duration is 0
- */
-public double getMean() {
-    return mean;
-}
+public double getMean() { return mean; }
 
-/**
- * Gets the running time-weighted variance (population variance, representing the
- * time-average variance over the total duration).
- *
- * @return the time-weighted variance, or 0.0 if total duration is 0
- */
-public double getVariance() {
-    if (totalDuration <= 0.0) {
-        return 0.0;
-    }
-    return sumOfSquares / totalDuration;
-}
+public double getVariance() { return sumOfSquares / totalDuration; }
 \end{lstlisting}
 Questa distinzione è essenziale per non distorcere utilizzazione e popolazione media del sistema, che sono grandezze definite rispetto al tempo e non rispetto al numero di eventi.
 
@@ -1507,25 +1245,11 @@ e l'intervallo riportato nelle tabelle è:
 \end{equation}
 La classe \texttt{IntervalEstimator} riceve il numero di campioni, la media e la deviazione standard e restituisce direttamente media, deviazione standard, Half-Width ed estremi dell'intervallo.
 \begin{lstlisting}[language=Java]
-/**
- * Calculates the semi-interval of confidence.
- *
- * @param count           The number of observations.
- * @param stdDev          The sample standard deviation.
- * @param confidenceLevel The desired confidence level (e.g., 0.95).
- * @return The calculated half-width.
- */
 public static double estimateHalfWidth(long count, double stdDev, double confidenceLevel) {
-    if (count < 2) {
-        return 0.0;
-    }
-
     double alpha = 1.0 - confidenceLevel;
     double quantile = 1.0 - alpha / 2.0;
-
     double t = rvms.idfStudent(count - 1, quantile);
     double standardError = stdDev / Math.sqrt(count);
-
     return t * standardError;
 }
 \end{lstlisting}
@@ -1559,21 +1283,10 @@ Per ragioni di efficienza, l'implementazione software rigetta l'approccio a due 
 Il valore di $r_j$ risultante viene valutato per identificare il cutoff statistico di indipendenza basato sulla regola di Chatfield, la quale stabilisce che per una serie non correlata il coefficiente fluttuerà oltre i limiti critici $\pm 2/\sqrt{n}$ solo con una probabilità residua dello $0.05$ \cite{leemis-park-book}.
 Il cutoff di autocorrelazione (indicato nel codice come \texttt{cutoffLag}, corrispondente al parametro teorico $L$) è definito come il più piccolo indice di lag a partire dal quale la funzione di autocorrelazione decade stabilmente e si confina permanentemente all'interno della fascia di variabilità casuale. Al fine di irrobustire l'algoritmo contro falsi positivi generati da fluttuazioni stocastiche isolate della serie pilota, il simulatore adotta una finestra di verifica richiedendo la persistenza della condizione per un numero minimo di lag successivi, calcolato dinamicamente su base logaritmica:
 \begin{lstlisting}[language=Java]
-/**
- * Calculates the stable cutoff lag for the autocorrelation function.
- *
- * @param data the time series data
- * @param threshold the acf threshold
- * @return the first lag where acf remains below the threshold
- */
 public static int calculateCutoff(List<Double> data, final double threshold) {
     final int n = data.size();
-    if (n == 0) return 0;
-
     double mean = calculateMean(data);
     double ss = calculateSumOfSquares(data, mean);
-
-    if (ss == 0.0) return 0;
 
     int consecutiveBelow = 0;
     int candidateLag = -1;
@@ -1581,15 +1294,11 @@ public static int calculateCutoff(List<Double> data, final double threshold) {
 
     final int requiredConsecutiveLags = (int) Math.max(5, Math.round(2.5 * Math.log10(n)));
 
-    logger.info("Evaluating ACF cutoff for {} consecutive lags below threshold", requiredConsecutiveLags);
-
     for (int lag = 1; lag < maxLag; lag++) {
         double acf = Math.abs(calculateACF(data, lag, mean, ss));
 
         if (acf < threshold) {
-            if (consecutiveBelow == 0) {
-                candidateLag = lag;
-            }
+            if (consecutiveBelow == 0) candidateLag = lag;
             consecutiveBelow++;
 
             if (consecutiveBelow >= requiredConsecutiveLags) {
@@ -1603,15 +1312,6 @@ public static int calculateCutoff(List<Double> data, final double threshold) {
     throw new RuntimeException("No stable cutoff lag found within the threshold.");
 }
 
-/**
- * Internal acf calculation with pre-computed statistics.
- *
- * @param data the data series
- * @param lag the lag for the calculation
- * @param mean the pre-computed mean
- * @param ss the pre-computed sum of squares
- * @return the autocorrelation coefficient
- */
 private static double calculateACF(List<Double> data, int lag, double mean, double ss) {
     int n = data.size();
     double autocovarianceLagK = 0.0;
@@ -1637,21 +1337,11 @@ In virtù del Teorema del Limite Centrale e della dimensione conservativa di $b$
 \paragraph{Stima Dinamica.}
 Per gli scenari in cui la lunghezza ottimale della traiettoria stocastica non è stimabile \textit{a priori}, il simulatore estende l'analisi tramite un algoritmo iterativo basato sulla regola di arresto dinamica \cite{serazzi-book, jmt-software}. La procedura incrementa asincronamente la simulazione con blocchi di ampiezza fissa e verifica la validità dell'ipotesi di indipendenza calcolando la lag-1 ACF esclusivamente sulla serie trasformata delle medie dei batch, applicando una tolleranza rigida di $0.05$. Qualora il controllo fallisse a causa di una persistente memoria residua tra i blocchi, l'algoritmo espande la dimensione della finestra temporale dei batch eseguendo un raddoppio geometrico del parametro $b$, ripetendo il controllo fino alla convergenza simultanea dei requisiti di precisione e incorrelazione:
 \begin{lstlisting}[language=Java]
-/**
- * Dynamic Estimation.
- *
- * Advances the simulation iteratively, checks relative precision,
- * evaluates batch-level serial correlation, and dynamically doubles 'b' upon failure.
- *
- * @param config The system configuration parameters.
- * @return Standardized report containing dynamically converged statistical results.
-*/
 private static EstimationReport performDynamicEstimation(ApplicationConfig config) {
     SimulationBuilder builder = new SimulationBuilder().config(config);
     Simulator baseSimulator = builder.build();
     TimeSerieCollector collector = new TimeSerieCollector(baseSimulator);
 
-    // Prime the event priority queue without triggering the standard run() loop
     collector.scheduleInitialEvents();
 
     int b = INITIAL_BATCH_SIZE;
@@ -1659,22 +1349,17 @@ private static EstimationReport performDynamicEstimation(ApplicationConfig confi
     EstimationReport finalReport = null;
 
     while (!converged && collector.processNextEvent()) {
-        // Push the virtual clock forward by consuming a fixed chunk of completion events
         collector.resumableRun(RE_EVALUATION_BLOCK);
 
         List<Double> series = collector.getSeries();
         int n = series.size();
-        int k = n / b; // Re-calculate number of batches (k drops when b doubles, rises as n grows)
+        int k = n / b;
 
-        // Enforce minimum batch size guidelines to avoid small-sample variance instability [cite: 227, 228]
-        if (k < MIN_BATCHES_THRESHOLD) {
-            continue;
-        }
+        if (k < MIN_BATCHES_THRESHOLD) continue;
 
         List<Double> batchMeans = new ArrayList<>();
         Welford welford = new Welford();
 
-        // Construct temporary batch arrays on current accumulated memory
         for (int i = 0; i < k; i++) {
             double batchSum = 0.0;
             for (int j = 0; j < b; j++) {
@@ -1685,35 +1370,22 @@ private static EstimationReport performDynamicEstimation(ApplicationConfig confi
             welford.update(bMean);
         }
 
-        // Evaluate stochastic independence using Lag-1 ACF on batch means
         double acf1 = AutoCorrelation.calculateACF(batchMeans, 1);
-        boolean independent = Math.abs(acf1) < 0.05; // 0.05 absolute tolerance for uncorrelated luts
+        boolean independent = Math.abs(acf1) < 0.05;
 
-        // Evaluate precision convergence criterion (Half-Width / Mean <= epsilon)
         IntervalEstimator.IntervalResult currentResult = IntervalEstimator.estimate(welford, CONFIDENCE_LEVEL);
         double relativePrecision = currentResult.halfWidth() / currentResult.mean();
         boolean precise = relativePrecision < TARGET_PRECISION;
 
-        // Keep refreshing structural data snapshot
         finalReport = new EstimationReport(currentResult, n, b, k, acf1);
 
         if (independent && precise) {
-            logger.info("-> Convergence successfully reached!");
-            logger.info("   Final dynamic state parameters: N = {}, Batch Size (b) = {}, Batches (k) = {}", n, b, k);
-            logger.info(String.format("   Criteria validation: Lag-1 ACF = %.4f (< 0.05) | Rel. Precision = %.4f (< 0.05)", acf1, relativePrecision));
             converged = true;
         } else if (!independent) {
-            // Serial correlation detected: trigger Batch Size Doubling to reduce lag influence
-            logger.info(String.format("Lag-1 ACF = %.4f (>= 0.05). Independence failed. Doubling batch size to %d...", acf1, b * 2));
             b *= 2;
-        } else {
-            // Correlation passed but interval is too wide: fetch more data chunks from core
-            logger.info(String.format("Relative Precision = %.4f (>= 0.05). Precision failed. Appending data chunks...", relativePrecision));
         }
     }
 
-    // Gracefully finalize decorators, close streams, and flush records
-    collector.finalizeSimulation();
     return finalReport;
 }
 \end{lstlisting}
@@ -1725,12 +1397,6 @@ I checkpoint non crescono con passo costante per tutta la run. Si parte da un in
 
 Per ogni checkpoint la classe costruisce un intervallo di confidenza sulle repliche indipendenti. La configurazione viene considerata convergente quando il tempo medio di risposta mostra una variazione relativa inferiore alla tolleranza per un numero consecutivo di finestre e, nello stesso tempo, la Half-Width relativa rimane sotto la soglia di precisione. Viceversa, viene classificata come divergente quando la media cresce in modo statisticamente significativo per più finestre consecutive, con intervalli di confidenza che peggiorano senza sovrapporsi. Il punto di convergenza individuato viene poi usato come stima del numero di job di warm-up per le successive simulazioni a Batch Means.
 \begin{lstlisting}[language=Java]
-/**
- * Runs convergence analysis on the provided configuration.
- *
- * @param config target simulation configuration
- * @return convergence report
- */
 public static ConvergenceReport run(ApplicationConfig config) {
     int[] checkpoints = buildCheckpoints();
     List<ReplicationTrace> traces = collectLongRunTraces(config, checkpoints);
@@ -1752,17 +1418,11 @@ public static ConvergenceReport run(ApplicationConfig config) {
         boolean worseningMean = isStatisticallyWorse(currentPoint.responseTime(), lastPoint)
                 && relativeChange >= RESPONSE_TIME_DIVERGENCE_TOLERANCE;
 
-        if (stableMean && preciseEnough) {
-            stableWindows++;
-        } else {
-            stableWindows = 0;
-        }
+        if (stableMean && preciseEnough) stableWindows++;
+        else stableWindows = 0;
 
-        if (worseningMean) {
-            divergingWindows++;
-        } else {
-            divergingWindows = 0;
-        }
+        if (worseningMean) divergingWindows++;
+        else divergingWindows = 0;
 
         lastPoint = new ConvergencePoint(
                 currentPoint.numReplications(),
@@ -1775,8 +1435,6 @@ public static ConvergenceReport run(ApplicationConfig config) {
                 stableWindows,
                 divergingWindows
         );
-
-        logger.info("{}", lastPoint);
 
         if (stableWindows >= REQUIRED_STABLE_WINDOWS) {
             ConvergenceReport report = new ConvergenceReport(ConvergenceStatus.CONVERGED, lastPoint);
@@ -1800,7 +1458,7 @@ public static ConvergenceReport run(ApplicationConfig config) {
 \end{lstlisting}
 
 \subsection{Generatori Pseudo-Casuali e Variate Aleatorie}
-La libreria \texttt{lib.rng} deriva dalle classi \texttt{Rngs}, \texttt{Rvgs} e \texttt{Rvms} di Park, Miller e collaboratori, adottate nei testi di simulazione per la generazione di numeri pseudo-casuali e variate aleatorie \cite{park-miller,leemis-park-book}. Il generatore di base è un Lehmer multiplicative congruential generator:
+La libreria \texttt{lib.rng} deriva dalle classi \texttt{Rngs}, \texttt{Rvgs} e \texttt{Rvms} di Park, Miller e collaboratori, adottate nei testi di simulazione per la generazione di numeri pseudo-casuali e variate aleatorie \cite{leemis-park-book}. Il generatore di base è un Lehmer multiplicative congruential generator:
 \begin{equation}
     X_{n+1} = 48271 X_n \bmod (2^{31}-1),
     \qquad
@@ -1824,9 +1482,7 @@ Le variate esponenziali sono generate dalla classe \texttt{Rvgs} tramite trasfor
 \end{equation}
 Il codice è:
 \begin{lstlisting}[language=Java]
-public double exponential(double m) {
-    return (-m * Math.log(1.0 - rngs.random()));
-}
+public double exponential(double m) { return (-m * Math.log(1.0 - rngs.random())); }
 \end{lstlisting}
 
 La distribuzione iperesponenziale a due fasi viene generata per composizione. Un primo stream decide il ramo, mentre due stream distinti generano la variata esponenziale del ramo selezionato:
