@@ -1426,32 +1426,32 @@ Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,00
 Spike Server Utilization : Mean = 0,0000, StdDev = 0,0004, HW=0,0000, CI = [-0,0000, 0,0000]
 ==================================================================
 INFO  ConvergenceEstimator [SIM] - Starting long-run convergence estimation analysis...
-INFO  ConvergenceEstimator [SIM] - Independent replications = 10, initial jobs = 10000, initial job increment = 10000, max jobs = 1000000
+INFO  ConvergenceEstimator [SIM] - Independent replications = 10, initial jobs = 10000, initial job increment = 10000, max jobs = 10000000
 INFO  ConvergenceEstimator [SIM] - Increment schedule: grow by factor 2 every 10 evaluated horizons
 INFO  ConvergenceEstimator [SIM] - Criteria: relative change <= 0.01 for 5 consecutive windows and relative HW <= 0.05
 INFO  ConvergenceEstimator [SIM] - Divergence rule: relative growth >= 0.02 with non-overlapping worsening CI for 5 consecutive windows
 INFO  SimulationFacade [SIM] - Starting 10 independent replications...
 INFO  SimulationFacade [SIM] - Running replication 1/10 with seed 123456789...
-INFO  SimulationFacade [SIM] - Running replication 2/10 with seed 2022569552...
-INFO  SimulationFacade [SIM] - Running replication 3/10 with seed 918434476...
-INFO  SimulationFacade [SIM] - Running replication 4/10 with seed 854996899...
-INFO  SimulationFacade [SIM] - Running replication 5/10 with seed 1119971474...
-INFO  SimulationFacade [SIM] - Running replication 6/10 with seed 2025515664...
-INFO  SimulationFacade [SIM] - Running replication 7/10 with seed 1711288726...
-INFO  SimulationFacade [SIM] - Running replication 8/10 with seed 124722864...
-INFO  SimulationFacade [SIM] - Running replication 9/10 with seed 1024930385...
-INFO  SimulationFacade [SIM] - Running replication 10/10 with seed 595075125...
+INFO  SimulationFacade [SIM] - Running replication 2/10 with seed 2075801736...
+INFO  SimulationFacade [SIM] - Running replication 3/10 with seed 379954342...
+INFO  SimulationFacade [SIM] - Running replication 4/10 with seed 1163348145...
+INFO  SimulationFacade [SIM] - Running replication 5/10 with seed 669659646...
+INFO  SimulationFacade [SIM] - Running replication 6/10 with seed 821088096...
+INFO  SimulationFacade [SIM] - Running replication 7/10 with seed 446736857...
+INFO  SimulationFacade [SIM] - Running replication 8/10 with seed 1350826383...
+INFO  SimulationFacade [SIM] - Running replication 9/10 with seed 619636393...
+INFO  SimulationFacade [SIM] - Running replication 10/10 with seed 1616816226...
 INFO  SimulationFacade [SIM] -
  ==================================================================
                    AGGREGATED SIMULATION REPORT
 METHOD: INDEPENDENT REPLICATIONS
 SAMPLES (N): 10
 ==================================================================
-Response Time            : Mean = 2,2532, StdDev = 0,1498, HW=0,1072, CI = [2,1460, 2,3603]
-Jobs in System           : Mean = 24,7569, StdDev = 1,7554, HW=1,2558, CI = [23,5012, 26,0127]
-System Utilization       : Mean = 0,6863, StdDev = 0,0039, HW=0,0028, CI = [0,6835, 0,6891]
-Throughput               : Mean = 10,9830, StdDev = 0,0529, HW=0,0379, CI = [10,9451, 11,0208]
-Diverted Jobs            : Mean = 1337,3000, StdDev = 561,5813, HW=401,7311, CI = [935,5689, 1739,0311]
+Response Time            : Mean = 2,2906, StdDev = 0,0303, HW=0,0217, CI = [2,2690, 2,3123]
+Jobs in System           : Mean = 25,1987, StdDev = 0,3543, HW=0,2534, CI = [24,9452, 25,4521]
+System Utilization       : Mean = 0,6874, StdDev = 0,0011, HW=0,0008, CI = [0,6866, 0,6882]
+Throughput               : Mean = 11,0004, StdDev = 0,0135, HW=0,0096, CI = [10,9907, 11,0100]
+Diverted Jobs            : Mean = 13835,6000, StdDev = 1760,6441, HW=1259,4889, CI = [12576,1111, 15095,0889]
 Avg Active Servers (N)   : Mean = 3,0000, StdDev = 0,0000, HW=0,0000, CI = [3,0000, 3,0000]
 ------------------------------------------------------------------
 Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
@@ -1459,49 +1459,74 @@ Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,00
 Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
 Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
-Spike Server Utilization : Mean = 0,0035, StdDev = 0,0014, HW=0,0010, CI = [0,0025, 0,0046]
+Spike Server Utilization : Mean = 0,0039, StdDev = 0,0005, HW=0,0004, CI = [0,0035, 0,0042]
 ==================================================================
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 10000, time ~= 936,4888, R0 = 1,5905, HW = 0,2517, rel.change = NaN, rel.HW = 0,15824, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 20000, time ~= 1856,3034, R0 = 1,9233, HW = 0,4838, rel.change = 0,20926, rel.HW = 0,25155, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 30000, time ~= 2781,6561, R0 = 2,0287, HW = 0,4951, rel.change = 0,05484, rel.HW = 0,24406, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 40000, time ~= 3689,3676, R0 = 2,1622, HW = 0,3782, rel.change = 0,06576, rel.HW = 0,17491, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 50000, time ~= 4602,2592, R0 = 2,2779, HW = 0,3401, rel.change = 0,05352, rel.HW = 0,14931, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 60000, time ~= 5503,4562, R0 = 2,2517, HW = 0,2761, rel.change = 0,01151, rel.HW = 0,12261, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 70000, time ~= 6408,2577, R0 = 2,3465, HW = 0,3051, rel.change = 0,04211, rel.HW = 0,13004, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 80000, time ~= 7309,3916, R0 = 2,3305, HW = 0,2793, rel.change = 0,00681, rel.HW = 0,11984, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 90000, time ~= 8198,9775, R0 = 2,3816, HW = 0,2885, rel.change = 0,02193, rel.HW = 0,12115, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 100000, time ~= 9110,6320, R0 = 2,4293, HW = 0,2967, rel.change = 0,02003, rel.HW = 0,12213, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 120000, time ~= 10893,7839, R0 = 2,4064, HW = 0,2692, rel.change = 0,00942, rel.HW = 0,11186, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 140000, time ~= 12744,5621, R0 = 2,3099, HW = 0,2364, rel.change = 0,04012, rel.HW = 0,10233, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 160000, time ~= 14547,8994, R0 = 2,3401, HW = 0,2333, rel.change = 0,01309, rel.HW = 0,09971, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 180000, time ~= 16369,1359, R0 = 2,3174, HW = 0,2316, rel.change = 0,00972, rel.HW = 0,09992, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 200000, time ~= 18207,1112, R0 = 2,3078, HW = 0,2080, rel.change = 0,00414, rel.HW = 0,09013, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 220000, time ~= 19999,4401, R0 = 2,3092, HW = 0,2239, rel.change = 0,00063, rel.HW = 0,09697, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 240000, time ~= 21832,5921, R0 = 2,3037, HW = 0,2212, rel.change = 0,00237, rel.HW = 0,09603, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 260000, time ~= 23664,1779, R0 = 2,2907, HW = 0,2098, rel.change = 0,00567, rel.HW = 0,09161, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 280000, time ~= 25473,7916, R0 = 2,2995, HW = 0,1649, rel.change = 0,00385, rel.HW = 0,07172, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 300000, time ~= 27302,9885, R0 = 2,2967, HW = 0,1683, rel.change = 0,00123, rel.HW = 0,07327, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 340000, time ~= 30939,3860, R0 = 2,3040, HW = 0,1409, rel.change = 0,00319, rel.HW = 0,06114, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 380000, time ~= 34573,2458, R0 = 2,3052, HW = 0,1417, rel.change = 0,00050, rel.HW = 0,06148, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 420000, time ~= 38234,6353, R0 = 2,2891, HW = 0,1453, rel.change = 0,00697, rel.HW = 0,06347, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 460000, time ~= 41851,4299, R0 = 2,2915, HW = 0,1331, rel.change = 0,00104, rel.HW = 0,05810, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 500000, time ~= 45464,3174, R0 = 2,3064, HW = 0,1193, rel.change = 0,00650, rel.HW = 0,05174, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 540000, time ~= 49128,9271, R0 = 2,2860, HW = 0,1071, rel.change = 0,00881, rel.HW = 0,04685, stable windows = 1, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 580000, time ~= 52806,6121, R0 = 2,2614, HW = 0,1050, rel.change = 0,01078, rel.HW = 0,04643, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 620000, time ~= 56460,0635, R0 = 2,2339, HW = 0,0962, rel.change = 0,01216, rel.HW = 0,04305, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 660000, time ~= 60110,1618, R0 = 2,2188, HW = 0,0916, rel.change = 0,00678, rel.HW = 0,04130, stable windows = 1, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 700000, time ~= 63780,8250, R0 = 2,2151, HW = 0,0876, rel.change = 0,00166, rel.HW = 0,03956, stable windows = 2, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 780000, time ~= 71036,7179, R0 = 2,2354, HW = 0,1058, rel.change = 0,00919, rel.HW = 0,04734, stable windows = 3, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 860000, time ~= 78349,3232, R0 = 2,2447, HW = 0,1116, rel.change = 0,00416, rel.HW = 0,04970, stable windows = 4, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 940000, time ~= 85595,0992, R0 = 2,2524, HW = 0,1170, rel.change = 0,00339, rel.HW = 0,05196, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 10000, time ~= 909,0928, R0 = 1,7481, HW = 0,4010, rel.change = NaN, rel.HW = 0,22936, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 20000, time ~= 1789,9227, R0 = 2,5510, HW = 0,6104, rel.change = 0,45929, rel.HW = 0,23929, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 30000, time ~= 2701,2454, R0 = 2,3403, HW = 0,4999, rel.change = 0,08260, rel.HW = 0,21362, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 40000, time ~= 3632,2637, R0 = 2,2118, HW = 0,4048, rel.change = 0,05490, rel.HW = 0,18299, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 50000, time ~= 4553,1906, R0 = 2,1793, HW = 0,4585, rel.change = 0,01472, rel.HW = 0,21041, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 60000, time ~= 5452,8144, R0 = 2,1887, HW = 0,4119, rel.change = 0,00431, rel.HW = 0,18818, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 70000, time ~= 6379,1926, R0 = 2,1396, HW = 0,3680, rel.change = 0,02241, rel.HW = 0,17197, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 80000, time ~= 7303,2045, R0 = 2,1554, HW = 0,3136, rel.change = 0,00737, rel.HW = 0,14547, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 90000, time ~= 8239,3932, R0 = 2,1087, HW = 0,2641, rel.change = 0,02167, rel.HW = 0,12522, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 100000, time ~= 9130,3955, R0 = 2,1066, HW = 0,2487, rel.change = 0,00103, rel.HW = 0,11804, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 120000, time ~= 10933,6271, R0 = 2,1668, HW = 0,2157, rel.change = 0,02858, rel.HW = 0,09957, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 140000, time ~= 12743,6336, R0 = 2,1831, HW = 0,1962, rel.change = 0,00753, rel.HW = 0,08987, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 160000, time ~= 14546,9781, R0 = 2,2008, HW = 0,1995, rel.change = 0,00812, rel.HW = 0,09065, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 180000, time ~= 16352,6820, R0 = 2,2285, HW = 0,1529, rel.change = 0,01260, rel.HW = 0,06860, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 200000, time ~= 18159,5686, R0 = 2,2423, HW = 0,1647, rel.change = 0,00619, rel.HW = 0,07347, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 220000, time ~= 19950,9130, R0 = 2,2369, HW = 0,1525, rel.change = 0,00243, rel.HW = 0,06819, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 240000, time ~= 21769,0846, R0 = 2,2430, HW = 0,1626, rel.change = 0,00276, rel.HW = 0,07251, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 260000, time ~= 23568,9838, R0 = 2,2667, HW = 0,1616, rel.change = 0,01054, rel.HW = 0,07129, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 280000, time ~= 25383,3665, R0 = 2,2541, HW = 0,1480, rel.change = 0,00555, rel.HW = 0,06567, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 300000, time ~= 27206,2770, R0 = 2,2446, HW = 0,1382, rel.change = 0,00420, rel.HW = 0,06156, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 340000, time ~= 30862,8845, R0 = 2,2360, HW = 0,1483, rel.change = 0,00383, rel.HW = 0,06633, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 380000, time ~= 34510,6089, R0 = 2,2248, HW = 0,1310, rel.change = 0,00500, rel.HW = 0,05889, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 420000, time ~= 38137,4538, R0 = 2,2182, HW = 0,1304, rel.change = 0,00300, rel.HW = 0,05878, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 460000, time ~= 41766,7052, R0 = 2,2170, HW = 0,1370, rel.change = 0,00052, rel.HW = 0,06180, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 500000, time ~= 45374,3742, R0 = 2,2375, HW = 0,1164, rel.change = 0,00926, rel.HW = 0,05202, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 540000, time ~= 49053,9730, R0 = 2,2362, HW = 0,1160, rel.change = 0,00060, rel.HW = 0,05185, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 580000, time ~= 52718,1618, R0 = 2,2288, HW = 0,1056, rel.change = 0,00330, rel.HW = 0,04739, stable windows = 1, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 620000, time ~= 56332,8851, R0 = 2,2279, HW = 0,0934, rel.change = 0,00039, rel.HW = 0,04191, stable windows = 2, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 660000, time ~= 59963,9079, R0 = 2,2315, HW = 0,0937, rel.change = 0,00160, rel.HW = 0,04200, stable windows = 3, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 700000, time ~= 63599,4426, R0 = 2,2404, HW = 0,1048, rel.change = 0,00398, rel.HW = 0,04677, stable windows = 4, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 780000, time ~= 70879,7171, R0 = 2,2695, HW = 0,1107, rel.change = 0,01300, rel.HW = 0,04879, stable windows = 0, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 860000, time ~= 78128,6841, R0 = 2,2785, HW = 0,1050, rel.change = 0,00396, rel.HW = 0,04610, stable windows = 1, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 940000, time ~= 85379,9899, R0 = 2,2850, HW = 0,0971, rel.change = 0,00285, rel.HW = 0,04251, stable windows = 2, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 1020000, time ~= 92620,3061, R0 = 2,2997, HW = 0,0866, rel.change = 0,00643, rel.HW = 0,03768, stable windows = 3, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 1100000, time ~= 99925,6331, R0 = 2,2934, HW = 0,0767, rel.change = 0,00272, rel.HW = 0,03345, stable windows = 4, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - replications = 10, jobs = 1180000, time ~= 107215,4272, R0 = 2,2890, HW = 0,0655, rel.change = 0,00193, rel.HW = 0,02862, stable windows = 5, diverging windows = 0
 INFO  ConvergenceEstimator [SIM] - =======================================================================================================================
 INFO  ConvergenceEstimator [SIM] -                                                 CONVERGENCE ANALYSIS REPORT
 INFO  ConvergenceEstimator [SIM] - =======================================================================================================================
-INFO  ConvergenceEstimator [SIM] - INCONCLUSIVE | replications = 10, jobs = 940000, time ~= 85595,0992, R0 = 2,2524, HW = 0,1170, rel.change = 0,00339, rel.HW = 0,05196, stable windows = 0, diverging windows = 0
-INFO  ConvergenceEstimator [SIM] - Last observed jobs: 940000
-INFO  ConvergenceEstimator [SIM] - Last observed time: 85595.09916801882
+INFO  ConvergenceEstimator [SIM] - CONVERGED | replications = 10, jobs = 1180000, time ~= 107215,4272, R0 = 2,2890, HW = 0,0655, rel.change = 0,00193, rel.HW = 0,02862, stable windows = 5, diverging windows = 0
+INFO  ConvergenceEstimator [SIM] - Convergence jobs: 1180000
+INFO  ConvergenceEstimator [SIM] - Convergence time: 107215.42715017023
 INFO  ConvergenceEstimator [SIM] - =======================================================================================================================
-INFO  HorizontalScalingEstimationObjective [OBJ1.4] - Skipping Batch Means for lambda = 11.0, servers = 3: INCONCLUSIVE
+INFO  SimulationFacade [SIM] - Starting BATCH MEANS simulation... Warm-up: 5900000 jobs
+INFO  SimulationFacade [SIM] - Warm-up completed. Running 4096 batches of 4096 jobs...
+[==================================================] 100% | Batch: 4096/4096
+INFO  SimulationFacade [SIM] -
+ ==================================================================
+                   AGGREGATED SIMULATION REPORT
+METHOD: BATCH MEANS (STEADY STATE)
+SAMPLES (N): 4096
+==================================================================
+Response Time            : Mean = 2,2695, StdDev = 1,2367, HW=0,0379, CI = [2,2316, 2,3074]
+Jobs in System           : Mean = 25,4071, StdDev = 14,8643, HW=0,4553, CI = [24,9517, 25,8624]
+System Utilization       : Mean = 0,6886, StdDev = 0,0479, HW=0,0015, CI = [0,6871, 0,6901]
+Throughput               : Mean = 11,0364, StdDev = 0,6753, HW=0,0207, CI = [11,0157, 11,0570]
+Diverted Jobs            : Mean = 4,7036, StdDev = 23,4247, HW=0,7176, CI = [3,9860, 5,4212]
+Avg Active Servers (N)   : Mean = 3,0000, StdDev = 0,0000, HW=0,0000, CI = [3,0000, 3,0000]
+------------------------------------------------------------------
+Scale OUT Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Scale IN  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Scale UP  Actions        : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Scale DOWN Actions       : Mean = 0,0000, StdDev = 0,0000, HW=0,0000, CI = [0,0000, 0,0000]
+Spike Server Avg Speed   : Mean = 1,0000, StdDev = 0,0000, HW=0,0000, CI = [1,0000, 1,0000]
+Spike Server Utilization : Mean = 0,0034, StdDev = 0,0179, HW=0,0005, CI = [0,0028, 0,0039]
+==================================================================
 INFO  ConvergenceEstimator [SIM] - Starting long-run convergence estimation analysis...
 INFO  ConvergenceEstimator [SIM] - Independent replications = 10, initial jobs = 10000, initial job increment = 10000, max jobs = 1000000
 INFO  ConvergenceEstimator [SIM] - Increment schedule: grow by factor 2 every 10 evaluated horizons
