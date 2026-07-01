@@ -1267,7 +1267,7 @@ L'approccio implementato nella classe \texttt{IntervalEstimator} è quindi matem
 Nelle simulazioni a orizzonte infinito, le osservazioni consecutive prodotte da una singola run lunga presentano una forte dipendenza seriale, rendendo invalida l'ipotesi di campionamento indipendente \cite{leemis-park-book}.
 
 \paragraph{Stima Analitica.}
-Per quantificare matematicamente questa relazione stocastica, indicando con $x_1, x_2, \dots, x_n$ le $n$ osservazioni consecutive della serie temporale, il formalismo teorico definisce l'autocovarianza campionaria per un lag $j$ generico. Secondo la definizione classica \textit{two-pass}, l'autocovarianza $c_j$ si basa unicamente sugli $n-j$ valori sovrapposti della serie rispetto alla media campionaria globale $\bar{x} = \frac{1}{n}\sum_{i=1}^{n}x_i$, assumendo la forma:
+Per quantificare matematicamente questa relazione stocastica, indicando con $x_1, x_2, \dots, x_n$ le $n$ osservazioni consecutive della serie temporale, il formalismo teorico definisce l'autocovarianza campionaria per un lag $j$ generico. Secondo la definizione classica, l'autocovarianza $c_j$ si basa unicamente sugli $n-j$ valori sovrapposti della serie rispetto alla media campionaria globale $\bar{x} = \frac{1}{n}\sum_{i=1}^{n}x_i$, assumendo la forma:
 \begin{equation}
     c_j = \frac{1}{n-j}\sum_{i=1}^{n-j}(x_i-\bar{x})(x_{i+j}-\bar{x}), \qquad j = 1, 2, \dots, k
 \end{equation}
