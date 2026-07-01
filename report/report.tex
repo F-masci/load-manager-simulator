@@ -2020,7 +2020,7 @@ Le soglie di reazione per la modulazione della capacità elaborativa sono state 
 
 I risultati della simulazione, illustrati graficamente nella Figura~\ref{fig:vertical_scaling_dynamics}, mostrano la coincidenza tra il comportamento atteso e le transizioni osservate. All'istante $t = 1.6\text{ s}$, il numero di task attivi nello Spike Server raggiunge la soglia critica di 3. Il controllore verticale registra un'azione di \textit{Speed Up}, che raddoppia il fattore di capacità elaborativa da $v_s=4.0$ a $v_s=8.0$. A causa del timer di \textit{Cooldown} di $4.0$ secondi, la configurazione di picco viene mantenuta fino a $t = 5.6\text{ s}$; a tale istante il cooldown è scaduto e il carico dello Spike Server è sceso a zero, al di sotto della soglia inferiore pari a 1. Il software applica quindi l'azione di \textit{Speed Down}, riportando il fattore a $v_s=4.0$.
 
-L'evoluzione temporale di questa transizione giustifica il tasso di servizio assoluto medio dello Spike Server registrato nei log di simulazione, pari a $4.9760\text{ job/s}$. Il bilancio registra esattamente un'azione di \textit{Speed Up} e una di \textit{Speed Down}, senza oscillazioni ulteriori nella traccia considerata.
+L'evoluzione temporale di questa transizione giustifica il fattore di capacità elaborativa medio dello Spike Server registrato nei log di simulazione, pari a $4.9760$. Il bilancio registra esattamente un'azione di \textit{Speed Up} e una di \textit{Speed Down}, senza oscillazioni ulteriori nella traccia considerata.
 
 \begin{figure}[H]
     \centering
