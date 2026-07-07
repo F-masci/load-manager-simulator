@@ -46,6 +46,10 @@ report/auxil
 report/report.*
 !report/report.pdf
 !report/report.tex
+presentation/auxil
+presentation/presentation.*
+!presentation/presentation.pdf
+!presentation/presentation.tex
 
 ### Data ###
 # Too large to be stored in GitHub
