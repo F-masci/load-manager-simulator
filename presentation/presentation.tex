@@ -121,7 +121,7 @@
 
 \title{Autoscaling gerarchico}
 \subtitle{Modellazione, simulazione e valutazione di un'infrastruttura cloud}
-\author{Francesco Masci}
+\author{Francesco Masci, 0365258}
 \institute{Università degli Studi di Roma Tor Vergata}
 \date{A.A. 2025/2026}
 
@@ -168,7 +168,12 @@
     \vspace{1.25cm}
     {\color{gold}\rule{1.4cm}{2pt}}\par\vspace{0.25cm}
     {\color{white}\bfseries\insertauthor}\par
-    {\small\color{white!68}\insertinstitute\quad|\quad\insertdate}
+    \vspace{0.2cm}
+    {\scriptsize\color{white!58}\insertinstitute}\par
+    {\scriptsize\color{white!50}Corso di Laurea Magistrale in Ingegneria Informatica}\par
+    {\scriptsize\color{white!50}Performance Modeling of Computer Systems and Networks}\par
+    \vspace{0.24cm}
+    {\scriptsize\color{white!58}\insertdate}
   \end{minipage}
 \end{frame}
 }
@@ -217,6 +222,7 @@
 
 \sectionframe{01}{Sistema e obiettivi}{Architettura, carico bursty e domanda di ricerca.}
 
+\subsection{Problema}
 % 2 ------------------------------------------------------------------------
 \begin{frame}{Il problema: due scale temporali, una sola infrastruttura}
   \begin{columns}[T,onlytextwidth]
@@ -254,6 +260,7 @@
 \end{frame}
 
 % 3 ------------------------------------------------------------------------
+\subsection{Architettura proposta}
 \begin{frame}{La risposta: elasticità su due livelli}
   \begin{columns}[T,onlytextwidth]
     \column{.55\textwidth}
@@ -281,6 +288,7 @@
 \end{frame}
 
 % 4 ------------------------------------------------------------------------
+\subsection{Obiettivi sperimentali}
 \begin{frame}{Obiettivi e percorso sperimentale}
   \begin{columns}[T,onlytextwidth]
     \column{.31\textwidth}
@@ -314,6 +322,7 @@
 % --------------------------------------------------------------------------
 \sectionframe{02}{Modellazione}{Rete di code, stato e specifiche operative.}
 
+\subsection{Modello concettuale}
 \begin{frame}{\frameConc: una rete di code gerarchica}
   \centering
   \resizebox{!}{.56\textheight}{%
@@ -455,6 +464,7 @@
 % \end{frame}
 
 % --------------------------------------------------------------------------
+\subsection{Modello delle specifiche}
 \begin{frame}{\frameSpec: workload e disciplina di servizio}
   \small
   \begin{columns}[T,onlytextwidth]
@@ -620,6 +630,7 @@
 % --------------------------------------------------------------------------
 \sectionframe{03}{Implementazione}{Simulatore next-event e analisi statistica.}
 
+\subsection{Componenti del simulatore}
 \begin{frame}[fragile=singleslide]{\frameComp: oggetti di dominio e Processor Sharing}
   \begin{columns}[T,onlytextwidth]
     \column{.54\textwidth}
@@ -784,6 +795,7 @@ return true;
 % \end{frame}
 
 % --------------------------------------------------------------------------
+\subsection{Output analysis}
 \begin{frame}[fragile=singleslide]{\frameComp: Batch Means e repliche indipendenti}
   \begin{columns}[T,onlytextwidth]
     \column{.31\textwidth}
@@ -925,6 +937,7 @@ for (int i = 0; i < numReplications; i++) {
 % --------------------------------------------------------------------------
 \sectionframe{04}{Verifica e validazione}{Tracce controllate e confronto esterno.}
 
+\subsection{Verifica funzionale}
 \begin{frame}{Verifica: il routing segue esattamente la soglia}
   \begin{columns}[T,onlytextwidth]
     \column{.67\textwidth}
@@ -970,6 +983,7 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % --------------------------------------------------------------------------
+\subsection{Validazione esterna}
 \begin{frame}{Validazione esterna: simulatore Java vs JMT}
   \vspace{-0.08cm}
   \begin{minipage}{\textwidth}
@@ -1026,6 +1040,7 @@ for (int i = 0; i < numReplications; i++) {
 % 8 ------------------------------------------------------------------------
 \sectionframe{05}{Risultati}{Dimensionamento, costo e robustezza.}
 
+\subsection{Dimensionamento}
 \begin{frame}{Obiettivo 1A: scegliere la politica di routing}
   \begin{columns}[T,onlytextwidth]
     \column{.64\textwidth}
@@ -1148,6 +1163,7 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % --------------------------------------------------------------------------
+\subsection{Costo del controllo}
 \begin{frame}{Costo: il cooldown conta}
   \begin{columns}[T,onlytextwidth]
     \column{.62\textwidth}
@@ -1193,6 +1209,7 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % 10 -----------------------------------------------------------------------
+\subsection{Analisi del transitorio}
 \begin{frame}{Analisi del transitorio: il sistema si assesta}
   \begin{columns}[T,onlytextwidth]
     \column{.63\textwidth}
@@ -1246,6 +1263,7 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % 12 -----------------------------------------------------------------------
+\subsection{Robustezza alla burstiness}
 \begin{frame}[shrink=3]{Burstiness: la gerarchia redistribuisce il carico}
   \begin{columns}[T,onlytextwidth]
     \column{.62\textwidth}
@@ -1306,6 +1324,7 @@ for (int i = 0; i < numReplications; i++) {
 % 13 -----------------------------------------------------------------------
 \sectionframe{06}{Miglioramento}{Banda di stabilità e sintesi finale.}
 
+\subsection{Meccanismo a bande}
 \begin{frame}{Limite del modello base: chattering vicino alla soglia}
   \begin{columns}[T,onlytextwidth]
     \column{.51\textwidth}
@@ -1426,6 +1445,7 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % 15 -----------------------------------------------------------------------
+\subsection{Conclusioni}
 \begin{frame}{Conclusioni}
   \begin{columns}[T,onlytextwidth]
     \column{.63\textwidth}
