@@ -1045,7 +1045,7 @@ for (int i = 0; i < numReplications; i++) {
   \begin{columns}[T,onlytextwidth]
     \column{.64\textwidth}
     \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/objective/routing_policy_comparison.png}
-    \source{\(4\) Web Server, \(H_2/H_2\), \(\lambda=5\), \(C_V=4\).}
+    \source{Simulazione stazionaria con Batch Means; \(4\) Web Server, \(H_2/H_2\), \(\lambda=5\), \(C_V=4\).}
     \column{.33\textwidth}
     \tagbox{teal}{SCELTA}\par\vspace{0.12cm}
     {\Large\bfseries Least Loaded}
@@ -1067,7 +1067,7 @@ for (int i = 0; i < numReplications; i++) {
   \begin{columns}[T,onlytextwidth]
     \column{.66\textwidth}
     \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/objective/simax_estimation.png}
-    \source{Un Web Server, Spike Server attivo, \(H_2/H_2\), scaling disabilitato.}
+    \source{Simulazione stazionaria con Batch Means; un Web Server, Spike Server attivo, scaling disabilitato.}
     \column{.31\textwidth}
     \tagbox{teal}{SCELTA}\par\vspace{0.12cm}
     {\Large\bfseries \(SI_{\max}=40\)}
@@ -1090,7 +1090,7 @@ for (int i = 0; i < numReplications; i++) {
   \begin{columns}[T,onlytextwidth]
     \column{.66\textwidth}
     \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/objective/vertical_step_sizing.png}
-    \source{\(SI_{\max}=40\); incremento additivo di capacità variato da \(0.5\) a \(5.0\).}
+    \source{Simulazione stazionaria con Batch Means; \(SI_{\max}=40\), \(\Delta v_s\in[0.5,5.0]\).}
     \column{.31\textwidth}
     \tagbox{teal}{SCELTA}\par\vspace{0.12cm}
     {\Large\bfseries \(\Delta v_s=1.0\)}
@@ -1111,7 +1111,7 @@ for (int i = 0; i < numReplications; i++) {
   \begin{columns}[T,onlytextwidth]
     \column{.67\textwidth}
     \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/objective/horizontal_parameter_estimation.png}
-    \source{Frontiera statica di capacità; SLA \(R_0\le6\,s\).}
+    \source{Convergenza a orizzonte finito e stima steady-state con Batch Means; SLA \(R_0\le6\,s\).}
     \column{.30\textwidth}
     \tagbox{teal}{SCELTA NOMINALE}\par\vspace{0.12cm}
     {\Large\bfseries \(R^{\min}=3.5\,s\)}
@@ -1129,38 +1129,38 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % --------------------------------------------------------------------------
-\begin{frame}{Dimensionamento completato: la baseline}
-  \begin{center}
-    \begin{tikzpicture}[node distance=.48cm,every node/.style={font=\small}]
-      \node[rounded corners,fill=ink,text=white,minimum width=3.0cm,
-        minimum height=1.05cm,align=center] (r) {\textbf{Routing}\\Least Loaded};
-      \node[rounded corners,fill=teal,text=white,minimum width=3.0cm,
-        minimum height=1.05cm,align=center,right=of r] (s) {\textbf{Deviazione}\\\(SI_{\max}=40\)};
-      \node[rounded corners,fill=cyan,text=white,minimum width=3.0cm,
-        minimum height=1.05cm,align=center,right=of s] (v) {\textbf{Verticale}\\\(\Delta v_s=1.0\)};
-      \node[rounded corners,fill=coral,text=white,minimum width=3.0cm,
-        minimum height=1.05cm,align=center,right=of v] (h) {\textbf{Orizzontale}\\\(6.0/3.5\,s\)};
-      \draw[-{Latex},thick,muted] (r)--(s);
-      \draw[-{Latex},thick,muted] (s)--(v);
-      \draw[-{Latex},thick,muted] (v)--(h);
-    \end{tikzpicture}
-  \end{center}
-  \vspace{0.7cm}
-  \begin{columns}[T,onlytextwidth]
-    \column{.30\textwidth}
-    \begin{block}{Osservazione}
-      Finestra mobile: \(100\) completamenti.
-    \end{block}
-    \column{.30\textwidth}
-    \begin{block}{Reazione}
-      Cooldown iniziale: \(10\,s\).
-    \end{block}
-    \column{.30\textwidth}
-    \begin{block}{Vincolo}
-      SLA: \(R_0\le6\,s\).
-    \end{block}
-  \end{columns}
-\end{frame}
+% \begin{frame}{Dimensionamento completato: la baseline}
+%   \begin{center}
+%     \begin{tikzpicture}[node distance=.48cm,every node/.style={font=\small}]
+%       \node[rounded corners,fill=ink,text=white,minimum width=3.0cm,
+%         minimum height=1.05cm,align=center] (r) {\textbf{Routing}\\Least Loaded};
+%       \node[rounded corners,fill=teal,text=white,minimum width=3.0cm,
+%         minimum height=1.05cm,align=center,right=of r] (s) {\textbf{Deviazione}\\\(SI_{\max}=40\)};
+%       \node[rounded corners,fill=cyan,text=white,minimum width=3.0cm,
+%         minimum height=1.05cm,align=center,right=of s] (v) {\textbf{Verticale}\\\(\Delta v_s=1.0\)};
+%       \node[rounded corners,fill=coral,text=white,minimum width=3.0cm,
+%         minimum height=1.05cm,align=center,right=of v] (h) {\textbf{Orizzontale}\\\(6.0/3.5\,s\)};
+%       \draw[-{Latex},thick,muted] (r)--(s);
+%       \draw[-{Latex},thick,muted] (s)--(v);
+%       \draw[-{Latex},thick,muted] (v)--(h);
+%     \end{tikzpicture}
+%   \end{center}
+%   \vspace{0.7cm}
+%   \begin{columns}[T,onlytextwidth]
+%     \column{.30\textwidth}
+%     \begin{block}{Osservazione}
+%       Finestra mobile: \(100\) completamenti.
+%     \end{block}
+%     \column{.30\textwidth}
+%     \begin{block}{Reazione}
+%       Cooldown iniziale: \(10\,s\).
+%     \end{block}
+%     \column{.30\textwidth}
+%     \begin{block}{Vincolo}
+%       SLA: \(R_0\le6\,s\).
+%     \end{block}
+%   \end{columns}
+% \end{frame}
 
 % --------------------------------------------------------------------------
 \subsection{Costo del controllo}
@@ -1168,8 +1168,16 @@ for (int i = 0; i < numReplications; i++) {
   \begin{columns}[T,onlytextwidth]
     \column{.62\textwidth}
     \includegraphics[width=\linewidth,height=.69\textheight,keepaspectratio]{../data/objective/cost/cost_analysis_cooldown_10s.png}
-    \source{Costo aggregato e \(R_0\) per diverse soglie di Scale In, \(T_c=10\,s\).}
+    \source{Simulazione stazionaria con Batch Means: \(2048\) batch da \(4096\) job, warm-up \(5\cdot10^5\) job.}
     \column{.35\textwidth}
+    \tagbox{cyan}{FUNZIONE DI COSTO}\par
+    \[
+      C_{tot}=\bar{N}C_{WS}
+      +\bar{U}_{spike}\bar{S}_{spike}C_{CPU}
+    \]
+    {\scriptsize \(C_{WS}=2.5,\quad C_{CPU}=1.0\)}
+    \vspace{0.24cm}
+
     \textbf{Scelta equilibrata}
     \begin{itemize}
       \item \(R^{\min}=3.5\,s\);
@@ -1177,10 +1185,6 @@ for (int i = 0; i < numReplications; i++) {
       \item costo medio \(=4.469\);
       \item SLA rispettato fino a \(\lambda=11\).
     \end{itemize}
-    \vspace{0.3cm}
-    {\small Soglie più basse riducono la latenza ma mantengono più server
-      attivi. Un cooldown da \(100\,s\) reagisce troppo lentamente:
-      nel caso peggiore \(R_0=6.3678\,s\).}
   \end{columns}
 \end{frame}
 
@@ -1189,7 +1193,7 @@ for (int i = 0; i < numReplications; i++) {
   \begin{columns}[T,onlytextwidth]
     \column{.62\textwidth}
     \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/objective/cost/cost_analysis_cooldown_100s.png}
-    \source{Costo e \(R_0\) con cooldown \(100\,s\).}
+    \source{Simulazione stazionaria con Batch Means; costo e \(R_0\) con cooldown \(100\,s\).}
     \column{.35\textwidth}
     \tagbox{coral}{CASO CRITICO}\par\vspace{0.15cm}
     {\Large\bfseries \(R_0=6.3678\,s\)}
@@ -1214,7 +1218,7 @@ for (int i = 0; i < numReplications; i++) {
   \begin{columns}[T,onlytextwidth]
     \column{.63\textwidth}
     \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/objective/finite/transient_medium_load_cv4.png}
-    \source{Scenario medio: \(\lambda=5\) job/s, \(C_V=4\), sistema inizialmente vuoto.}
+    \source{Simulazione a orizzonte finito con repliche indipendenti; \(\lambda=5\), \(C_V=4\), sistema vuoto.}
     \column{.34\textwidth}
     \textbf{Cosa osserviamo}
     \begin{itemize}
@@ -1268,7 +1272,7 @@ for (int i = 0; i < numReplications; i++) {
   \begin{columns}[T,onlytextwidth]
     \column{.62\textwidth}
     \includegraphics[width=\linewidth,height=.68\textheight,keepaspectratio]{../data/objective/burstiness/burstiness_robustness_response_time.png}
-    \source{Tempo medio di risposta al variare di \(\lambda\) e \(C_V\).}
+    \source{Simulazione stazionaria con Batch Means: \(1024\) batch da \(4096\) job, warm-up \(5\cdot10^5\) job.}
     \column{.35\textwidth}
     \begin{center}
       {\color{coral}\bfseries\large \(4.2853\,s\)}\par
@@ -1358,31 +1362,31 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % --------------------------------------------------------------------------
-\begin{frame}{Meccanismo a bande: verifica trace-driven}
-  \begin{columns}[T,onlytextwidth]
-    \column{.68\textwidth}
-    \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/vv/chart/band_diversion_chart.png}
-    \source{\(SI_{\max}=5\), \(SI_{\mathrm{low}}=2\), 21 arrivi deterministici.}
-    \column{.29\textwidth}
-    \tagbox{teal}{COMPORTAMENTO ATTESO}
-    \vspace{0.35cm}
-    \begin{itemize}
-      \item attivazione a \(SI_{\max}\);
-      \item persistenza nella banda;
-      \item rilascio solo a \(SI_{\mathrm{low}}\);
-      \item nuova attivazione corretta.
-    \end{itemize}
-    \vspace{0.3cm}
-    {\small Nessun rientro prematuro, nessun job perso.}
-  \end{columns}
-\end{frame}
+% \begin{frame}{Meccanismo a bande: verifica trace-driven}
+%   \begin{columns}[T,onlytextwidth]
+%     \column{.68\textwidth}
+%     \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/vv/chart/band_diversion_chart.png}
+%     \source{Simulazione trace-driven deterministica; \(SI_{\max}=5\), \(SI_{\mathrm{low}}=2\), 21 arrivi noti.}
+%     \column{.29\textwidth}
+%     \tagbox{teal}{COMPORTAMENTO ATTESO}
+%     \vspace{0.35cm}
+%     \begin{itemize}
+%       \item attivazione a \(SI_{\max}\);
+%       \item persistenza nella banda;
+%       \item rilascio solo a \(SI_{\mathrm{low}}\);
+%       \item nuova attivazione corretta.
+%     \end{itemize}
+%     \vspace{0.3cm}
+%     {\small Nessun rientro prematuro, nessun job perso.}
+%   \end{columns}
+% \end{frame}
 
 % 14 -----------------------------------------------------------------------
 \begin{frame}{Sistema modificato: meno latenza, più uso dello spike}
   \begin{columns}[T,onlytextwidth]
     \column{.58\textwidth}
     \includegraphics[width=\linewidth,height=.68\textheight,keepaspectratio]{../data/objective/band/vertical_scaler_stability_band_10.png}
-    \source{Banda \(B=10\): utilizzazioni e tempo di risposta al variare del carico.}
+    \source{Simulazione stazionaria con Batch Means; banda \(B=10\), utilizzazioni e \(R_0\).}
     \column{.39\textwidth}
     \begin{center}
     \renewcommand{\arraystretch}{1.25}
