@@ -504,7 +504,7 @@
     \end{itemize}
     \vspace{0.04cm}
 
-    \tagbox{teal}{DISCIPLINA PROCESSOR SHARING}
+    \tagbox{coral}{DISCIPLINA PROCESSOR SHARING}
     \[
       \mu_i^{job}(t)=\frac{\mu_i(t)}{n_i(t)},
       \qquad
@@ -1163,14 +1163,13 @@ for (int i = 0; i < numReplications; i++) {
 % \end{frame}
 
 % --------------------------------------------------------------------------
-\subsection{Costo del controllo}
-\begin{frame}{Costo: il cooldown conta}
+\begin{frame}{Costo: quando il controller diventa troppo lento}
   \begin{columns}[T,onlytextwidth]
     \column{.62\textwidth}
-    \includegraphics[width=\linewidth,height=.69\textheight,keepaspectratio]{../data/objective/cost/cost_analysis_cooldown_10s.png}
-    \source{Simulazione stazionaria con Batch Means: \(2048\) batch da \(4096\) job, warm-up \(5\cdot10^5\) job.}
+    \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/objective/cost/cost_analysis_cooldown_100s.png}
+    \source{Simulazione stazionaria con Batch Means; costo e \(R_0\) con cooldown \(100\,s\).}
     \column{.35\textwidth}
-    \tagbox{cyan}{FUNZIONE DI COSTO}\par
+    \tagbox{cyan}{FUNZIONE DI COSTO}\par\vspace{-0.55cm}
     \[
       C_{tot}=\bar{N}C_{WS}
       +\bar{U}_{spike}\bar{S}_{spike}C_{CPU}
@@ -1178,23 +1177,6 @@ for (int i = 0; i < numReplications; i++) {
     {\scriptsize \(C_{WS}=2.5,\quad C_{CPU}=1.0\)}
     \vspace{0.24cm}
 
-    \textbf{Scelta equilibrata}
-    \begin{itemize}
-      \item \(R^{\min}=3.5\,s\);
-      \item cooldown \(=10\,s\);
-      \item costo medio \(=4.469\);
-      \item SLA rispettato fino a \(\lambda=11\).
-    \end{itemize}
-  \end{columns}
-\end{frame}
-
-% --------------------------------------------------------------------------
-\begin{frame}{Costo: quando il controller diventa troppo lento}
-  \begin{columns}[T,onlytextwidth]
-    \column{.62\textwidth}
-    \includegraphics[width=\linewidth,height=.70\textheight,keepaspectratio]{../data/objective/cost/cost_analysis_cooldown_100s.png}
-    \source{Simulazione stazionaria con Batch Means; costo e \(R_0\) con cooldown \(100\,s\).}
-    \column{.35\textwidth}
     \tagbox{coral}{CASO CRITICO}\par\vspace{0.15cm}
     {\Large\bfseries \(R_0=6.3678\,s\)}
     \vspace{0.4cm}
@@ -1204,7 +1186,25 @@ for (int i = 0; i < numReplications; i++) {
       \item reazione tardiva;
       \item SLA violato.
     \end{itemize}
-    \vspace{0.35cm}
+  \end{columns}
+\end{frame}
+
+% --------------------------------------------------------------------------
+\subsection{Costo del controllo}
+\begin{frame}{Costo: il cooldown conta}
+  \begin{columns}[T,onlytextwidth]
+    \column{.62\textwidth}
+    \includegraphics[width=\linewidth,height=.69\textheight,keepaspectratio]{../data/objective/cost/cost_analysis_cooldown_10s.png}
+    \source{Simulazione stazionaria con Batch Means: \(2048\) batch da \(4096\) job, warm-up \(5\cdot10^5\) job.}
+    \column{.35\textwidth}
+    \vspace{0.44cm}
+
+    \textbf{Scelta equilibrata}
+    \begin{itemize}
+      \item \(R^{\min}=3.5\,s\);
+      \item cooldown \(=10\,s\);
+      \item costo medio \(=4.469\);
+    \end{itemize}
     \begin{block}{Conclusione}
       \(10\,s\) evita sia l'eccesso di riconfigurazioni del caso \(5\,s\),
       sia l'inerzia dei casi \(50\)--\(100\,s\).
@@ -1223,7 +1223,6 @@ for (int i = 0; i < numReplications; i++) {
     \textbf{Cosa osserviamo}
     \begin{itemize}
       \item nessuna deriva iniziale persistente;
-      \item medie cumulative stabili;
       \item \(R_0\) sotto SLA in tutti i 6 scenari;
       \item ai carichi medio-alti cooperano entrambi i livelli.
     \end{itemize}
@@ -1285,9 +1284,9 @@ for (int i = 0; i < numReplications; i++) {
       \item a \(\lambda=5\), i burst attivano entrambi gli scaler;
       \item a \(\lambda=11\), il pool ordinario cresce e alleggerisce lo Spike Server.
     \end{itemize}
-    \vspace{0.25cm}
-    {\small Per \(\lambda=11\), passando da \(C_V=1\) a \(12\),
-      l'utilizzazione Spike scende dal \(68.18\%\) al \(59.19\%\).}
+    %\vspace{0.25cm}
+    %{\small Per \(\lambda=11\), passando da \(C_V=1\) a \(12\),
+    %  l'utilizzazione Spike scende dal \(68.18\%\) al \(59.19\%\).}
   \end{columns}
 \end{frame}
 
@@ -1309,21 +1308,21 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % --------------------------------------------------------------------------
-\begin{frame}{Burstiness: il controllo reagisce, il flusso resta stabile}
-  \begin{columns}[T,onlytextwidth]
-    \column{.49\textwidth}
-    \includegraphics[width=\linewidth,height=.58\textheight,keepaspectratio]{../data/objective/burstiness/burstiness_robustness_diverted_jobs.png}
-    \begin{center}\tagbox{coral}{JOB DEVIATI}\end{center}
-    \column{.49\textwidth}
-    \includegraphics[width=\linewidth,height=.58\textheight,keepaspectratio]{../data/objective/burstiness/burstiness_robustness_throughput.png}
-    \begin{center}\tagbox{teal}{THROUGHPUT}\end{center}
-  \end{columns}
-  \vspace{0.15cm}
-  \begin{center}
-    {\small Più variabilità produce più interventi e più deviazioni,
-      ma non perdita di throughput né instabilità delle metriche.}
-  \end{center}
-\end{frame}
+% \begin{frame}{Burstiness: il controllo reagisce, il flusso resta stabile}
+%   \begin{columns}[T,onlytextwidth]
+%     \column{.49\textwidth}
+%     \includegraphics[width=\linewidth,height=.58\textheight,keepaspectratio]{../data/objective/burstiness/burstiness_robustness_diverted_jobs.png}
+%     \begin{center}\tagbox{coral}{JOB DEVIATI}\end{center}
+%     \column{.49\textwidth}
+%     \includegraphics[width=\linewidth,height=.58\textheight,keepaspectratio]{../data/objective/burstiness/burstiness_robustness_throughput.png}
+%     \begin{center}\tagbox{teal}{THROUGHPUT}\end{center}
+%   \end{columns}
+%   \vspace{0.15cm}
+%   \begin{center}
+%     {\small Più variabilità produce più interventi e più deviazioni,
+%       ma non perdita di throughput né instabilità delle metriche.}
+%   \end{center}
+% \end{frame}
 
 % 13 -----------------------------------------------------------------------
 \sectionframe{06}{Miglioramento}{Banda di stabilità e sintesi finale.}
