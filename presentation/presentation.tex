@@ -93,6 +93,31 @@
   inner xsep=5pt,inner ysep=2.5pt,font=\scriptsize\bfseries](n){#2};%
 }
 \newcommand{\source}[1]{\par\vspace{0.05cm}{\tiny\color{muted}#1}}
+\newcommand{\sectionframe}[3]{%
+  \section{#2}
+  \begin{frame}[plain,noframenumbering]
+    \vspace{0.95cm}
+    {\color{teal}\bfseries\Large #1}\par
+    \vspace{0.28cm}
+    {\color{ink}\bfseries\Huge #2}\par
+    \vspace{0.22cm}
+    {\color{teal}\rule{1.6cm}{2pt}}\par
+    \vspace{0.55cm}
+    \begin{minipage}{.78\textwidth}
+      \raggedright
+      {\color{muted}\Large #3}
+    \end{minipage}
+    \vfill
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[teal!8] ([xshift=-3.8cm,yshift=-1.2cm]current page.north east)
+        circle (2.1cm);
+      \fill[coral!10] ([xshift=-0.8cm,yshift=0.4cm]current page.south east)
+        circle (2.8cm);
+      \fill[gold!16] ([xshift=-2.1cm,yshift=1.2cm]current page.south east)
+        circle (1.0cm);
+    \end{tikzpicture}
+  \end{frame}
+}
 
 \title{Autoscaling gerarchico}
 \subtitle{Modellazione, simulazione e valutazione di un'infrastruttura cloud}
@@ -190,6 +215,8 @@
 % La numerazione visibile inizia dopo frontespizio e agenda.
 \setcounter{framenumber}{0}
 
+\sectionframe{01}{Sistema e obiettivi}{Architettura, carico bursty e domanda di ricerca.}
+
 % 2 ------------------------------------------------------------------------
 \begin{frame}{Il problema: due scale temporali, una sola infrastruttura}
   \begin{columns}[T,onlytextwidth]
@@ -285,6 +312,8 @@
 \end{frame}
 
 % --------------------------------------------------------------------------
+\sectionframe{02}{Modellazione}{Rete di code, stato e specifiche operative.}
+
 \begin{frame}{\frameConc: una rete di code gerarchica}
   \centering
   \resizebox{!}{.56\textheight}{%
@@ -589,6 +618,8 @@
 \end{frame}
 
 % --------------------------------------------------------------------------
+\sectionframe{03}{Implementazione}{Simulatore next-event e analisi statistica.}
+
 \begin{frame}[fragile=singleslide]{\frameComp: oggetti di dominio e Processor Sharing}
   \begin{columns}[T,onlytextwidth]
     \column{.54\textwidth}
@@ -892,6 +923,8 @@ for (int i = 0; i < numReplications; i++) {
 % \end{frame}
 
 % --------------------------------------------------------------------------
+\sectionframe{04}{Verifica e validazione}{Tracce controllate e confronto esterno.}
+
 \begin{frame}{Verifica: il routing segue esattamente la soglia}
   \begin{columns}[T,onlytextwidth]
     \column{.67\textwidth}
@@ -991,6 +1024,8 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % 8 ------------------------------------------------------------------------
+\sectionframe{05}{Risultati}{Dimensionamento, costo e robustezza.}
+
 \begin{frame}{Obiettivo 1A: scegliere la politica di routing}
   \begin{columns}[T,onlytextwidth]
     \column{.64\textwidth}
@@ -1269,6 +1304,8 @@ for (int i = 0; i < numReplications; i++) {
 \end{frame}
 
 % 13 -----------------------------------------------------------------------
+\sectionframe{06}{Miglioramento}{Banda di stabilità e sintesi finale.}
+
 \begin{frame}{Limite del modello base: chattering vicino alla soglia}
   \begin{columns}[T,onlytextwidth]
     \column{.51\textwidth}
